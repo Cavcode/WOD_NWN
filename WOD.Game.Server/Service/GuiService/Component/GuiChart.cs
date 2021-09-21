@@ -1,0 +1,40 @@
+﻿using System;
+using System.Collections.Generic;
+using WOD.Game.Server.Core;
+using WOD.Game.Server.Core.Beamdog;
+using static WOD.Game.Server.Core.NWScript.NWScript;
+
+namespace WOD.Game.Server.Service.GuiService.Component
+{
+    public class GuiChart<T> : GuiWidget<T, GuiChart<T>>
+        where T: IGuiViewModel
+    {
+        private List<GuiChartSlot<T>> Slots { get; set; }
+
+        public GuiChart<T> AddSlot(Action<GuiChartSlot<T>> slot)
+        {
+            var newSlot = new GuiChartSlot<T>();
+            Slots.Add(newSlot);
+            slot(newSlot);
+
+            return this;
+        }
+
+        public GuiChart()
+        {
+            Slots = new List<GuiChartSlot<T>>();
+        }
+        
+        public override Json BuildElement()
+        {
+            var slots = JsonArray();
+
+            foreach (var slot in Slots)
+            {
+                slots = JsonArrayInsert(slots, slot.ToJson());
+            }
+
+            return Nui.Chart(slots);
+        }
+    }
+}
