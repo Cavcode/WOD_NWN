@@ -165,11 +165,20 @@
         ShieldExpertise = 174,
         Ironclad = 175,
 
-        ForceDrain = 176, 
+        ForceDrain = 176,
+        
+        // Presence
+        Awe = 177,
+        DreadGaze = 178,
+        Entrancement = 179,
+        Summon = 180,
+        Majesty = 181,
+
 
         TreasureHunter = 1002,
         CreditFinder = 1003,
         GuildRelations = 1004,
 
     }
+
 }

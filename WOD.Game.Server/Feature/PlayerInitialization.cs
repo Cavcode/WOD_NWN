@@ -154,6 +154,9 @@ namespace WOD.Game.Server.Feature
 
         private static void GrantBasicFeats(uint player)
         {
+
+            var @class = GetClassByPosition(1, player);        
+
             CreaturePlugin.AddFeatByLevel(player, FeatType.ArmorProficiencyLight, 1);
             CreaturePlugin.AddFeatByLevel(player, FeatType.ArmorProficiencyMedium, 1);
             CreaturePlugin.AddFeatByLevel(player, FeatType.ArmorProficiencyHeavy, 1);
@@ -164,7 +167,12 @@ namespace WOD.Game.Server.Feature
             CreaturePlugin.AddFeatByLevel(player, FeatType.UncannyDodge1, 1);
             CreaturePlugin.AddFeatByLevel(player, FeatType.ChatCommandTargeter, 1);
             CreaturePlugin.AddFeatByLevel(player, FeatType.StructureTool, 1);
-            Perk.UnlockPerkForPlayer(player, Service.PerkService.PerkType.ImprovedCriticalPistols);
+            if (@class == ClassType.Brujah)
+                Perk.UnlockPerkForPlayer(player, Service.PerkService.PerkType.Awe);
+                Perk.UnlockPerkForPlayer(player, Service.PerkService.PerkType.DreadGaze);
+                Perk.UnlockPerkForPlayer(player, Service.PerkService.PerkType.Entrancement);
+                Perk.UnlockPerkForPlayer(player, Service.PerkService.PerkType.Summon);
+                Perk.UnlockPerkForPlayer(player, Service.PerkService.PerkType.Majesty);
         }
 
 
