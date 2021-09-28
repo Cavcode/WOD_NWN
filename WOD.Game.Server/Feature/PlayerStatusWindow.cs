@@ -47,7 +47,7 @@ namespace WOD.Game.Server.Feature
                 var playerId = GetObjectUUID(player);
                 var dbPlayer = DB.Get<Player>(playerId);
 
-                    DrawStandardCharacterStatusComponent(player);
+                DrawForceCharacterStatusComponent(player);
             }
         }
 

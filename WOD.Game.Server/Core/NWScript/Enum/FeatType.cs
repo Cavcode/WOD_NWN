@@ -1706,7 +1706,12 @@ namespace WOD.Game.Server.Core.NWScript.Enum
         CityManagement4 = 1773,
         Upkeep1 = 1774,
         Upkeep2 = 1775,
-        CitySpecialization = 1776
+        CitySpecialization = 1776,
+        Awe = 1777,
+        DreadGaze = 1778,
+        Entrancement = 1779,
+        Summon = 1780,
+        Majesty = 1781,
 
     }
 }

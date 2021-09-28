@@ -279,6 +279,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
         }
 
         private void LeggingProficiency(PerkBuilder builder)
+
         {
             builder.Create(PerkCategoryType.ArmorHeavy, PerkType.LeggingProficiency)
                 .Name("Legging Proficiency")

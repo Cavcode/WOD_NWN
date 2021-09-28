@@ -89,7 +89,11 @@ namespace WOD.Game.Server.Service.PerkService
         Gathering = 27,
 
         [PerkCategory("Diplomacy", true)]
-        Diplomacy = 28
+        Diplomacy = 28,
+
+        [PerkCategory("Presence", true)]
+        Presence = 29
+
     }
 
     public class PerkCategoryAttribute : Attribute
