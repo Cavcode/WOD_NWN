@@ -48,7 +48,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Disciplines.Presence
             builder.Create(FeatType.Awe, PerkType.Awe)
                 .Name("Awe")
                 .RequirementFP(5)
-                .HasImpactAction(ImpactAction);
+                .HasImpactAction(ImpactAction)
+                .HasRecastDelay(RecastGroup.Awe,4f);
         }
 
     }

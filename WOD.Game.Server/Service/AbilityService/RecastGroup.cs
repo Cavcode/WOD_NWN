@@ -121,6 +121,8 @@ namespace WOD.Game.Server.Service.AbilityService
         CombatEnhancement = 56,
         [RecastGroup("Shielding", "Shielding")]
         Shielding = 57,
+        [RecastGroup("Awe", "Awe")]
+        Awe = 58,
     }
 
     public class RecastGroupAttribute: Attribute
