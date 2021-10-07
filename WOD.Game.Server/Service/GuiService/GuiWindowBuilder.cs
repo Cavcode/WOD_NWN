@@ -18,6 +18,33 @@ namespace WOD.Game.Server.Service.GuiService
             return _activeWindow;
         }
 
+        /// <summary>
+        /// Registers events found on the list of elements provided.
+        /// </summary>
+        /// <param name="elements">The elements to register.</param>
+        /// <param name="windowId">The window to register under.</param>
+        private void RegisterElementEvents(List<IGuiWidget> elements, string windowId)
+        {
+            foreach (var element in elements)
+            {
+                foreach (var (eventName, eventAction) in element.Events)
+                {
+                    // NWN only fires events for elements with Ids.
+                    // Skip any that don't have an Id
+                    if (!string.IsNullOrWhiteSpace(element.Id))
+                    {
+                        var eventKey = Gui.BuildEventKey(windowId, element.Id);
+                        Gui.RegisterElementEvent(eventKey, eventName, eventAction);
+                    }
+                }
+
+                RegisterElementEvents(element.Elements, windowId);
+            }
+        }
+
+        /// <summary>
+        /// Registers all events on all elements for a given window.
+        /// </summary>
         public void RegisterAllElementEvents()
         {
             var windowId = Gui.BuildWindowId(_type);
@@ -30,30 +57,14 @@ namespace WOD.Game.Server.Service.GuiService
             if(_activeWindow.ClosedEventMethodInfo != null)
                 Gui.RegisterElementEvent(windowEventKey, "close", _activeWindow.ClosedEventMethodInfo);
             
-            // Iterate over every column, every row, and every element to retrieve
-            // registered events.
-            foreach (var column in _activeWindow.Columns)
-            {
-                foreach (var row in column.Rows)
-                {
-                    foreach (var element in row.Elements)
-                    {
-                        // NWN only fires events for elements with Ids.
-                        // Skip any that don't have an Id
-                        if (string.IsNullOrWhiteSpace(element.Id))
-                            continue;
-
-                        var eventKey = Gui.BuildEventKey(windowId, element.Id);
-
-                        foreach (var (eventName, eventAction) in element.Events)
-                        {
-                            Gui.RegisterElementEvent(eventKey, eventName, eventAction);
-                        }
-                    }
-                }
-            }
+            // Recurse over all elements in the window, looking for and registering any events
+            RegisterElementEvents(_activeWindow.Elements, windowId);
         }
 
+        /// <summary>
+        /// Builds the window and registers all associated events.
+        /// </summary>
+        /// <returns>A constructed window.</returns>
         public GuiConstructedWindow Build()
         {
             var json = _activeWindow.Build();
@@ -64,7 +75,8 @@ namespace WOD.Game.Server.Service.GuiService
                 _type,
                 windowId,
                 json,
-                (player) =>
+                _activeWindow.Geometry,
+                () =>
             {
                 var dataModelInstance = Activator.CreateInstance<T>();
                 return new GuiPlayerWindow(dataModelInstance);

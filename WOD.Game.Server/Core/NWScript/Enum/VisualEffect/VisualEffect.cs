@@ -535,8 +535,8 @@ namespace WOD.Game.Server.Core.NWScript.Enum.VisualEffect
         Vfx_Imp_Starburst_Red = 645,
         Vfx_Imp_Nightmare_Head_Hit = 670,
 
-
         Vfx_Placement_Grid = 821,
-        Vfx_Target_Marker = 822
+        Vfx_Target_Marker = 822,
+        Awe_Duration = 833
     }
 }

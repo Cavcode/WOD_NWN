@@ -78,9 +78,19 @@ namespace WOD.Game.Server.Service
             const int WindowWidth = 26;
 
             var centerWindowX = Gui.CenterStringInWindow(name, WindowX, WindowWidth);
-            PostString(player, "Achievement Unlocked", centerWindowX + 2, WindowY+1, ScreenAnchor.TopRight, 10.0f, Gui.ColorWhite, Gui.ColorYellow, _idReservation.StartId,Gui.TextName);
-            PostString(player, " " + name, centerWindowX + 4, WindowY+3, ScreenAnchor.TopRight, 10.0f, Gui.ColorWhite, Gui.ColorYellow, _idReservation.StartId + 1, Gui.TextName);
+            PostString(player, "Achievement Unlocked", centerWindowX + 2, WindowY + 1, ScreenAnchor.TopRight, 10.0f, Gui.ColorWhite, Gui.ColorYellow, _idReservation.StartId, Gui.TextName);
+            PostString(player, " " + name, centerWindowX + 4, WindowY + 3, ScreenAnchor.TopRight, 10.0f, Gui.ColorWhite, Gui.ColorYellow, _idReservation.StartId + 1, Gui.TextName);
             Gui.DrawWindow(player, _idReservation.StartId + 2, ScreenAnchor.TopRight, WindowX, WindowY, WindowWidth, 4);
+        }
+
+        /// <summary>
+        /// Retrieves an achievement detail by its type.
+        /// </summary>
+        /// <param name="type">The type of achievement to retrieve.</param>
+        /// <returns>An achievement detail of the specified type.</returns>
+        public static AchievementAttribute GetAchievement(AchievementType type)
+        {
+            return _activeAchievements[type];
         }
 
         /// <summary>

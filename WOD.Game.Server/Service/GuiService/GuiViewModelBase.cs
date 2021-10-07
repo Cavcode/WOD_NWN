@@ -1,39 +1,65 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using WOD.Game.Server.Annotations;
-using WOD.Game.Server.Core;
+using WOD.Game.Server.Feature.GuiDefinition.ViewModel;
 using WOD.Game.Server.Service.GuiService.Component;
-using WOD.Game.Server.Service.GuiService.Converter;
 using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service.GuiService
 {
-    public abstract class GuiViewModelBase: IGuiViewModel, INotifyPropertyChanged
+    public abstract class GuiViewModelBase<TDerived>: IGuiViewModel, INotifyPropertyChanged
+        where TDerived: GuiViewModelBase<TDerived>
     {
+        private class PropertyDetail
+        {
+            public object Value { get; set; }
+            public Type Type { get; set; }
+            public bool HasEventBeenHooked { get; set; }
+            public bool IsGuiList { get; set; }
+        }
+
+        private static readonly GuiPropertyConverter _converter = new GuiPropertyConverter();
+
         protected uint Player { get; private set; }
         protected int WindowToken { get; private set; }
 
-        private readonly Dictionary<string, object> _propertyValues = new Dictionary<string, object>();
+        private readonly Dictionary<string, PropertyDetail> _propertyValues = new Dictionary<string, PropertyDetail>();
 
+        /// <summary>
+        /// The window geometry. This is automatically bound for all windows.
+        /// </summary>
         public GuiRectangle Geometry
         {
             get => Get<GuiRectangle>();
             set => Set(value);
         }
-        
+
+        /// <summary>
+        /// Retrieves a property's value and handles notification to subscribers.
+        /// </summary>
+        /// <typeparam name="T">The type of data to retrieve</typeparam>
+        /// <param name="propertyName">The name of the property.</param>
+        /// <returns>The retrieved object.</returns>
         protected T Get<T>([CallerMemberName]string propertyName = null)
         {
             if (string.IsNullOrWhiteSpace(propertyName))
                 return default(T);
 
             if (_propertyValues.ContainsKey(propertyName))
-                return (T)_propertyValues[propertyName];
+                return (T)_propertyValues[propertyName].Value;
 
             return default(T);
         }
 
+        /// <summary>
+        /// Sets a property's value and handles notification to subscribers.
+        /// </summary>
+        /// <typeparam name="T">The type of data to set.</typeparam>
+        /// <param name="value">The new value to set.</param>
+        /// <param name="propertyName">The name of the property.</param>
         protected void Set<T>(T value, [CallerMemberName]string propertyName = null)
         {
             if (string.IsNullOrWhiteSpace(propertyName))
@@ -48,75 +74,162 @@ namespace WOD.Game.Server.Service.GuiService
                     return;
             }
 
-            _propertyValues[propertyName] = value;
+            if (!_propertyValues.ContainsKey(propertyName))
+                _propertyValues[propertyName] = new PropertyDetail();
+
+            // List has already been bound, but the new value is a different object.
+            // Unsubscribe the event and reset the flag.
+            if (_propertyValues.ContainsKey(propertyName) &&
+                _propertyValues[propertyName].IsGuiList &&
+                _propertyValues[propertyName].HasEventBeenHooked &&
+                !ReferenceEquals(value, _propertyValues[propertyName].Value))
+            {
+                var list = ((IGuiBindingList)_propertyValues[propertyName].Value);
+                list.PropertyName = propertyName;
+                list.ListChanged -= OnListChanged;
+                _propertyValues[propertyName].HasEventBeenHooked = false;
+            }
+
+            // Update the type and value for this entry.
+            _propertyValues[propertyName].Value = value;
+            _propertyValues[propertyName].Type = typeof(T);
+
+            // Binding lists - The ListChanged event must also be hooked in order to raise
+            // the OnPropertyChanged event.
+            var valueType = typeof(T);
+            if (
+                (valueType == typeof(GuiBindingList<string>) ||
+                 valueType == typeof(GuiBindingList<int>) ||
+                 valueType == typeof(GuiBindingList<bool>) ||
+                 valueType == typeof(GuiBindingList<float>) ||
+                 valueType == typeof(GuiBindingList<GuiRectangle>) ||
+                 valueType == typeof(GuiBindingList<GuiVector2>) ||
+                 valueType == typeof(GuiBindingList<GuiColor>)))
+            {
+                var list = ((IGuiBindingList)_propertyValues[propertyName].Value);
+                list.PropertyName = propertyName;
+
+                list.ListChanged += OnListChanged;
+
+                _propertyValues[propertyName].HasEventBeenHooked = true;
+                _propertyValues[propertyName].IsGuiList = true;
+            }
+
             OnPropertyChanged(propertyName);
+        }
+
+        private void OnListChanged(object sender, ListChangedEventArgs e)
+        {
+            var list = ((IGuiBindingList) sender);
+            OnPropertyChanged(list.PropertyName);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// Notifies subscribers of changes.
+        /// </summary>
+        /// <param name="propertyName">The name of the property to notify about.</param>
         [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             
-            var value = _propertyValues[propertyName];
-            var json = ConvertToJson(value);
-
+            var value = _propertyValues[propertyName].Value;
+            var json = _converter.ToJson(value);
+            
             NuiSetBind(Player, WindowToken, propertyName, json);
-        }
 
-        private static Json ConvertToJson(object value)
-        {
-
-            if (value is string s)
+            if (_propertyValues[propertyName].IsGuiList)
             {
-                return new GuiStringConverter().ToJson(s);
-            }
-            else if (value is int i)
-            {
-                return new GuiIntConverter().ToJson(i);
-            }
-            else if (value is float f)
-            {
-                return new GuiFloatConverter().ToJson(f);
-            }
-            else if (value is bool b)
-            {
-                return new GuiBoolConverter().ToJson(b);
-            }
-            else if (value is GuiRectangle rect)
-            {
-                return new GuiRectangleConverter().ToJson(rect);
-            }
-            else if (value is GuiColor color)
-            {
-                return new GuiColorConverter().ToJson(color);
-            }
-            else
-            {
-                throw new Exception($"Converter is not defined for type {value.GetType()}");
+                var list = (IGuiBindingList) value;
+                NuiSetBind(Player, WindowToken, propertyName + "_RowCount", JsonInt(list.Count));
             }
         }
 
-        public void Bind(uint player, int windowToken)
+        protected GuiWindowType WindowType { get; private set; }
+
+        /// <summary>
+        /// Binds a player and window with the associated view model.
+        /// </summary>
+        /// <param name="player">The player to bind.</param>
+        /// <param name="windowToken">The window token to bind.</param>
+        /// <param name="initialGeometry">The initial geometry to use in the event the window dimensions aren't set.</param>
+        /// <param name="type">The type of window.</param>
+        public void Bind(uint player, int windowToken, GuiRectangle initialGeometry, GuiWindowType type)
         {
             Player = player;
             WindowToken = windowToken;
+            WindowType = type;
+
+            if (Geometry.X == 0.0f &&
+                Geometry.Y == 0.0f &&
+                Geometry.Width == 0.0f &&
+                Geometry.Height == 0.0f)
+            {
+                Geometry = initialGeometry;
+            }
 
             // Rebind any existing properties (in the event the window was closed and reopened)
-            foreach (var (name, value) in _propertyValues)
+            foreach (var (name, propertyDetail) in _propertyValues)
             {
-                var json = ConvertToJson(value);
+                var json = _converter.ToJson(propertyDetail.Value);
                 NuiSetBind(Player, WindowToken, name, json);
             }
 
-            // Bind and watch window geometry
-            NuiSetBindWatch(Player, WindowToken, nameof(Geometry), true);
+            WatchOnClient(model => model.Geometry);
         }
 
+
+        /// <summary>
+        /// Handles updating the view model with changes received from the player's client.
+        /// </summary>
+        /// <param name="propertyName">The name of the property to update.</param>
         public void UpdatePropertyFromClient(string propertyName)
         {
+            var property = _propertyValues[propertyName];
+            var json = NuiGetBind(Player, WindowToken, propertyName);
+            var value = _converter.ToObject(json, property.Type);
 
+            _propertyValues[propertyName].Value = value;
+
+            if(propertyName != nameof(Geometry))
+                GetType().GetProperty(propertyName)?.SetValue(this, value);
+
+            // Update Modal geometry if this VM has it active.
+            if (propertyName == nameof(Geometry))
+                Gui.GetPlayerModal(Player, WindowType).ViewModel.Geometry = Geometry;
         }
+
+        /// <summary>
+        /// Watches a property on the client.
+        /// </summary>
+        /// <typeparam name="TProperty">The property of the view model.</typeparam>
+        /// <param name="expression">Expression to target the property.</param>
+        protected void WatchOnClient<TProperty>(Expression<Func<TDerived, TProperty>> expression)
+        {
+            var propertyName = GuiHelper<TDerived>.GetPropertyName(expression);
+            var value = _propertyValues[propertyName].Value;
+            var json = _converter.ToJson(value);
+
+            NuiSetBindWatch(Player, WindowToken, propertyName, true);
+            NuiSetBind(Player, WindowToken, propertyName, json);
+        }
+        
+        protected void ShowModal(
+            string prompt, 
+            Action confirmAction, 
+            Action cancelAction = null, 
+            string confirmText = "Yes", 
+            string cancelText = "No")
+        {
+            var playerWindow = Gui.GetPlayerModal(Player, WindowType);
+            var vm = (ModalViewModel) playerWindow.ViewModel;
+
+            vm.LoadModalInfo(Geometry, prompt, confirmAction, cancelAction, confirmText, cancelText);
+            Gui.ShowModal(Player, WindowType);
+        }
+
+
     }
 }

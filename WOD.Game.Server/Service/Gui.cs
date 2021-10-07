@@ -6,8 +6,6 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Feature.DialogDefinition;
 using WOD.Game.Server.Service.GuiService;
-using WOD.Game.Server.Service.GuiService.Component;
-using WOD.Game.Server.Service.GuiService.Converter;
 using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
@@ -16,18 +14,19 @@ namespace WOD.Game.Server.Service
     {
         private static readonly Dictionary<GuiWindowType, GuiConstructedWindow> _windowTemplates = new();
         private static readonly Dictionary<string, Dictionary<GuiWindowType, GuiPlayerWindow>> _playerWindows = new();
+        private static readonly Dictionary<string, Dictionary<GuiWindowType, GuiPlayerWindow>> _playerModals = new();
         private static readonly Dictionary<string, Dictionary<string, MethodInfo>> _elementEvents = new();
         private static readonly Dictionary<string, GuiWindowType> _windowTypesByKey = new();
 
         /// <summary>
         /// When the module loads, cache all of the GUI windows for later retrieval.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("WOD_skl_cache")]
         public static void CacheData()
         {
             LoadWindowTemplates();
         }
-        
+
         /// <summary>
         /// Loads all of the window definitions, constructs them, and caches the data into memory.
         /// </summary>
@@ -51,6 +50,7 @@ namespace WOD.Game.Server.Service
                 // Register the window template into the cache.
                 _windowTemplates[constructedWindow.Type] = constructedWindow;
                 _windowTypesByKey[BuildWindowId(constructedWindow.Type)] = constructedWindow.Type;
+                _windowTypesByKey[BuildWindowId(constructedWindow.Type) + "_MODAL"] = constructedWindow.Type;
             }
 
             Console.WriteLine($"Loaded {_windowTemplates.Count} GUI window templates.");
@@ -60,22 +60,37 @@ namespace WOD.Game.Server.Service
         /// When a player enters the server, create instances of every window if they have not already been created this session.
         /// </summary>
         [NWNEventHandler("mod_enter")]
-        public static void RefreshPlayerWindows()
+        public static void CreatePlayerWindows()
         {
             var player = GetEnteringObject();
             var playerId = GetObjectUUID(player);
 
             if (_playerWindows.ContainsKey(playerId))
                 return;
-            
+
             _playerWindows[playerId] = new Dictionary<GuiWindowType, GuiPlayerWindow>();
+            _playerModals[playerId] = new Dictionary<GuiWindowType, GuiPlayerWindow>();
+
             foreach (var (type, window) in _windowTemplates)
             {
-                var playerWindow = window.CreatePlayerWindowAction(player);
+                // Add the window
+                var playerWindow = window.CreatePlayerWindowAction();
+                playerWindow.ViewModel.Geometry = window.InitialGeometry;
                 _playerWindows[playerId][type] = playerWindow;
+
+                // All windows also get a separate modal window added to the cache.
+                var modalWindow = _windowTemplates[GuiWindowType.Modal].CreatePlayerWindowAction();
+                modalWindow.ViewModel.Geometry = window.InitialGeometry;
+                _playerModals[playerId][type] = modalWindow;
             }
         }
 
+        /// <summary>
+        /// Registers an element's event information.
+        /// </summary>
+        /// <param name="elementId">The Id of the element to register.</param>
+        /// <param name="eventName">The name of the event.</param>
+        /// <param name="eventAction">The action to run when the event is raised.</param>
         public static void RegisterElementEvent(string elementId, string eventName, MethodInfo eventAction)
         {
             if (!_elementEvents.ContainsKey(elementId))
@@ -95,12 +110,19 @@ namespace WOD.Game.Server.Service
             var playerId = GetObjectUUID(player);
             var windowToken = NuiGetEventWindow();
             var windowId = NuiGetWindowId(player, windowToken);
+            var parentWindowType = GuiWindowType.Invalid;
+
+            var isModal = windowId.EndsWith("_MODAL");
+            if (isModal)
+            {
+                var parentWindowId = windowId;
+                parentWindowType = _windowTypesByKey[parentWindowId];
+                windowId = BuildWindowId(GuiWindowType.Modal);
+            }
+
             var eventType = NuiGetEventType();
             var elementId = NuiGetEventElement();
-            var arrayIndex = NuiGetEventArrayIndex();
             var eventKey = BuildEventKey(windowId, elementId);
-
-            Console.WriteLine($"windowToken = {windowToken}, windowId = {windowId}, eventType = {eventType}, elementId = {elementId}, arrayIndex = {arrayIndex}");
 
             if (!_elementEvents.ContainsKey(eventKey))
                 return;
@@ -111,7 +133,9 @@ namespace WOD.Game.Server.Service
                 return;
 
             var windowType = _windowTypesByKey[windowId];
-            var playerWindow = _playerWindows[playerId][windowType];
+            var playerWindow = isModal
+                ? _playerModals[playerId][parentWindowType]
+                : _playerWindows[playerId][windowType];
             var viewModel = playerWindow.ViewModel;
 
             // Note: This section has the possibility of being slow.
@@ -133,22 +157,19 @@ namespace WOD.Game.Server.Service
             var windowToken = NuiGetEventWindow();
             var windowId = NuiGetWindowId(player, windowToken);
             var eventType = NuiGetEventType();
-            var elementId = NuiGetEventElement();
-            var arrayIndex = NuiGetEventArrayIndex();
-            var eventKey = BuildEventKey(windowId, elementId);
+            var propertyName = NuiGetEventElement();
 
             if (eventType != "watch")
                 return;
 
             if (!_playerWindows.ContainsKey(playerId))
                 return;
-            
+
             var playerWindows = _playerWindows[playerId];
             var windowType = _windowTypesByKey[windowId];
             var playerWindow = playerWindows[windowType];
 
-            //playerWindow.ViewModel.UpdatePropertyFromClient();
-
+            playerWindow.ViewModel.UpdatePropertyFromClient(propertyName);
         }
 
         /// <summary>
@@ -174,17 +195,104 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// Shows a specific window for a given player.
+        /// Shows or hides a specific window for a given player.
         /// </summary>
-        /// <param name="player">The player to show the window to.</param>
-        /// <param name="type">The type of window to show.</param>
-        public static void ShowPlayerWindow(uint player, GuiWindowType type)
+        /// <param name="player">The player to toggle the window for.</param>
+        /// <param name="type">The type of window to toggle.</param>
+        public static void TogglePlayerWindow(uint player, GuiWindowType type)
         {
             var playerId = GetObjectUUID(player);
             var template = _windowTemplates[type];
             var playerWindow = _playerWindows[playerId][type];
-            playerWindow.WindowToken = NuiCreate(player, template.Window, template.WindowId);
-            playerWindow.ViewModel.Bind(player, playerWindow.WindowToken);
+            var windowId = BuildWindowId(type);
+
+            // If the window is closed, open it.
+            if (NuiFindWindow(player, windowId) == 0)
+            {
+                playerWindow.WindowToken = NuiCreate(player, template.Window, template.WindowId);
+                playerWindow.ViewModel.Bind(player, playerWindow.WindowToken, template.InitialGeometry, type);
+            }
+            // Otherwise the window must already be open. Close it.
+            else
+            {
+                NuiDestroy(player, playerWindow.WindowToken);
+
+                // Also destroy the modal, if it's open.
+                var modalWindowId = windowId + "_MODAL";
+                if (NuiFindWindow(player, modalWindowId) != 0)
+                {
+                    NuiDestroy(player, _playerModals[playerId][type].WindowToken);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Shows the modal associated with the specified parent window type for the player.
+        /// If the modal is already open, nothing will happen.
+        /// </summary>
+        /// <param name="player">The player who will be shown the modal.</param>
+        /// <param name="parentType">The parent window type.</param>
+        public static void ShowModal(uint player, GuiWindowType parentType)
+        {
+            var modalWindowId = BuildWindowId(parentType) + "_MODAL";
+
+            // If the modal is already open, don't do anything else.
+            if (NuiFindWindow(player, modalWindowId) != 0)
+                return;
+
+            var playerId = GetObjectUUID(player);
+            var playerModal = _playerModals[playerId][parentType];
+            var template = _windowTemplates[GuiWindowType.Modal];
+            var parentWindow = _playerWindows[playerId][parentType];
+            playerModal.WindowToken = NuiCreate(player, template.Window, modalWindowId);
+            playerModal.ViewModel.Bind(player, playerModal.WindowToken, parentWindow.ViewModel.Geometry, parentType);
+        }
+
+        /// <summary>
+        /// Closes the modal associated with the specified parent window type for the player.
+        /// If the modal isn't open, nothing will happen.
+        /// </summary>
+        /// <param name="player">The player to close the modal for.</param>
+        /// <param name="parentType">The parent window type.</param>
+        public static void CloseModal(uint player, GuiWindowType parentType)
+        {
+            var modalWindowId = BuildWindowId(parentType) + "_MODAL";
+
+            // If the modal is not open, don't do anything else.
+            if (NuiFindWindow(player, modalWindowId) == 0)
+                return;
+
+            var playerId = GetObjectUUID(player);
+            NuiDestroy(player, _playerModals[playerId][parentType].WindowToken);
+        }
+
+        /// <summary>
+        /// Skips the character sheet panel open event and shows the WOD character sheet instead.
+        /// </summary>
+        [NWNEventHandler("mod_gui_event")]
+        public static void CharacterSheetGui()
+        {
+            var player = GetLastGuiEventPlayer();
+            var type = GetLastGuiEventType();
+            if (type != GuiEventType.DisabledPanelAttemptOpen) return;
+
+            var panelType = (GuiPanel)GetLastGuiEventInteger();
+            if (panelType != GuiPanel.CharacterSheet)
+                return;
+
+            TogglePlayerWindow(player, GuiWindowType.CharacterSheet);
+        }
+
+        /// <summary>
+        /// Retrieves the modal instance of a player's window.
+        /// </summary>
+        /// <param name="player">The player to retrieve for.</param>
+        /// <param name="type">The type of window to retrieve.</param>
+        /// <returns>A player's window instance of the specified type.</returns>
+        public static GuiPlayerWindow GetPlayerModal(uint player, GuiWindowType type)
+        {
+            var playerId = GetObjectUUID(player);
+            return _playerModals[playerId][type];
         }
 
         public class IdReservation
@@ -240,7 +348,7 @@ namespace WOD.Game.Server.Service
         public static int ColorPurple = Convert.ToInt32("0x800080FF", 16);
 
         public static int ColorHealthBar = Convert.ToInt32("0x008080FF", 16);
-        public static int ColorFPBar = Convert.ToInt32("0x8B0000FF", 16);
+        public static int ColorFPBar = Convert.ToInt32("0xFF0000FF", 16);
         public static int ColorStaminaBar = Convert.ToInt32("0x008B00FF", 16);
 
         public static int ColorShieldsBar = Convert.ToInt32("0x00AAE4FF", 16);
@@ -286,11 +394,11 @@ namespace WOD.Game.Server.Service
 
         public static void DrawWindow(uint player, int startId, ScreenAnchor anchor, int x, int y, int width, int height, float lifeTime = 10.0f)
         {
-            string top = WindowTopLeft;
-            string middle = WindowMiddleLeft;
-            string bottom = WindowBottomLeft;
+            var top = WindowTopLeft;
+            var middle = WindowMiddleLeft;
+            var bottom = WindowBottomLeft;
 
-            for (int i = 0; i < width; i++)
+            for (var i = 0; i < width; i++)
             {
                 top += WindowTopMiddle;
                 middle += WindowMiddleBlank;
@@ -309,8 +417,8 @@ namespace WOD.Game.Server.Service
             {
                 Draw(player, top, x, y, anchor, startId++, lifeTime);
             }
-            
-            
+
+
             for (var i = 0; i < height; i++)
             {
                 Draw(player, middle, x, ++y, anchor, startId++, lifeTime);
@@ -342,27 +450,6 @@ namespace WOD.Game.Server.Service
         public static int CenterStringInWindow(string text, int windowX, int windowWidth)
         {
             return (windowX + (windowWidth / 2)) - ((text.Length + 2) / 2);
-        }
-
-        /// <summary>
-        /// Skips the character sheet panel open event and shows the WOD character sheet instead.
-        /// </summary>
-        [NWNEventHandler("mod_gui_event")]
-        public static void CharacterSheetGui()
-        {
-            // todo: When NUI is released, this should build and draw the new UI for character sheets.
-            // todo: Until that happens, this will simply open the character rest menu.
-            var player = GetLastGuiEventPlayer();
-            var type = GetLastGuiEventType();
-            if (type != GuiEventType.DisabledPanelAttemptOpen) return;
-
-            var panelType = (GuiPanel)GetLastGuiEventInteger();
-            if (panelType != GuiPanel.CharacterSheet)
-                return;
-
-            AssignCommand(player, () => ClearAllActions());
-
-            Dialog.StartConversation(player, player, nameof(RestMenuDialog));
         }
 
     }

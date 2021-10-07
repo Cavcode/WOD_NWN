@@ -34,7 +34,7 @@ namespace WOD.Game.Server.Service
             // Creatures or DM-possessed creatures
             else
             {
-                var perkLevel = GetLocalInt(creature, $"PERK_LEVEL_{(int) perkType}");
+                var perkLevel = GetLocalInt(creature, $"PERK_LEVEL_{(int)perkType}");
                 var perkMaxLevel = perkType == PerkType.Invalid
                     ? 1
                     : _perkMaxLevels[perkType];
@@ -112,7 +112,7 @@ namespace WOD.Game.Server.Service
             Dialog.StartConversation(player, player, nameof(PerkRefundDialog));
 
             // Don't display the "You cannot use this item" message. Skip the event.
-            EventsPlugin.SetEventResult("1"); 
+            EventsPlugin.SetEventResult("1");
             EventsPlugin.SkipEvent();
         }
 

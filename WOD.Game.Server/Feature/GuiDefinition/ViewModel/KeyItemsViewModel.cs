@@ -1,0 +1,75 @@
+﻿using System;
+using WOD.Game.Server.Entity;
+using WOD.Game.Server.Service;
+using WOD.Game.Server.Service.GuiService;
+using static WOD.Game.Server.Core.NWScript.NWScript;
+
+namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
+{
+    public class KeyItemsViewModel: GuiViewModelBase<KeyItemsViewModel>
+    {
+        public GuiBindingList<string> Names
+        {
+            get => Get<GuiBindingList<string>>();
+            set => Set(value);
+        }
+
+        public GuiBindingList<string> Types
+        {
+            get => Get<GuiBindingList<string>>();
+            set => Set(value);
+        }
+
+        public GuiBindingList<string> Descriptions
+        {
+            get => Get<GuiBindingList<string>>();
+            set => Set(value);
+        }
+
+        public int SelectedCategoryId
+        {
+            get => Get<int>();
+            set
+            {
+                Set(value);
+                LoadKeyItems();
+            }
+        }
+
+        public Action OnLoadWindow() => () =>
+        {
+            SelectedCategoryId = 0;
+            LoadKeyItems();
+            WatchOnClient(model => model.SelectedCategoryId);
+        };
+
+        private void LoadKeyItems()
+        {
+            var playerId = GetObjectUUID(Player);
+            var dbPlayer = DB.Get<Player>(playerId);
+
+            var names = new GuiBindingList<string>();
+            var types = new GuiBindingList<string>();
+            var descriptions = new GuiBindingList<string>();
+
+            foreach (var (type, _) in dbPlayer.KeyItems)
+            {
+                var detail = KeyItem.GetKeyItem(type);
+                var categoryDetail = KeyItem.GetKeyItemCategory(detail.Category);
+
+                // If a key item filter is applied and this key item isn't part of this category,
+                // skip it and move to the next.
+                if (SelectedCategoryId != 0 && SelectedCategoryId != (int) detail.Category) 
+                    continue;
+
+                names.Add(detail.Name);
+                types.Add(categoryDetail.Name);
+                descriptions.Add(detail.Description);
+            }
+
+            Names = names;
+            Types = types;
+            Descriptions = descriptions;
+        }
+    }
+}

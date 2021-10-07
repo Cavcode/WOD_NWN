@@ -19,6 +19,10 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Disciplines.Presence
         {
             var builder = new AbilityBuilder();
             Awe(builder);
+            Awe2(builder);
+            Awe3(builder);
+            Awe4(builder);
+            Awe5(builder);
 
             return builder.Build();
         }
@@ -46,10 +50,42 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Disciplines.Presence
         private static void Awe(AbilityBuilder builder)
         {
             builder.Create(FeatType.Awe, PerkType.Awe)
-                .Name("Awe")
+                .Name("Awe I")
                 .RequirementFP(5)
                 .HasImpactAction(ImpactAction)
                 .HasRecastDelay(RecastGroup.Awe,4f);
+        }
+        private static void Awe2(AbilityBuilder builder)
+        {
+            builder.Create(FeatType.Awe, PerkType.Awe)
+                .Name("Awe II")
+                .RequirementFP(5)
+                .HasImpactAction(ImpactAction)
+                .HasRecastDelay(RecastGroup.Awe, 4f);
+        }
+        private static void Awe3(AbilityBuilder builder)
+        {
+            builder.Create(FeatType.Awe, PerkType.Awe)
+                .Name("Awe III")
+                .RequirementFP(5)
+                .HasImpactAction(ImpactAction)
+                .HasRecastDelay(RecastGroup.Awe, 4f);
+        }
+        private static void Awe4(AbilityBuilder builder)
+        {
+            builder.Create(FeatType.Awe, PerkType.Awe)
+                .Name("Awe IV")
+                .RequirementFP(5)
+                .HasImpactAction(ImpactAction)
+                .HasRecastDelay(RecastGroup.Awe, 4f);
+        }
+        private static void Awe5(AbilityBuilder builder)
+        {
+            builder.Create(FeatType.Awe, PerkType.Awe)
+                .Name("Awe V")
+                .RequirementFP(5)
+                .HasImpactAction(ImpactAction)
+                .HasRecastDelay(RecastGroup.Awe, 4f);
         }
 
     }

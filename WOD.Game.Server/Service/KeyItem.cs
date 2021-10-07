@@ -62,7 +62,7 @@ namespace WOD.Game.Server.Service
                     _keyItemsByTypeName[enumName] = keyItem;
                 }
 
-                _keyItemsByTypeId[(int) keyItem] = keyItem;
+                _keyItemsByTypeId[(int)keyItem] = keyItem;
 
                 if (keyItemDetail.IsActive)
                 {
@@ -73,6 +73,16 @@ namespace WOD.Game.Server.Service
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets a key item category's detail by its type.
+        /// </summary>
+        /// <param name="type">The type of key item category to retrieve.</param>
+        /// <returns>A key item category detail.</returns>
+        public static KeyItemCategoryAttribute GetKeyItemCategory(KeyItemCategoryType type)
+        {
+            return _allCategories[type];
         }
 
         /// <summary>
@@ -93,8 +103,8 @@ namespace WOD.Game.Server.Service
         /// <returns>A KeyItemType matching the Id.</returns>
         public static KeyItemType GetKeyItemTypeById(int keyItemId)
         {
-            return !_keyItemsByTypeId.ContainsKey(keyItemId) ? 
-                KeyItemType.Invalid : 
+            return !_keyItemsByTypeId.ContainsKey(keyItemId) ?
+                KeyItemType.Invalid :
                 _keyItemsByTypeId[keyItemId];
         }
 
@@ -106,8 +116,8 @@ namespace WOD.Game.Server.Service
         /// <returns>A KeyItemType matching the name.</returns>
         public static KeyItemType GetKeyItemTypeByName(string name)
         {
-            return !_keyItemsByTypeName.ContainsKey(name) ? 
-                KeyItemType.Invalid : 
+            return !_keyItemsByTypeName.ContainsKey(name) ?
+                KeyItemType.Invalid :
                 _keyItemsByTypeName[name];
         }
 
@@ -127,7 +137,7 @@ namespace WOD.Game.Server.Service
         /// <returns>A dictionary containing key item type and key item attribute data.</returns>
         public static Dictionary<KeyItemType, KeyItemAttribute> GetActiveKeyItemsByCategory(KeyItemCategoryType category)
         {
-            if(!_activeKeyItemsByCategory.ContainsKey(category))
+            if (!_activeKeyItemsByCategory.ContainsKey(category))
                 return new Dictionary<KeyItemType, KeyItemAttribute>();
 
             return _activeKeyItemsByCategory[category].ToDictionary(s => s.Key, s => s.Value);
@@ -215,7 +225,7 @@ namespace WOD.Game.Server.Service
 
             var playerId = GetObjectUUID(player);
             var dbPlayer = DB.Get<Player>(playerId);
-            
+
             foreach (var ki in keyItems)
             {
                 if (!dbPlayer.KeyItems.ContainsKey(ki))
@@ -241,7 +251,7 @@ namespace WOD.Game.Server.Service
 
             if (keyItemID <= 0) return;
 
-            var keyItem = (KeyItemType) keyItemID;
+            var keyItem = (KeyItemType)keyItemID;
             if (HasKeyItem(player, keyItem))
             {
                 SendMessageToPC(player, "You already have this key item.");

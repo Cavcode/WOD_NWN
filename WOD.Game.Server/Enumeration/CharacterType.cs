@@ -1,4 +1,6 @@
-﻿namespace WOD.Game.Server.Enumeration
+﻿using System;
+
+namespace WOD.Game.Server.Enumeration
 {
     public enum CharacterType
     {
@@ -10,5 +12,14 @@
         Nosferatu = 5,
         Toreador = 6,
         Ventrue = 7,
+    }
+    public class CharacterTypeAttribute : Attribute
+    {
+        public string Name { get; set; }
+
+        public CharacterTypeAttribute(string name)
+        {
+            Name = name;
+        }
     }
 }
