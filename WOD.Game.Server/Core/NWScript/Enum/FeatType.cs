@@ -1712,5 +1712,6 @@ namespace WOD.Game.Server.Core.NWScript.Enum
         Awe3 = 1779,
         Awe4 = 1780,
         Awe5 = 1781,
+        Feed = 1782,
     }
 }

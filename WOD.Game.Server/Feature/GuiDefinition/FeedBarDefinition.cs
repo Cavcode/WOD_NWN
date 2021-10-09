@@ -12,18 +12,17 @@ namespace WOD.Game.Server.Feature.GuiDefinition
         {
             _builder.CreateWindow(GuiWindowType.CharacterSheet)
                 .BindOnOpened(model => model.OnLoadWindow())
-                .SetInitialGeometry(0, 60, 545f, 320f)
-                .SetTitle("Character Sheet")
+                .SetInitialGeometry(60, 60, 545f, 320f)
                 .AddColumn(col =>
                 {
                     col.AddRow(row =>
-                    {
+                    {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
                         row.AddProgressBar()
-                            .BindValue(model => model.Progresses);
+                            .BindValue(model => model.Progress);
                     });
                 });
 
             return _builder.Build();
         }
     }
-}+
+}
