@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using WOD.Game.Server.Core.Extensions;
 
 namespace WOD.Game.Server.Core
@@ -14,7 +15,7 @@ namespace WOD.Game.Server.Core
         private static readonly List<ScheduledItem> scheduledItems = new List<ScheduledItem>(1024);
         private static readonly IComparer<ScheduledItem> comparer = new ScheduledItem.SortedByExecutionTime();
 
-        public static IDisposable Schedule(Action task, TimeSpan delay)
+        public static IDisposable Schedule(Action task, TimeSpan delay, string identifier)
         {
             if (delay < TimeSpan.Zero)
             {
@@ -26,12 +27,17 @@ namespace WOD.Game.Server.Core
                 throw new ArgumentNullException(nameof(task));
             }
 
-            var item = new ScheduledItem(task, Time + delay.TotalSeconds);
+            if (identifier == null)
+            {
+                throw new ArgumentNullException(nameof(task));
+            }
+
+            var item = new ScheduledItem(task, Time + delay.TotalSeconds, identifier);
             scheduledItems.InsertOrdered(item, comparer);
             return item;
         }
 
-        public static IDisposable ScheduleRepeating(Action task, TimeSpan schedule, TimeSpan delay = default)
+        public static IDisposable ScheduleRepeating(Action task, TimeSpan schedule, string identifier, TimeSpan delay = default)
         {
             if (schedule <= TimeSpan.Zero)
             {
@@ -43,20 +49,49 @@ namespace WOD.Game.Server.Core
                 throw new ArgumentNullException(nameof(task));
             }
 
-            var item = new ScheduledItem(task, Time + delay.TotalSeconds + schedule.TotalSeconds, schedule.TotalSeconds);
+            if (identifier == null)
+            {
+                throw new ArgumentNullException(nameof(task));
+            }
+
+
+            var item = new ScheduledItem(task, Time + delay.TotalSeconds + schedule.TotalSeconds, schedule.TotalSeconds, identifier);
             scheduledItems.InsertOrdered(item, comparer);
             return item;
         }
 
+        public static ScheduledItem GetSchedule(string scheduleName)
+        {
+            var matchSchedule = scheduledItems;
+            for (int i = 0; i <= matchSchedule.Count(); i++)
+            {
+                if (matchSchedule[i].Identifier == scheduleName)
+                {
+                    return matchSchedule[i];
+                }
+            }
+            return null;
+        }
+
         internal static void Unschedule(ScheduledItem scheduledItem)
         {
-            scheduledItems.Remove(scheduledItem);
+            
+            for (int i = 0; i < scheduledItems.Count; i++)
+            {
+                if (scheduledItems[i].Identifier == scheduledItem.Identifier)
+                {
+                    scheduledItems[i].Disposed = true;
+                    scheduledItems.Remove(scheduledItem);
+                }
+
+            }
+            Console.WriteLine($"Unscheduled {scheduledItem.Identifier}.");
         }
 
         public static void Process()
         {
             ProcessTime();
-            ProcessScheduledItems();
+            Update();
         }
         private static void ProcessTime()
         {
@@ -65,27 +100,49 @@ namespace WOD.Game.Server.Core
             stopwatch.Restart();
         }
 
-        private static void ProcessScheduledItems()
+        public static void Update()
         {
             int i;
             for (i = 0; i < scheduledItems.Count; i++)
             {
-                var item = scheduledItems[i];
+                ScheduledItem item = scheduledItems[i];
                 if (Time < item.ExecutionTime)
                 {
                     break;
                 }
 
-                item.Execute();
-                if (!item.Repeating)
+                if (item.Disposed)
+                {
+                    break;
+                }
+
+
+                try
+                {
+                    if (item.Disposed != true)
+                    {
+                        item.Execute();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+
+                if (!item.Repeating || item.Disposed)
                 {
                     continue;
                 }
 
-                item.Reschedule(Time + item.Schedule);
-                scheduledItems.RemoveAt(i);
-                scheduledItems.InsertOrdered(item, comparer);
-                i--;
+
+                if (item.Disposed == false)
+                {
+                    item.Reschedule(Time + item.Schedule);
+                    Console.WriteLine(item.Identifier);
+                    scheduledItems.RemoveAt(i);
+                    scheduledItems.InsertOrdered(item, comparer);
+                    i--;
+                }
             }
 
             if (i > 0)

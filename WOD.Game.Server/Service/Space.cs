@@ -42,7 +42,7 @@ namespace WOD.Game.Server.Service
             Console.WriteLine($"Loaded {_shipModules.Count} ship modules.");
             Console.WriteLine($"Loaded {_spaceObjects.Count} space objects.");
 
-            Scheduler.ScheduleRepeating(ProcessSpaceNPCAI, TimeSpan.FromSeconds(1));
+            //Scheduler.ScheduleRepeating(ProcessSpaceNPCAI, TimeSpan.FromSeconds(1), "spaceSchedule");
         }
 
         /// <summary>

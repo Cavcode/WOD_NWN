@@ -10,13 +10,19 @@ namespace WOD.Game.Server.Feature.GuiDefinition
 
         public GuiConstructedWindow BuildWindow()
         {
-            _builder.CreateWindow(GuiWindowType.CharacterSheet)
+            _builder.CreateWindow(GuiWindowType.FeedBar)
+                .SetIsTransparent(true)
+                .SetIsResizable(false)
+                .SetShowBorder(false)
+                .SetTitle("")
+                .SetIsClosable(false)
+
                 .BindOnOpened(model => model.OnLoadWindow())
-                .SetInitialGeometry(60, 60, 545f, 320f)
+                .SetInitialGeometry(600, 60, 545f, 320f)
                 .AddColumn(col =>
                 {
                     col.AddRow(row =>
-                    {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                    {
                         row.AddProgressBar()
                             .BindValue(model => model.Progress);
                     });

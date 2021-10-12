@@ -9,6 +9,7 @@ using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.ChatCommandService;
 using WOD.Game.Server.Service.GuiService;
+using static WOD.Game.Server.Core.Scheduler;
 using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
@@ -24,6 +25,7 @@ namespace WOD.Game.Server.Service
         {
             var player = OBJECT_SELF;
             var target = StringToObject(EventsPlugin.GetEventData("TARGET_OBJECT_ID"));
+            SetLocalObject(player,"bloodTarget",target);
             var feat = (FeatType)Convert.ToInt32(EventsPlugin.GetEventData("FEAT_ID"));
             if (feat != FeatType.Feed) return;
             if (GetObjectType(target) != ObjectType.Creature)
@@ -31,7 +33,7 @@ namespace WOD.Game.Server.Service
                 SendMessageToPC(player, "You can only feed on kine or animals.");
                 return;
             }
-            if (GetObjectType(target) != ObjectType.Player)
+            if (GetObjectType(target) == ObjectType.Player)
             {
                 SendMessageToPC(player, "You cannot feed on other players, diablerist.");
                 return;
@@ -40,7 +42,12 @@ namespace WOD.Game.Server.Service
 
             // Check to see if the player succeeds in a grapple.
 
+            Effect blind = EffectBlindness();
+            TagEffect(blind, "feedBlind");
+            ApplyEffectToObject(DurationType.Permanent,blind,player);
 
+            RemoveEffectByTag(player, "feedBlind");
+            
             Gui.TogglePlayerWindow(player, GuiWindowType.FeedBar);
           
         }

@@ -9,7 +9,7 @@ using Skill = WOD.Game.Server.Service.Skill;
 
 namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 {
-    public class CharacterSheetViewModel: GuiViewModelBase<CharacterSheetViewModel>
+    public class CharacterSheetViewModel : GuiViewModelBase<CharacterSheetViewModel>
     {
         public string PortraitResref
         {
@@ -156,6 +156,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             var playerId = GetObjectUUID(Player);
             var dbPlayer = DB.Get<Player>(playerId);
             PortraitResref = GetPortraitResRef(Player) + "l";
+            var playerType = GetClassByPosition(1, Player);
 
             HP = GetCurrentHitPoints(Player) + " / " + GetMaxHitPoints(Player);
             FP = Stat.GetCurrentFP(Player, dbPlayer) + " / " + Stat.GetMaxFP(Player, dbPlayer);
@@ -168,7 +169,31 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             Social = GetAbilityScore(Player, AbilityType.Social);
             Defense = Stat.GetDefense(Player, CombatDamageType.Physical);
             Evasion = GetAC(Player);
-            CharacterType = GetClassByPosition(1, Player) == ClassType.Brujah ? "Brujah" : "Tremere";
+            switch (playerType)
+            {
+                case ClassType.Brujah:
+                    CharacterType = "Brujah";
+                    break;
+                case ClassType.Nosferatu:
+                    CharacterType = "Nosferatu";
+                    break;
+                case ClassType.Tremere:
+                    CharacterType = "Tremere";
+                    break;
+                case ClassType.Ventrue:
+                    CharacterType = "Ventrue";
+                    break;
+                case ClassType.Malkavian:
+                    CharacterType = "Malkavian";
+                    break;
+                case ClassType.Toreador:
+                    CharacterType = "Toreador";
+                    break;
+
+                default:
+                    CharacterType = "Brujah";
+                    break;
+            }  
             Race = GetStringByStrRef(Convert.ToInt32(Get2DAString("racialtypes", "Name", (int)GetRacialType(Player))), GetGender(Player));
             SP = $"{dbPlayer.TotalSPAcquired} / {Skill.SkillCap} ({dbPlayer.UnallocatedSP})";
             AP = $"{dbPlayer.TotalAPAcquired} / 30 ({dbPlayer.UnallocatedAP})";

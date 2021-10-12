@@ -167,6 +167,7 @@ namespace WOD.Game.Server.Feature
             CreaturePlugin.AddFeatByLevel(player, FeatType.UncannyDodge1, 1);
             CreaturePlugin.AddFeatByLevel(player, FeatType.ChatCommandTargeter, 1);
             CreaturePlugin.AddFeatByLevel(player, FeatType.StructureTool, 1);
+            CreaturePlugin.AddFeatByLevel(player, FeatType.Feed, 1);
             if (@class == ClassType.Brujah)
                 Perk.UnlockPerkForPlayer(player, Service.PerkService.PerkType.Awe);
                 Perk.UnlockPerkForPlayer(player, Service.PerkService.PerkType.DreadGaze);
@@ -182,11 +183,13 @@ namespace WOD.Game.Server.Feature
             var chatCommandTargeter = PlayerQuickBarSlot.UseFeat(FeatType.ChatCommandTargeter);
             var restAbility = PlayerQuickBarSlot.UseFeat(FeatType.Rest);
             var structureTool = PlayerQuickBarSlot.UseFeat(FeatType.StructureTool);
+            var feed = PlayerQuickBarSlot.UseFeat(FeatType.Feed);
 
             PlayerPlugin.SetQuickBarSlot(player, 0, openRestMenu);
             PlayerPlugin.SetQuickBarSlot(player, 1, chatCommandTargeter);
             PlayerPlugin.SetQuickBarSlot(player, 2, restAbility);
             PlayerPlugin.SetQuickBarSlot(player, 3, structureTool);
+            PlayerPlugin.SetQuickBarSlot(player, 4, feed);
         }
 
         /// <summary>

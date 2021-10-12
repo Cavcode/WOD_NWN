@@ -1708,10 +1708,10 @@ namespace WOD.Game.Server.Core.NWScript.Enum
         Upkeep2 = 1775,
         CitySpecialization = 1776,
         Awe = 1777,
-        Awe2 = 1778,
-        Awe3 = 1779,
-        Awe4 = 1780,
-        Awe5 = 1781,
+        AweII = 1778,
+        AweIII = 1779,
+        AweIV = 1780,
+        AweV = 1781,
         Feed = 1782,
     }
 }

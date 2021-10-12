@@ -101,7 +101,7 @@ namespace WOD.Game.Server.Core
         public static void OnModuleLoad()
         {
             Console.WriteLine("OnModuleLoad() called");
-            Scheduler.ScheduleRepeating(RunOneSecondPCIntervalEvent, TimeSpan.FromSeconds(1));
+            Scheduler.ScheduleRepeating(RunOneSecondPCIntervalEvent, TimeSpan.FromSeconds(1), "entrypoint");
         }
 
         //
