@@ -13,7 +13,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition
         {
 
             _builder.CreateWindow(GuiWindowType.Skills)
-                .BindOnOpened(model => model.OnLoadWindow())
                 .SetIsResizable(true)
                 .SetInitialGeometry(0, 0, 545f, 295.5f)
                 .SetTitle("Skills")
@@ -68,23 +67,34 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                     {
                         row.AddList(template =>
                         {
-                            template.AddLabel()
-                                .BindText(model => model.SkillNames);
-
-                            template.AddLabel()
-                                .BindText(model => model.Levels);
-
-                            template.AddLabel()
-                                .BindText(model => model.Titles);
-
-                            template.AddProgressBar()
-                                .BindValue(model => model.Progresses);
-
-                            template.AddButton()
-                                .BindText(model => model.DecayLockTexts)
-                                .BindColor(model => model.DecayLockColors)
-                                .BindOnClicked(model => model.ToggleDecayLock())
-                                .BindIsEnabled(model => model.DecayLockButtonEnabled);
+                            template.AddCell(cell =>
+                            {
+                                cell.AddLabel()
+                                    .BindText(model => model.SkillNames);
+                            });
+                            template.AddCell(cell =>
+                            {
+                                cell.AddLabel()
+                                    .BindText(model => model.Levels);
+                            });
+                            template.AddCell(cell =>
+                            {
+                                cell.AddLabel()
+                                    .BindText(model => model.Titles);
+                            });
+                            template.AddCell(cell =>
+                            {
+                                cell.AddProgressBar()
+                                    .BindValue(model => model.Progresses);
+                            });
+                            template.AddCell(cell =>
+                            {
+                                cell.AddButton()
+                                    .BindText(model => model.DecayLockTexts)
+                                    .BindColor(model => model.DecayLockColors)
+                                    .BindOnClicked(model => model.ToggleDecayLock())
+                                    .BindIsEnabled(model => model.DecayLockButtonEnabled);
+                            });
                         })
                             .BindRowCount(model => model.SkillNames);
                     });

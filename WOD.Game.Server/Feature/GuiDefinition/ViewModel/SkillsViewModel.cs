@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.GuiService;
@@ -10,7 +9,7 @@ using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 {
-    public class SkillsViewModel : GuiViewModelBase<SkillsViewModel>
+    public class SkillsViewModel : GuiViewModelBase<SkillsViewModel, GuiPayloadBase>
     {
         private readonly List<SkillType> _viewableSkills;
 
@@ -88,13 +87,12 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             DecayLockButtonEnabled = new GuiBindingList<bool>();
         }
 
-
-        public Action OnLoadWindow() => () =>
+        protected override void Initialize(GuiPayloadBase initialPayload)
         {
             SelectedCategoryId = 0;
             LoadSkills(Skill.GetAllActiveSkills());
             WatchOnClient(model => model.SelectedCategoryId);
-        };
+        }
 
         private void LoadSkills(Dictionary<SkillType, SkillAttribute> skills)
         {
@@ -200,5 +198,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             DecayLockColors[index] = GetDecayLockColor(isLocked, true);
             DecayLockTexts[index] = GetDecayLockText(isLocked, true);
         };
+
     }
 }

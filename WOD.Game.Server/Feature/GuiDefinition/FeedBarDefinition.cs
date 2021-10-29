@@ -16,8 +16,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                 .SetShowBorder(false)
                 .SetTitle("")
                 .SetIsClosable(false)
-
-                .BindOnOpened(model => model.OnLoadWindow())
                 .SetInitialGeometry(600, 60, 545f, 320f)
                 .AddColumn(col =>
                 {

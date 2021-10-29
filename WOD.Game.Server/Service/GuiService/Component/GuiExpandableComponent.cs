@@ -196,6 +196,15 @@ namespace WOD.Game.Server.Service.GuiService.Component
             return newList;
         }
 
+        public GuiGroup<T> AddGroup(Action<GuiGroup<T>> group)
+        {
+            var newGroup = new GuiGroup<T>();
+            group(newGroup);
+            Elements.Add(newGroup);
+
+            return newGroup;
+        }
+
         /// <summary>
         /// Adds a column.
         /// </summary>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.AchievementService;
 
 namespace WOD.Game.Server.Entity
@@ -13,10 +12,11 @@ namespace WOD.Game.Server.Entity
             AchievementProgress = new AchievementProgress();
         }
 
-        public override string KeyPrefix => "Account";
 
+        [Indexed]
         public ulong TimesLoggedIn { get; set; }
 
+        [Indexed]
         public bool HasCompletedTutorial { get; set; }
 
         public Dictionary<AchievementType, DateTime> Achievements { get; set; }

@@ -8,7 +8,6 @@ using WOD.Game.Server.Core.NWNX.Enum;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Item;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SpaceService;
 using static WOD.Game.Server.Core.NWScript.NWScript;
@@ -19,19 +18,22 @@ namespace WOD.Game.Server.Service
     {
         public const int MaxRegisteredShips = 10;
 
-        private static readonly Dictionary<string, ShipDetail> _ships = new Dictionary<string, ShipDetail>();
-        private static readonly Dictionary<string, ShipModuleDetail> _shipModules = new Dictionary<string, ShipModuleDetail>();
-        private static readonly Dictionary<string, SpaceObjectDetail> _spaceObjects = new Dictionary<string, SpaceObjectDetail>();
+        private static readonly Dictionary<string, ShipDetail> _ships = new();
+        private static readonly Dictionary<string, ShipModuleDetail> _shipModules = new();
+        private static readonly Dictionary<string, SpaceObjectDetail> _spaceObjects = new();
         
-        private static readonly Dictionary<uint, ShipStatus> _shipNPCs = new Dictionary<uint, ShipStatus>();
-        private static readonly Dictionary<uint, ShipStatus> _spaceObjectInstances = new Dictionary<uint, ShipStatus>();
+        private static readonly Dictionary<uint, ShipStatus> _shipNPCs = new();
+        private static readonly Dictionary<uint, ShipStatus> _spaceObjectInstances = new();
 
         public static Dictionary<FeatType, ShipModuleFeat> ShipModuleFeats { get; } = ShipModuleFeat.GetAll();
+
+        private static readonly HashSet<string> _shipItemResrefs = new();
+        private static readonly HashSet<string> _shipModuleItemTags = new();
 
         /// <summary>
         /// When the module loads, cache all space data into memory.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void LoadSpaceSystem()
         {
             LoadShips();
@@ -42,7 +44,7 @@ namespace WOD.Game.Server.Service
             Console.WriteLine($"Loaded {_shipModules.Count} ship modules.");
             Console.WriteLine($"Loaded {_spaceObjects.Count} space objects.");
 
-            //Scheduler.ScheduleRepeating(ProcessSpaceNPCAI, TimeSpan.FromSeconds(1), "spaceSchedule");
+            //Scheduler.ScheduleRepeating(ProcessSpaceNPCAI, TimeSpan.FromSeconds(1));
         }
 
         /// <summary>
@@ -62,6 +64,9 @@ namespace WOD.Game.Server.Service
                 foreach (var (shipType, shipDetail) in ships)
                 {
                     _ships.Add(shipType, shipDetail);
+
+                    if (!_shipItemResrefs.Contains(shipDetail.ItemResref))
+                        _shipItemResrefs.Add(shipDetail.ItemResref);
                 }
             }
         }
@@ -90,6 +95,9 @@ namespace WOD.Game.Server.Service
                     }
 
                     _shipModules.Add(moduleType, moduleDetail);
+
+                    if (!_shipModuleItemTags.Contains(moduleType))
+                        _shipModuleItemTags.Add(moduleType);
                 }
             }
         }
@@ -153,6 +161,28 @@ namespace WOD.Game.Server.Service
         public static bool IsRegisteredShipModule(string itemTag)
         {
             return _shipModules.ContainsKey(itemTag);
+        }
+
+        /// <summary>
+        /// Determines whether an item is a ship deed.
+        /// </summary>
+        /// <param name="item">The item to check</param>
+        /// <returns>true if item is a ship deed, false otherwise</returns>
+        public static bool IsItemShip(uint item)
+        {
+            var resref = GetResRef(item);
+            return _shipItemResrefs.Contains(resref);
+        }
+
+        /// <summary>
+        /// Determines whether an item is a ship module.
+        /// </summary>
+        /// <param name="item">The item to check</param>
+        /// <returns>true if item is a ship module, false otherwise</returns>
+        public static bool IsItemShipModule(uint item)
+        {
+            var tag = GetTag(item);
+            return _shipModuleItemTags.Contains(tag);
         }
 
         /// <summary>

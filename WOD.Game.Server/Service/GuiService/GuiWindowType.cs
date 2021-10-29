@@ -12,9 +12,15 @@
         Skills = 7,
         Perks = 8,
         Settings = 9,
-        AppearanceCustomization = 10,
+        AppearanceEditor = 10,
         Bank = 11,
         Modal = 12,
-        FeedBar = 13,
+        Outfits = 13,
+        MarketListing = 14,
+        MarketBuying = 15,
+        PriceSelection = 16,
+        ExamineItem = 17,
+        Notes = 18,
+        FeedBar = 19,
     }
 }

@@ -1,26 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Newtonsoft.Json;
+using NRediSearch;
+using NReJSON;
 using StackExchange.Redis;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Entity;
+using WOD.Game.Server.Service.DBService;
 
 namespace WOD.Game.Server.Service
 {
-    internal class DB
+    internal static class DB
     {
+        internal class JsonSerializer : ISerializerProxy
+        {
+            public TResult Deserialize<TResult>(RedisResult serializedValue)
+            {
+                return JsonConvert.DeserializeObject<TResult>(serializedValue.ToString());
+            }
+
+            public string Serialize<TObjectType>(TObjectType obj)
+            {
+                return JsonConvert.SerializeObject(obj);
+            }
+        }
+
         private static ApplicationSettings _appSettings;
-        private static readonly Dictionary<Type, string> _keyPrefixByType = new Dictionary<Type, string>();
+        private static readonly Dictionary<Type, string> _keyPrefixByType = new();
+        private static readonly Dictionary<Type, Client> _searchClientsByType = new();
+        private static readonly Dictionary<Type, List<string>> _indexedPropertiesByName = new();
         private static ConnectionMultiplexer _multiplexer;
-        private static readonly Dictionary<string, EntityBase> _cachedEntities = new Dictionary<string, EntityBase>();
+        private static readonly Dictionary<string, EntityBase> _cachedEntities = new();
+
+        static DB()
+        {
+            NReJSONSerializer.SerializerProxy = new JsonSerializer();
+        }
 
         [NWNEventHandler("mod_preload")]
         public static void Load()
         {
             _appSettings = ApplicationSettings.Get();
             _multiplexer = ConnectionMultiplexer.Connect(_appSettings.RedisIPAddress);
-            LoadKeyPrefixes();
+            LoadEntities();
 
             // Runs at the end of every main loop. Clears out all data retrieved during this cycle.
             Entrypoints.OnScriptContextEnd += () =>
@@ -30,11 +54,71 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
+        /// Processes the Redis Search index with the latest changes.
+        /// </summary>
+        /// <param name="entity"></param>
+        private static void ProcessIndex(EntityBase entity)
+        {
+            var type = entity.GetType();
+
+            // Drop any existing index
+            try
+            {
+                // FT.DROPINDEX is used here in lieu of DropIndex() as it does not cause all documents to be lost.
+                _multiplexer.GetDatabase().Execute("FT.DROPINDEX", type.Name);
+                Console.WriteLine($"Dropped index for {type}");
+            }
+            catch
+            {
+                Console.WriteLine($"Index does not exist for type {type}");
+            }
+
+            // Build the schema based on the IndexedAttribute associated to properties.
+            var schema = new Schema();
+            var indexedProperties = new List<string>();
+
+            foreach (var prop in type.GetProperties())
+            {
+                var attribute = prop.GetCustomAttribute(typeof(IndexedAttribute));
+                if (attribute != null)
+                {
+                    var detail = (IndexedAttribute)attribute;
+                    if (prop.PropertyType == typeof(int) ||
+                        prop.PropertyType == typeof(int?) ||
+                        prop.PropertyType == typeof(ulong) ||
+                        prop.PropertyType == typeof(ulong?) ||
+                        prop.PropertyType == typeof(long) ||
+                        prop.PropertyType == typeof(long?))
+                    {
+                        schema.AddNumericField(prop.Name);
+                    }
+                    else
+                    {
+                        schema.AddTextField(prop.Name);
+                    }
+
+                    indexedProperties.Add(prop.Name);
+                }
+
+            }
+
+            // Cache the indexed properties for quick look-up later.
+            _indexedPropertiesByName[type] = indexedProperties;
+
+            // Create the index.
+            if (schema.Fields.Count > 0)
+            {
+                _searchClientsByType[type].CreateIndex(schema, new Client.ConfiguredIndexOptions());
+                Console.WriteLine($"Created index for {type}");
+            }
+        }
+
+        /// <summary>
         /// When initialized, the assembly will be searched for all implementations of the EntityBase object.
         /// The KeyPrefix value of each of these will be stored into a dictionary for quick retrievals later.
         /// This is intended to abstract key building away from the consumer of this class.
         /// </summary>
-        private static void LoadKeyPrefixes()
+        private static void LoadEntities()
         {
             var entityInstances = typeof(EntityBase)
                 .Assembly.GetTypes()
@@ -43,9 +127,15 @@ namespace WOD.Game.Server.Service
 
             foreach (var entity in entityInstances)
             {
+                var type = entity.GetType();
                 // Register the type by itself first.
-                _keyPrefixByType[entity.GetType()] = entity.KeyPrefix;
-                Console.WriteLine($"Registered type '{entity.GetType()}' using key prefix {entity.KeyPrefix}");
+                _keyPrefixByType[type] = type.Name;
+
+                // Register the search client.
+                _searchClientsByType[type] = new Client(type.Name, _multiplexer.GetDatabase());
+                ProcessIndex(entity);
+
+                Console.WriteLine($"Registered type '{entity.GetType()}' using key prefix {type.Name}");
             }
         }
 
@@ -55,43 +145,43 @@ namespace WOD.Game.Server.Service
         /// <typeparam name="T">The type of data to store</typeparam>
         /// <param name="entity">The data to store.</param>
         /// <param name="key">The arbitrary key to set this object under.</param>
-        /// <param name="keyPrefixOverride">If null, the key prefix defined on the entity will be used. Otherwise, this value will be used as the prefix.</param>
-        public static void Set<T>(string key, T entity, string keyPrefixOverride = null)
+        public static void Set<T>(string key, T entity)
             where T : EntityBase
         {
-            if (string.IsNullOrWhiteSpace(keyPrefixOverride))
-            {
-                keyPrefixOverride = _keyPrefixByType[typeof(T)];
-            }
-
+            var type = typeof(T);
             var data = JsonConvert.SerializeObject(entity);
-            _multiplexer.GetDatabase().StringSet($"{keyPrefixOverride}:{key}", data);
+            var keyPrefix = _keyPrefixByType[type];
+            var indexKey = $"Index:{keyPrefix}:{key}";
+            var indexData = new Dictionary<string, RedisValue>();
+
+            foreach (var prop in _indexedPropertiesByName[type])
+            {
+                var property = type.GetProperty(prop);
+                var value = property?.GetValue(entity);
+
+                if (value != null)
+                {
+                    // Convert enums to numeric values
+                    if (property.PropertyType.IsEnum)
+                        value = (int)value;
+
+                    if (property.PropertyType == typeof(Guid))
+                    {
+                        value = EscapeTokens(((Guid)value).ToString());
+                    }
+
+                    if (property.PropertyType == typeof(string))
+                    {
+                        value = EscapeTokens((string)value);
+                    }
+
+                    indexData[prop] = (dynamic)value;
+                }
+            }
+
+            _searchClientsByType[type].ReplaceDocument(indexKey, indexData);
+            _multiplexer.GetDatabase().JsonSet($"{keyPrefix}:{key}", data);
             _cachedEntities[key] = entity;
-        }
-
-        /// <summary>
-        /// Stores a list of objects in the database by an arbitrary key.
-        /// </summary>
-        /// <typeparam name="T">The type of data to store.</typeparam>
-        /// <param name="key">The arbitrary key to set this object under.</param>
-        /// <param name="entities">The list of entities to store.</param>
-        /// <param name="keyPrefix">The key prefix to store the data under. Must be specified or call will fail</param>
-        public static void SetList<T>(string key, EntityList<T> entities, string keyPrefix)
-            where T: EntityBase
-        {
-            if(string.IsNullOrWhiteSpace(keyPrefix))
-                throw new ArgumentException($"{nameof(keyPrefix)} cannot be null or whitespace.");
-
-            string data;
-            using (new Profiler("Serialization"))
-            {
-                data = JsonConvert.SerializeObject(entities);
-            }
-
-            using (new Profiler("RedisSet"))
-            {
-                _multiplexer.GetDatabase().StringSet($"{keyPrefix}:{key}", data);
-            }
         }
 
         /// <summary>
@@ -99,16 +189,11 @@ namespace WOD.Game.Server.Service
         /// </summary>
         /// <typeparam name="T">The type of data to retrieve</typeparam>
         /// <param name="key">The arbitrary key the data is stored under</param>
-        /// <param name="keyPrefixOverride">If null, the key prefix defined on the entity will be used. Otherwise, this value will be used as the prefix.</param>
         /// <returns>The object stored in the database under the specified key</returns>
-        public static T Get<T>(string key, string keyPrefixOverride = null)
-            where T: EntityBase
+        public static T Get<T>(string key)
+            where T : EntityBase
         {
-            if (string.IsNullOrWhiteSpace(keyPrefixOverride))
-            {
-                keyPrefixOverride = _keyPrefixByType[typeof(T)];
-            }
-
+            var keyPrefix = _keyPrefixByType[typeof(T)];
             if (_cachedEntities.ContainsKey(key))
             {
                 return (T)_cachedEntities[key];
@@ -119,7 +204,7 @@ namespace WOD.Game.Server.Service
 
                 using (new Profiler("RedisGet"))
                 {
-                    data = _multiplexer.GetDatabase().StringGet($"{keyPrefixOverride}:{key}");
+                    data = _multiplexer.GetDatabase().JsonGet($"{keyPrefix}:{key}").ToString();
                 }
 
                 if (string.IsNullOrWhiteSpace(data))
@@ -133,43 +218,19 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// Retrieves a list of objects stored under the specified key from the database. 
-        /// </summary>
-        /// <typeparam name="T">The type of data to retrieve.</typeparam>
-        /// <param name="key">The arbitrary key the data is stored under.</param>
-        /// <param name="keyPrefix">The key prefix to store the data under. Must be specified or call will fail</param>
-        /// <returns>A list of entities.</returns>
-        public static EntityList<T> GetList<T>(string key, string keyPrefix)
-            where T : EntityBase
-        {
-            if(string.IsNullOrWhiteSpace(keyPrefix))
-                throw new ArgumentException($"{nameof(keyPrefix)} cannot be null or whitespace.");
-
-            var json = _multiplexer.GetDatabase().StringGet($"{keyPrefix}:{key}");
-            if (string.IsNullOrWhiteSpace(json))
-                return default;
-
-            return JsonConvert.DeserializeObject<EntityList<T>>(json);
-        }
-
-        /// <summary>
         /// Returns true if an entry with the specified key exists.
         /// Returns false if not.
         /// </summary>
         /// <param name="key">The key of the entity.</param>
-        /// <param name="keyPrefixOverride">If null, the key prefix defined on the entity will be used. Otherwise, this value will be used as the prefix.</param>
         /// <returns>true if found, false otherwise.</returns>
-        public static bool Exists<T>(string key, string keyPrefixOverride = null)
+        public static bool Exists<T>(string key)
+            where T : EntityBase
         {
-            if (keyPrefixOverride == null)
-            {
-                keyPrefixOverride = _keyPrefixByType[typeof(T)];
-            }
-
+            var keyPrefix = _keyPrefixByType[typeof(T)];
             if (_cachedEntities.ContainsKey(key))
                 return true;
             else
-                return _multiplexer.GetDatabase().KeyExists($"{keyPrefixOverride}:{key}");
+                return _multiplexer.GetDatabase().KeyExists($"{keyPrefix}:{key}");
         }
 
         /// <summary>
@@ -177,31 +238,68 @@ namespace WOD.Game.Server.Service
         /// </summary>
         /// <typeparam name="T">The type of entity to delete.</typeparam>
         /// <param name="key">The key of the entity</param>
-        /// <param name="keyPrefixOverride">If null, the key prefix defined on the entity will be used. Otherwise, this value will be used as the prefix.</param>
-        public static void Delete<T>(string key, string keyPrefixOverride = null)
+        public static void Delete<T>(string key)
+            where T : EntityBase
         {
-            if (keyPrefixOverride == null)
-            {
-                keyPrefixOverride = _keyPrefixByType[typeof(T)];
-            }
-
-            _multiplexer.GetDatabase().KeyDelete($"{keyPrefixOverride}:{key}");
+            var keyPrefix = _keyPrefixByType[typeof(T)];
+            var indexKey = $"Index:{keyPrefix}:{key}";
+            _searchClientsByType[typeof(T)].DeleteDocument(indexKey);
+            _multiplexer.GetDatabase().JsonDelete($"{keyPrefix}:{key}");
             _cachedEntities.Remove(key);
         }
 
         /// <summary>
-        /// Retrieves a list of keys associated with a given key prefix.
+        /// Escapes tokens used in Redis queries.
         /// </summary>
-        /// <param name="keyPrefix">The key to search for.</param>
-        /// <returns>A list of keys found associated with the prefix.</returns>
-        public static IEnumerable<string> SearchKeys(string keyPrefix)
+        /// <param name="str">The string to escape</param>
+        /// <returns>A string containing escaped tokens.</returns>
+        public static string EscapeTokens(string str)
         {
-            foreach (var key in _multiplexer.GetServer(_multiplexer.GetEndPoints()[0])
-                .Keys(pattern: $"{keyPrefix}*", pageSize: 9999))
+            return str
+                .Replace("@", "\\@")
+                .Replace("!", "\\!")
+                .Replace("{", "\\{")
+                .Replace("}", "\\}")
+                .Replace("(", "\\(")
+                .Replace(")", "\\)")
+                .Replace("|", "\\|")
+                .Replace("-", "\\-")
+                .Replace("=", "\\=")
+                .Replace(">", "\\>");
+        }
+
+        /// <summary>
+        /// Searches the Redis DB for records matching the query criteria.
+        /// </summary>
+        /// <typeparam name="T">The type of entity to retrieve.</typeparam>
+        /// <param name="query">The query to run.</param>
+        /// <returns>An enumerable of entities matching the criteria.</returns>
+        public static IEnumerable<T> Search<T>(DBQuery<T> query)
+            where T : EntityBase
+        {
+            var result = _searchClientsByType[typeof(T)].Search(query.BuildQuery());
+
+            foreach (var doc in result.Documents)
             {
-                yield return key.ToString().Split(':')[1];
+                // Remove the 'Index:' prefix.
+                var recordId = doc.Id.Remove(0, 6);
+                yield return _multiplexer.GetDatabase().JsonGet<T>(recordId);
             }
         }
 
+        /// <summary>
+        /// Searches the Redis DB for the number of records matching the query criteria.
+        /// This only retrieves the number of records. Use Search() if you need the actual results.
+        /// </summary>
+        /// <typeparam name="T">The type of entity to retrieve.</typeparam>
+        /// <param name="query">The query to run.</param>
+        /// <returns>The number of records matching the query criteria.</returns>
+        public static long SearchCount<T>(DBQuery<T> query)
+            where T : EntityBase
+        {
+            var result = _searchClientsByType[typeof(T)].Search(query.BuildQuery(true));
+
+            return result.TotalResults;
+        }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.HousingService;
 
 namespace WOD.Game.Server.Entity
@@ -11,9 +10,10 @@ namespace WOD.Game.Server.Entity
             Furnitures = new Dictionary<string, PlayerHouseFurniture>();
         }
 
-        public override string KeyPrefix => "PlayerHouse";
 
+        [Indexed]
         public string CustomName { get; set; }
+        [Indexed]
         public PlayerHouseType HouseType { get; set; }
         public Dictionary<string, PlayerHouseFurniture> Furnitures { get; set; }
         public Dictionary<string, PlayerHousePermission> PlayerPermissions { get; set; }

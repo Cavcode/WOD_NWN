@@ -26,15 +26,16 @@ namespace WOD.Game.Server.Service
             SelectRecipeResref
         };
 
-        private static readonly Dictionary<RecipeType, RecipeDetail> _recipes = new Dictionary<RecipeType, RecipeDetail>();
-        private static readonly Dictionary<RecipeCategoryType, RecipeCategoryAttribute> _allCategories = new Dictionary<RecipeCategoryType, RecipeCategoryAttribute>();
-        private static readonly Dictionary<RecipeCategoryType, RecipeCategoryAttribute> _activeCategories = new Dictionary<RecipeCategoryType, RecipeCategoryAttribute>();
-        private static readonly Dictionary<SkillType, Dictionary<RecipeCategoryType, Dictionary<RecipeType, RecipeDetail>>> _recipesBySkillAndCategory = new Dictionary<SkillType, Dictionary<RecipeCategoryType, Dictionary<RecipeType, RecipeDetail>>>();
-        private static readonly Dictionary<SkillType, Dictionary<RecipeCategoryType, RecipeCategoryAttribute>> _categoriesBySkill = new Dictionary<SkillType, Dictionary<RecipeCategoryType, RecipeCategoryAttribute>>();
+        private static readonly Dictionary<RecipeType, RecipeDetail> _recipes = new();
+        private static readonly Dictionary<RecipeCategoryType, RecipeCategoryAttribute> _allCategories = new();
+        private static readonly Dictionary<RecipeCategoryType, RecipeCategoryAttribute> _activeCategories = new();
+        private static readonly Dictionary<SkillType, Dictionary<RecipeCategoryType, Dictionary<RecipeType, RecipeDetail>>> _recipesBySkillAndCategory = new();
+        private static readonly Dictionary<SkillType, Dictionary<RecipeCategoryType, RecipeCategoryAttribute>> _categoriesBySkill = new();
 
-        private static readonly Dictionary<SkillType, Tuple<AbilityType, AbilityType>> _craftSkillToAbility = new Dictionary<SkillType, Tuple<AbilityType, AbilityType>>();
+        private static readonly Dictionary<SkillType, Tuple<AbilityType, AbilityType>> _craftSkillToAbility = new();
 
-        private static readonly Dictionary<uint, PlayerCraftingState> _playerCraftingStates = new Dictionary<uint, PlayerCraftingState>();
+        private static readonly Dictionary<uint, PlayerCraftingState> _playerCraftingStates = new();
+        private static readonly HashSet<string> _componentResrefs = new();
 
         /// <summary>
         /// When the skill cache has finished loading, recipe and category data is cached.
@@ -109,6 +110,12 @@ namespace WOD.Game.Server.Service
                         if (!_categoriesBySkill[recipe.Skill].ContainsKey(recipe.Category))
                             _categoriesBySkill[recipe.Skill][recipe.Category] = _allCategories[recipe.Category];
 
+                        // Cache the resrefs into a hashset for later use in determining if an item is a component
+                        foreach (var (resref, _) in recipe.Components)
+                        {
+                            if (!_componentResrefs.Contains(resref))
+                                _componentResrefs.Add(resref);
+                        }
                     }
                 }
             }
@@ -143,6 +150,38 @@ namespace WOD.Game.Server.Service
         public static bool RecipeExists(RecipeType recipeType)
         {
             return _recipes.ContainsKey(recipeType);
+        }
+
+        /// <summary>
+        /// Retrieves all of the registered recipe categories.
+        /// </summary>
+        /// <returns>A dictionary containing all registered categories.</returns>
+        public static Dictionary<RecipeCategoryType, RecipeCategoryAttribute> GetAllCategories()
+        {
+            return _activeCategories.ToDictionary(x => x.Key, y => y.Value);
+        }
+
+        /// <summary>
+        /// Determines if an item is a recipe.
+        /// </summary>
+        /// <param name="item">The item to check</param>
+        /// <returns>true if item is a recipe, false otherwise</returns>
+        public static bool IsItemRecipe(uint item)
+        {
+            var tag = GetTag(item).ToLower();
+
+            return tag == "recipe";
+        }
+
+        /// <summary>
+        /// Determines if an item is a crafting component.
+        /// </summary>
+        /// <param name="item">The item to check</param>
+        /// <returns>true if item is a crafting component, false otherwise</returns>
+        public static bool IsItemComponent(uint item)
+        {
+            var resref = GetResRef(item);
+            return _componentResrefs.Contains(resref);
         }
 
         /// <summary>

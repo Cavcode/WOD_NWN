@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30717.126
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WOD.Game.Server", "WOD.Game.Server\WOD.Game.Server.csproj", "{386957F4-A7FA-4A98-A5AA-DA1FD54D3EED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WOD.Game.Server", "WOD.Game.Server\WOD.Game.Server.csproj", "{386957F4-A7FA-4A98-A5AA-DA1FD54D3EED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WOD.Web", "WOD.Web\WOD.Web.csproj", "{7963EA82-74A4-4B57-9661-525E618BD1DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{386957F4-A7FA-4A98-A5AA-DA1FD54D3EED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{386957F4-A7FA-4A98-A5AA-DA1FD54D3EED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{386957F4-A7FA-4A98-A5AA-DA1FD54D3EED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7963EA82-74A4-4B57-9661-525E618BD1DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7963EA82-74A4-4B57-9661-525E618BD1DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7963EA82-74A4-4B57-9661-525E618BD1DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7963EA82-74A4-4B57-9661-525E618BD1DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -4,14 +4,19 @@ namespace WOD.Game.Server.Entity
 {
     public abstract class EntityBase
     {
-        public Guid ID { get; set; }
+        [Indexed]
+        public Guid Id { get; set; }
+        
         public DateTime DateCreated { get; set; }
-        public abstract string KeyPrefix { get; }
+
+        [Indexed]
+        public string EntityType { get; set; }
 
         protected EntityBase()
         {
-            ID = Guid.NewGuid();
+            Id = Guid.NewGuid();
             DateCreated = DateTime.UtcNow;
+            EntityType = GetType().Name;
         }
     }
 }

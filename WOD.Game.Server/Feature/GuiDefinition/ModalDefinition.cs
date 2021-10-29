@@ -10,7 +10,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition
         public GuiConstructedWindow BuildWindow()
         {
             _builder.CreateWindow(GuiWindowType.Modal)
-                .BindOnOpened(model => model.OnWindowOpen())
                 .BindOnClosed(model => model.OnWindowClose())
                 .SetIsResizable(false)
                 .SetIsClosable(false)
@@ -26,12 +25,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
 
                     col.AddRow(row =>
                     {
-                        row.AddSpacer();
                         row.AddText()
-                            .BindText(modal => modal.PromptText)
-                            .SetHeight(200f);
-
-                        row.AddSpacer();
+                            .BindText(modal => modal.PromptText);
                     });
 
                     col.AddRow(row =>

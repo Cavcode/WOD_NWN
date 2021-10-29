@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using WOD.Game.Server.Core.NWNX.Enum;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Core.NWScript.Enum.Item.Property;
 using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
@@ -67,7 +66,6 @@ namespace WOD.Game.Server.Entity
             CharacterType = CharacterType.Invalid;
             KeyItems = new Dictionary<KeyItemType, DateTime>();
             Guilds = new Dictionary<GuildType, PlayerGuild>();
-            SavedOutfits = new Dictionary<int, string>();
             Ships = new Dictionary<Guid, ShipStatus>();
             Factions = new Dictionary<FactionType, PlayerFactionStanding>();
             TaxiDestinations = new Dictionary<int, List<TaxiDestinationType>>();
@@ -75,9 +73,10 @@ namespace WOD.Game.Server.Entity
             ObjectVisibilities = new Dictionary<string, VisibilityType>();
         }
 
-        public override string KeyPrefix => "Player";
 
+        [Indexed]
         public int Version { get; set; }
+        [Indexed]
         public string Name { get; set; }
         public int MaxHP { get; set; }
         public int MaxFP { get; set; }
@@ -89,6 +88,7 @@ namespace WOD.Game.Server.Entity
         public int Fortitude { get; set; }
         public int Reflex { get; set; }
         public int Will { get; set; }
+        [Indexed]
         public string LocationAreaResref { get; set; }
         public float LocationX { get; set; }
         public float LocationY { get; set; }
@@ -98,6 +98,7 @@ namespace WOD.Game.Server.Entity
         public float RespawnLocationY { get; set; }
         public float RespawnLocationZ { get; set; }
         public float RespawnLocationOrientation { get; set; }
+        [Indexed]
         public string RespawnAreaResref { get; set; }
         public int UnallocatedXP { get; set; }
         public int UnallocatedSP { get; set; }
@@ -109,10 +110,13 @@ namespace WOD.Game.Server.Entity
         public int FPRegen { get; set; }
         public int STMRegen { get; set; }
         public int XPDebt { get; set; }
+        public int NumberPerkResetsAvailable { get; set; }
+        [Indexed]
         public bool IsDeleted { get; set; }
         public bool ShowHelmet { get; set; }
         public bool IsUsingDualPistolMode { get; set; }
         public DateTime? DatePerkRefundAvailable { get; set; }
+        [Indexed]
         public CharacterType CharacterType { get; set; }
         public bool IsHolonetEnabled { get; set; }
         public EmoteStyle EmoteStyle { get; set; }
@@ -122,6 +126,7 @@ namespace WOD.Game.Server.Entity
         public AppearanceType OriginalAppearanceType { get; set; }
         public float MovementRate { get; set; }
         public int AbilityRecastReduction { get; set; }
+        public int MarketTill { get; set; }
 
         public PlayerSettings Settings { get; set; }
         public Dictionary<AbilityType, int> BaseStats { get; set; }
@@ -137,7 +142,6 @@ namespace WOD.Game.Server.Entity
         public Dictionary<RecipeType, DateTime> UnlockedRecipes { get; set; }
         public Dictionary<KeyItemType, DateTime> KeyItems{ get; set; }
         public Dictionary<GuildType, PlayerGuild> Guilds { get; set; }
-        public Dictionary<int, string> SavedOutfits { get; set; }
         public Dictionary<Guid, ShipStatus> Ships { get; set; }
         public Dictionary<FactionType, PlayerFactionStanding> Factions { get; set; }
         public Dictionary<int, List<TaxiDestinationType>> TaxiDestinations { get; set; }

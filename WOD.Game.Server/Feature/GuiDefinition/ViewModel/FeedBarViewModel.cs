@@ -11,7 +11,7 @@ using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 {
-    public class FeedBarViewModel : GuiViewModelBase<FeedBarViewModel>
+    public class FeedBarViewModel: GuiViewModelBase<FeedBarViewModel, GuiPayloadBase>
     {
         public float Progress
         {
@@ -19,18 +19,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set => Set(value);
         }
 
-    public Action OnLoadWindow() => () =>
-        {
-            StartFeed();
-            AssignCommand(Player, () =>
-            {
-                ClearAllActions();
-                PlaySound("feed_on_start");
-                PlaySound("heartbeat_loop");
-                PlaySound("feed_on_loop");
-            });
-            Scheduler.ScheduleRepeating(StartFeed, TimeSpan.FromSeconds(1), "feedSchedule");
-        };
 
         private void StartFeed()
         {
@@ -91,6 +79,19 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             targetBloodAmount -= (0.1f * GetLocalFloat(Player, "targetBloodAmountMax"));
             Stat.RestoreFP(Player, FloatToInt(targetBloodAmount));
             SetLocalFloat(target, "bloodAmount", targetBloodAmount);
+        }
+
+        protected override void Initialize(GuiPayloadBase initialPayload)
+        {
+            StartFeed();
+            AssignCommand(Player, () =>
+            {
+                ClearAllActions();
+                PlaySound("feed_on_start");
+                PlaySound("heartbeat_loop");
+                PlaySound("feed_on_loop");
+            });
+            Scheduler.ScheduleRepeating(StartFeed, TimeSpan.FromSeconds(1), "feedSchedule");
         }
     }
 }

@@ -11,7 +11,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition
         public GuiConstructedWindow BuildWindow()
         {
             _builder.CreateWindow(GuiWindowType.ChangePortrait)
-                .BindOnOpened(model => model.OnLoadWindow())
                 .SetIsResizable(true)
                 .SetInitialGeometry(0, 0, 340f, 360f)
                 .SetTitle("Change Portrait")
@@ -22,7 +21,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                     {
                         row.AddSpacer();
                         row.AddImage()
-                            .SetResref("BrujahS")
+                            .BindResref(model => model.ActivePortrait)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Center)
                             .SetAspect(NuiAspect.ExactScaled)
