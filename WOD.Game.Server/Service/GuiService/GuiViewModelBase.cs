@@ -4,9 +4,7 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using WOD.Game.Server.Annotations;
-using WOD.Game.Server.Feature.GuiDefinition.ViewModel;
 using WOD.Game.Server.Service.GuiService.Component;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service.GuiService
 {
@@ -14,12 +12,15 @@ namespace WOD.Game.Server.Service.GuiService
         where TDerived: GuiViewModelBase<TDerived, TPayload>
         where TPayload: GuiPayloadBase
     {
+        public uint TetherObject { get; private set; }
+
         private class PropertyDetail
         {
             public object Value { get; set; }
             public Type Type { get; set; }
             public bool HasEventBeenHooked { get; set; }
             public bool IsGuiList { get; set; }
+            public bool SkipNotify { get; set; }
         }
 
         private static readonly GuiPropertyConverter _converter = new GuiPropertyConverter();
@@ -93,13 +94,37 @@ namespace WOD.Game.Server.Service.GuiService
                 _propertyValues[propertyName].HasEventBeenHooked = false;
             }
 
+            var valueType = typeof(T);
+
+            // The following section is explicitly for applying the workaround
+            // for the Vector issue outlined here: https://github.com/Beamdog/nwn-issues/issues/427
+            // If Beamdog fixes this issue, this section can be removed.
+            var oldMaxSize = 0;
+            var oldListItemVisibility = new GuiBindingList<bool>();
+
+            if (_propertyValues[propertyName].Value != null)
+            {
+                if (
+                    (valueType == typeof(GuiBindingList<string>) ||
+                     valueType == typeof(GuiBindingList<int>) ||
+                     valueType == typeof(GuiBindingList<bool>) ||
+                     valueType == typeof(GuiBindingList<float>) ||
+                     valueType == typeof(GuiBindingList<GuiRectangle>) ||
+                     valueType == typeof(GuiBindingList<GuiVector2>) ||
+                     valueType == typeof(GuiBindingList<GuiColor>)))
+                {
+                    var list = ((IGuiBindingList)_propertyValues[propertyName].Value);
+                    oldMaxSize = list.MaxSize;
+                    oldListItemVisibility = list.ListItemVisibility;
+                }
+            }
+
             // Update the type and value for this entry.
             _propertyValues[propertyName].Value = value;
             _propertyValues[propertyName].Type = typeof(T);
 
             // Binding lists - The ListChanged event must also be hooked in order to raise
             // the OnPropertyChanged event.
-            var valueType = typeof(T);
             if (
                 (valueType == typeof(GuiBindingList<string>) ||
                  valueType == typeof(GuiBindingList<int>) ||
@@ -111,6 +136,8 @@ namespace WOD.Game.Server.Service.GuiService
             {
                 var list = ((IGuiBindingList)_propertyValues[propertyName].Value);
                 list.PropertyName = propertyName;
+                list.MaxSize = oldMaxSize;
+                list.ListItemVisibility = oldListItemVisibility;
 
                 list.ListChanged += OnListChanged;
 
@@ -118,7 +145,8 @@ namespace WOD.Game.Server.Service.GuiService
                 _propertyValues[propertyName].IsGuiList = true;
             }
 
-            OnPropertyChanged(propertyName);
+            if(!_propertyValues[propertyName].SkipNotify)
+                OnPropertyChanged(propertyName);
         }
 
         private void OnListChanged(object sender, ListChangedEventArgs e)
@@ -141,13 +169,45 @@ namespace WOD.Game.Server.Service.GuiService
             var value = _propertyValues[propertyName].Value;
             var json = _converter.ToJson(value);
             
-            NuiSetBind(Player, WindowToken, propertyName, json);
-
             if (_propertyValues[propertyName].IsGuiList)
             {
-                var list = (IGuiBindingList) value;
-                NuiSetBind(Player, WindowToken, propertyName + "_RowCount", JsonInt(list.Count));
+                var list = (IGuiBindingList)_propertyValues[propertyName].Value;
+
+                // List visibility workaround for issue outlined here: https://github.com/Beamdog/nwn-issues/issues/427
+                // This can be removed if Beamdog fixes the Vector error.
+                if (list.ListItemVisibility == null)
+                {
+                    list.ListItemVisibility = new GuiBindingList<bool>();
+                }
+
+                if (list.Count > list.MaxSize)
+                {
+                    for (var x = list.MaxSize; x <= list.Count; x++)
+                    {
+                        list.ListItemVisibility.Add(true);
+                    }
+
+                    list.MaxSize = list.Count;
+                }
+                else if (list.Count < list.MaxSize)
+                {
+                    for (var x = list.Count; x <= list.MaxSize; x++)
+                    {
+                        list.ListItemVisibility[x] = false;
+                    }
+                }
+
+                for (var x = 0; x < list.Count; x++)
+                {
+                    list.ListItemVisibility[x] = true;
+                }
+
+                var visibilities = _converter.ToJson(list.ListItemVisibility);
+                NuiSetBind(Player, WindowToken, propertyName + "_RowCount", JsonInt(list.MaxSize));
+                NuiSetBind(Player, WindowToken, propertyName + "_RowVisibility", visibilities);
             }
+
+            NuiSetBind(Player, WindowToken, propertyName, json);
         }
 
         protected GuiWindowType WindowType { get; private set; }
@@ -160,16 +220,19 @@ namespace WOD.Game.Server.Service.GuiService
         /// <param name="initialGeometry">The initial geometry to use in the event the window dimensions aren't set.</param>
         /// <param name="type">The type of window.</param>
         /// <param name="payload">The payload sent in by the caller.</param>
+        /// <param name="tetherObject">The object to tether the window to.</param>
         public void Bind(
             uint player, 
             int windowToken, 
             GuiRectangle initialGeometry, 
             GuiWindowType type,
-            GuiPayloadBase payload)
+            GuiPayloadBase payload,
+            uint tetherObject)
         {
             Player = player;
             WindowToken = windowToken;
             WindowType = type;
+            TetherObject = tetherObject;
 
             if (Geometry.X == 0.0f &&
                 Geometry.Y == 0.0f &&
@@ -188,6 +251,7 @@ namespace WOD.Game.Server.Service.GuiService
 
             WatchOnClient(model => model.Geometry);
 
+            ChangePartialView("_window_", "%%WINDOW_MAIN%%");
             var convertedPayload = payload == null ? default : (TPayload)payload;
             Initialize(convertedPayload);
         }
@@ -205,12 +269,9 @@ namespace WOD.Game.Server.Service.GuiService
 
             _propertyValues[propertyName].Value = value;
 
-            if(propertyName != nameof(Geometry))
-                GetType().GetProperty(propertyName)?.SetValue(this, value);
-
-            // Update Modal geometry if this VM has it active.
-            if (propertyName == nameof(Geometry))
-                Gui.GetPlayerModal(Player, WindowType).ViewModel.Geometry = Geometry;
+            _propertyValues[propertyName].SkipNotify = true;
+            GetType().GetProperty(propertyName)?.SetValue(this, value);
+            _propertyValues[propertyName].SkipNotify = false;
         }
 
         /// <summary>
@@ -221,13 +282,24 @@ namespace WOD.Game.Server.Service.GuiService
         protected void WatchOnClient<TProperty>(Expression<Func<TDerived, TProperty>> expression)
         {
             var propertyName = GuiHelper<TDerived>.GetPropertyName(expression);
+            if (!_propertyValues.ContainsKey(propertyName))
+                _propertyValues[propertyName] = new PropertyDetail();
+            
             var value = _propertyValues[propertyName].Value;
             var json = _converter.ToJson(value);
 
-            NuiSetBindWatch(Player, WindowToken, propertyName, true);
             NuiSetBind(Player, WindowToken, propertyName, json);
+            NuiSetBindWatch(Player, WindowToken, propertyName, true);
         }
         
+        /// <summary>
+        /// Displays a modal window on top of the active window being displayed.
+        /// </summary>
+        /// <param name="prompt">The text to display to the user inside the modal.</param>
+        /// <param name="confirmAction">The action to run when the player confirms.</param>
+        /// <param name="cancelAction">The action to run when the player cancels.</param>
+        /// <param name="confirmText">The confirmation text to display.</param>
+        /// <param name="cancelText">The cancel text to display.</param>
         protected void ShowModal(
             string prompt, 
             Action confirmAction, 
@@ -235,13 +307,91 @@ namespace WOD.Game.Server.Service.GuiService
             string confirmText = "Yes", 
             string cancelText = "No")
         {
-            var playerWindow = Gui.GetPlayerModal(Player, WindowType);
-            var vm = (ModalViewModel) playerWindow.ViewModel;
+            ModalPromptText = prompt;
+            ModalConfirmButtonText = confirmText;
+            ModalCancelButtonText = cancelText;
+            _callerConfirmAction = confirmAction;
+            _callerCancelAction = cancelAction;
 
-            vm.LoadModalInfo(Geometry, prompt, confirmAction, cancelAction, confirmText, cancelText);
-            Gui.ShowModal(Player, WindowType);
+            ChangePartialView("_window_", "%%WINDOW_MODAL%%");
+        }
+
+        /// <inheritdoc />
+        public void ChangePartialView(string elementId, string partialName)
+        {
+            var window = Gui.GetWindowTemplate(WindowType);
+            var partial = window.PartialViews[partialName];
+            NuiSetGroupLayout(Player, WindowToken, elementId, partial);
+            
+            ApplyRefreshBugFix();
         }
 
 
+        public string ModalPromptText
+        {
+            get => Get<string>();
+            private set => Set(value);
+        }
+
+        public string ModalConfirmButtonText
+        {
+            get => Get<string>();
+            private set => Set(value);
+        }
+
+        public string ModalCancelButtonText
+        {
+            get => Get<string>();
+            private set => Set(value);
+        }
+
+        private Action _callerConfirmAction;
+        private Action _callerCancelAction;
+
+        public Action OnModalClose() => () =>
+        {
+            // Reset to default values.
+            ModalPromptText = "Are you sure?";
+
+            ModalConfirmButtonText = "Yes";
+            ModalCancelButtonText = "No";
+
+            _callerConfirmAction = null;
+            _callerCancelAction = null;
+        };
+
+        public Action OnModalConfirmClick() => () =>
+        {
+            if (_callerConfirmAction != null)
+                _callerConfirmAction();
+
+            ChangePartialView("_window_", "%%WINDOW_MAIN%%");
+        };
+
+        public Action OnModalCancelClick() => () =>
+        {
+            if (_callerCancelAction != null)
+                _callerCancelAction();
+
+            ChangePartialView("_window_", "%%WINDOW_MAIN%%");
+        };
+
+        // The following method works around a NUI issue where the new partial view won't display on screen until the window resizes.
+        // We force a change to the geometry of the window to ensure it redraws appropriately.
+        // If/when a fix is implemented by Beamdog, this can be removed.
+        private void ApplyRefreshBugFix()
+        {
+            if (Geometry == null)
+                return;
+
+            Geometry.Height++;
+            NuiSetBind(Player, WindowToken, nameof(Geometry), Geometry.ToJson());
+
+            DelayCommand(0.0f, () =>
+            {
+                Geometry.Height--;
+                NuiSetBind(Player, WindowToken, nameof(Geometry), Geometry.ToJson());
+            });
+        }
     }
 }

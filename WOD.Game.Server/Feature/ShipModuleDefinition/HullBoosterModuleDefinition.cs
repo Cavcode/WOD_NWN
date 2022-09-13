@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SpaceService;
 
@@ -29,13 +28,16 @@ namespace WOD.Game.Server.Feature.ShipModuleDefinition
                 .Description($"Improves a ship's maximum hull by {hullBoostAmount}.")
                 .PowerType(ShipModulePowerType.Low)
                 .RequirePerk(PerkType.DefensiveModules, requiredLevel)
-                .EquippedAction((creature, shipStatus) =>
+                .EquippedAction((creature, shipStatus, moduleBonus) =>
                 {
-                    shipStatus.MaxHull += hullBoostAmount;
+                    shipStatus.MaxHull += hullBoostAmount + moduleBonus * 2;
                 })
-                .UnequippedAction((creature, shipStatus) =>
+                .UnequippedAction((creature, shipStatus, moduleBonus) =>
                 {
-                    shipStatus.MaxHull -= hullBoostAmount;
+                    shipStatus.MaxHull -= hullBoostAmount + moduleBonus * 2;
+
+                    if (shipStatus.Hull > shipStatus.MaxHull)
+                        shipStatus.Hull = shipStatus.MaxHull;
                 });
         }
     }

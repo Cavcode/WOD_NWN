@@ -5,10 +5,8 @@ using System.Text;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Entity;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.LanguageService;
 using WOD.Game.Server.Service.StatusEffectService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 using SkillType = WOD.Game.Server.Service.SkillService.SkillType;
 
 namespace WOD.Game.Server.Service
@@ -26,15 +24,22 @@ namespace WOD.Game.Server.Service
         {
             _translators = new Dictionary<SkillType, ITranslator>
             {
-                { SkillType.Mandarin, new TranslatorBothese() },
-                { SkillType.Hindi, new TranslatorCatharese() },
-                { SkillType.Spanish, new TranslatorCheunh() },
-                { SkillType.French, new TranslatorDosh() },
-                { SkillType.Arabic, new TranslatorHuttese() },
-                { SkillType.Russian,  new TranslatorMandoa() },
-                { SkillType.Portuguese, new TranslatorShyriiwook() },
-                { SkillType.German, new TranslatorTwileki() },
-                { SkillType.Dutch, new TranslatorZabraki() },
+                { SkillType.Bothese, new TranslatorBothese() },
+                { SkillType.Catharese, new TranslatorCatharese() },
+                { SkillType.Cheunh, new TranslatorCheunh() },
+                { SkillType.Dosh, new TranslatorDosh() },
+                { SkillType.Droidspeak, new TranslatorDroidspeak() },
+                { SkillType.Huttese, new TranslatorHuttese() },
+                { SkillType.Mandoa,  new TranslatorMandoa() },
+                { SkillType.Shyriiwook, new TranslatorShyriiwook() },
+                { SkillType.Twileki, new TranslatorTwileki() },
+                { SkillType.Zabraki, new TranslatorZabraki() },
+                { SkillType.Togruti, new TranslatorTogruti() },
+                { SkillType.Rodese, new TranslatorRodese() },
+                { SkillType.Mirialan, new TranslatorMirialan() },
+                { SkillType.MonCalamarian, new TranslatorMonCalamarian() },
+                { SkillType.Ugnaught, new TranslatorUgnaught() },
+                { SkillType.KelDor, new TranslatorKelDor() }
             };
         }
 
@@ -43,13 +48,14 @@ namespace WOD.Game.Server.Service
             var translator = _translators.ContainsKey(language) ? _translators[language] : _genericTranslator;
             var languageSkill = Skill.GetSkillDetails(language);
 
-            if (GetIsPC(speaker) && !GetIsDM(speaker))
+            if (GetIsPC(speaker))
             {
                 var playerId = GetObjectUUID(speaker);
                 var dbSpeaker = DB.Get<Player>(playerId);
-
                 // Get the rank and max rank for the speaker, and garble their English text based on it.
-                var speakerSkillRank = dbSpeaker.Skills[language].Rank;
+                var speakerSkillRank = dbSpeaker == null ? 
+                    languageSkill.MaxRank : 
+                    dbSpeaker.Skills[language].Rank;
 
                 if (speakerSkillRank != languageSkill.MaxRank)
                 {
@@ -77,7 +83,9 @@ namespace WOD.Game.Server.Service
             // Let's grab the max rank for the listener skill, and then we roll for a successful translate based on that.
             var listenerId = GetObjectUUID(listener);
             var dbListener = DB.Get<Player>(listenerId);
-            var rank = dbListener.Skills[language].Rank;
+            var rank = dbListener == null ? 
+                languageSkill.MaxRank : 
+                dbListener.Skills[language].Rank;
             var maxRank = languageSkill.MaxRank;
 
             // Check for the Comprehend Speech concentration ability.
@@ -158,7 +166,9 @@ namespace WOD.Game.Server.Service
 
                 Skill.GiveSkillXP(listener, language, amount);
 
-
+                // Grant Force XP if player is concentrating Comprehend Speech.
+                if (grantSenseXP)
+                    Skill.GiveSkillXP(listener, SkillType.Force, amount * 10);
 
                 SetLocalInt(listener, "LAST_LANGUAGE_SKILL_INCREASE_LOW", (int)(now & 0xFFFFFFFF));
                 SetLocalInt(listener, "LAST_LANGUAGE_SKILL_INCREASE_HIGH", (int)((now >> 32) & 0xFFFFFFFF));
@@ -175,15 +185,22 @@ namespace WOD.Game.Server.Service
 
             switch (language)
             {
-                case SkillType.Mandarin: r = 132; g = 56; b = 18; break;
-                case SkillType.Hindi: r = 235; g = 235; b = 199; break;
-                case SkillType.Spanish: r = 82; g = 143; b = 174; break;
-                case SkillType.French: r = 166; g = 181; b = 73; break;
-                case SkillType.Arabic: r = 255; g = 215; b = 0; break;
-                case SkillType.Russian: r = 65; g = 105; b = 225; break;
-                case SkillType.Portuguese: r = 255; g = 102; b = 102; break;
-                case SkillType.German: r = 77; g = 230; b = 215; break;
-                case SkillType.Dutch: r = 128; g = 128; b = 192; break;
+                case SkillType.Bothese: r = 132; g = 56; b = 18; break;
+                case SkillType.Catharese: r = 235; g = 235; b = 199; break;
+                case SkillType.Cheunh: r = 82; g = 143; b = 174; break;
+                case SkillType.Dosh: r = 166; g = 181; b = 73; break;
+                case SkillType.Droidspeak: r = 192; g = 192; b = 192; break;
+                case SkillType.Huttese: r = 162; g = 74; b = 10; break;
+                case SkillType.KelDor: r = 162; g = 162; b = 0; break;
+                case SkillType.Mandoa: r = 255; g = 215; b = 0; break;
+                case SkillType.Rodese: r = 82; g = 255; b = 82; break;
+                case SkillType.Shyriiwook: r = 149; g = 125; b = 86; break;
+                case SkillType.Togruti: r = 82; g = 82; b = 255; break;
+                case SkillType.Twileki: r = 65; g = 105; b = 225; break;
+                case SkillType.Zabraki: r = 255; g = 102; b = 102; break;
+                case SkillType.Mirialan: r = 77; g = 230; b = 215; break;
+                case SkillType.MonCalamarian: r = 128; g = 128; b = 192; break;
+                case SkillType.Ugnaught: r = 255; g = 193; b = 233; break;
             }
 
             return r << 24 | g << 16 | b << 8;
@@ -193,18 +210,25 @@ namespace WOD.Game.Server.Service
         {
             switch (language)
             {
-                case SkillType.Mandarin: return "Mandarin";
-                case SkillType.Hindi: return "Hindi";
-                case SkillType.Spanish: return "Spanish";
-                case SkillType.French: return "French";
-                case SkillType.Arabic: return "Arabic";
-                case SkillType.Russian: return "Russian";
-                case SkillType.Portuguese: return "Portuguese";
-                case SkillType.German: return "German";
-                case SkillType.Dutch: return "Dutch";
+                case SkillType.Bothese: return "Bothese";
+                case SkillType.Catharese: return "Catharese";
+                case SkillType.Cheunh: return "Cheunh";
+                case SkillType.Dosh: return "Dosh";
+                case SkillType.Droidspeak: return "Droidspeak";
+                case SkillType.Huttese: return "Huttese";
+                case SkillType.KelDor: return "KelDor";
+                case SkillType.Mandoa: return "Mandoa";
+                case SkillType.Rodese: return "Rodese";
+                case SkillType.Shyriiwook: return "Shyriiwook";
+                case SkillType.Togruti: return "Togruti";
+                case SkillType.Twileki: return "Twi'leki";
+                case SkillType.Zabraki: return "Zabraki";
+                case SkillType.Mirialan: return "Mirialan";
+                case SkillType.MonCalamarian: return "Mon Calamarian";
+                case SkillType.Ugnaught: return "Ugnaught";
             }
 
-            return "English";
+            return "Basic";
         }
 
         public static SkillType GetActiveLanguage(uint obj)
@@ -213,7 +237,7 @@ namespace WOD.Game.Server.Service
 
             if (ret == 0)
             {
-                return SkillType.English;
+                return SkillType.Basic;
             }
 
             return (SkillType)ret;
@@ -221,7 +245,7 @@ namespace WOD.Game.Server.Service
 
         public static void SetActiveLanguage(uint obj, SkillType language)
         {
-            if (language == SkillType.English)
+            if (language == SkillType.Basic)
             {
                 DeleteLocalInt(obj, "ACTIVE_LANGUAGE");
             }
@@ -241,16 +265,23 @@ namespace WOD.Game.Server.Service
                 {
                     var languages = new List<LanguageCommand>
                     {
-                        new LanguageCommand("English", SkillType.English, new [] { "english" }),
-                        new LanguageCommand("Mandarin", SkillType.Mandarin, new[] {"mandarin"}),
-                        new LanguageCommand("Hindi", SkillType.Hindi, new []{"hindi"}),
-                        new LanguageCommand("Spanish", SkillType.Spanish, new []{"spanish"}),
-                        new LanguageCommand("French", SkillType.French, new []{"french"}),
-                        new LanguageCommand("Arabic", SkillType.Arabic, new []{"arabic"}),
-                        new LanguageCommand("Russian", SkillType.Russian, new []{"russian"}),
-                        new LanguageCommand("Portuguese", SkillType.Portuguese, new []{ "portuguese"}),
-                        new LanguageCommand("German", SkillType.German, new []{ "german"}),
-                        new LanguageCommand("Dutch", SkillType.Dutch, new []{ "dutch"}),
+                        new LanguageCommand("Basic", SkillType.Basic, new [] { "basic" }),
+                        new LanguageCommand("Bothese", SkillType.Bothese, new[] {"bothese"}),
+                        new LanguageCommand("Catharese", SkillType.Catharese, new []{"catharese"}),
+                        new LanguageCommand("Cheunh", SkillType.Cheunh, new []{"cheunh"}),
+                        new LanguageCommand("Dosh", SkillType.Dosh, new []{"dosh"}),
+                        new LanguageCommand("Droidspeak", SkillType.Droidspeak, new []{"droidspeak"}),
+                        new LanguageCommand("Huttese", SkillType.Huttese, new []{"huttese"}),
+                        new LanguageCommand("KelDor", SkillType.KelDor, new []{"keldor"}),
+                        new LanguageCommand("Mando'a", SkillType.Mandoa, new []{"mandoa"}),
+                        new LanguageCommand("Mirialan", SkillType.Mirialan, new []{"mirialan"}),
+                        new LanguageCommand("Mon Calamarian", SkillType.MonCalamarian, new []{"moncalamarian", "moncal"}),
+                        new LanguageCommand("Rodese", SkillType.Rodese, new []{"rodese", "rodian"}),
+                        new LanguageCommand("Shyriiwook", SkillType.Shyriiwook, new []{"shyriiwook", "wookieespeak"}),
+                        new LanguageCommand("Togruti", SkillType.Togruti, new []{"togruti"}),
+                        new LanguageCommand("Twi'leki", SkillType.Twileki, new []{"twileki", "ryl"}),
+                        new LanguageCommand("Ugnaught", SkillType.Ugnaught, new []{"ugnaught"}),
+                        new LanguageCommand("Zabraki", SkillType.Zabraki, new []{"zabraki", "zabrak"}),
                     };
 
                     _languages = languages;

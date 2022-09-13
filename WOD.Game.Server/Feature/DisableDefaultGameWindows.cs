@@ -1,6 +1,5 @@
 ﻿using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature
 {
@@ -14,12 +13,20 @@ namespace WOD.Game.Server.Feature
         public static void DisableWindows()
         {
             var player = GetEnteringObject();
+            if (!GetIsPC(player) || GetIsDM(player))
+                return;
 
             // Spell Book - Completely unused
             SetGuiPanelDisabled(player, GuiPanel.SpellBook, true);
 
             // Character Sheet - A NUI replacement is used
             SetGuiPanelDisabled(player, GuiPanel.CharacterSheet, true);
+
+            // Journal - A NUI replacement is used
+            SetGuiPanelDisabled(player, GuiPanel.Journal, true);
+
+            // Compass - Space is used by HP/FP/STM bars.
+            SetGuiPanelDisabled(player, GuiPanel.Compass, true);
         }
     }
 }

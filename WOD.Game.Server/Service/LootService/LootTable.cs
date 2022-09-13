@@ -6,6 +6,8 @@ namespace WOD.Game.Server.Service.LootService
 {
     public class LootTable : List<LootTableItem>
     {
+        public bool IsRare { get; set; }
+
         /// <summary>
         /// Retrieves a random item from the loot table.
         /// Throws an exception if there are no items in the loot table.

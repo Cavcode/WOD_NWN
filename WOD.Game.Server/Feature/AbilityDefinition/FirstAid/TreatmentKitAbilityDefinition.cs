@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WOD.Game.Server.Core;
+﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.PerkService;
+using WOD.Game.Server.Service.SkillService;
 using WOD.Game.Server.Service.StatusEffectService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
 {
@@ -29,8 +23,10 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.TreatmentKit1, PerkType.TreatmentKit)
                 .Name("Treatment Kit I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.TreatmentKit, 6f)
                 .HasActivationDelay(2f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(3)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
@@ -59,14 +55,21 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                     ApplyEffectToObject(DurationType.Instant, EffectVisualEffect(VisualEffect.Vfx_Imp_Healing_G), target);
                     StatusEffect.Remove(target, StatusEffectType.Bleed);
                     StatusEffect.Remove(target, StatusEffectType.Poison);
+
+                    TakeMedicalSupplies(activator);
+
+                    Enmity.ModifyEnmityOnAll(activator, 200);
+                    CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
                 });
         }
         private void TreatmentKit2()
         {
             Builder.Create(FeatType.TreatmentKit2, PerkType.TreatmentKit)
                 .Name("Treatment Kit II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.TreatmentKit, 6f)
                 .HasActivationDelay(2f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(3)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
@@ -97,6 +100,11 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                     StatusEffect.Remove(target, StatusEffectType.Poison);
                     StatusEffect.Remove(target, StatusEffectType.Shock);
                     StatusEffect.Remove(target, StatusEffectType.Burn);
+
+                    TakeMedicalSupplies(activator);
+
+                    Enmity.ModifyEnmityOnAll(activator, 350);
+                    CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
                 });
         }
     }

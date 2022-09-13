@@ -1,7 +1,6 @@
 ﻿using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Core.NWScript.Enum.Item;
 using Item = WOD.Game.Server.Service.Item;
 
 namespace WOD.Game.Server.Feature

@@ -6,7 +6,6 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Extension;
 using WOD.Game.Server.Service.AbilityService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
 {
@@ -15,7 +14,7 @@ namespace WOD.Game.Server.Service
         // Recast Group Descriptions
         private static readonly Dictionary<RecastGroup, string> _recastDescriptions = new Dictionary<RecastGroup, string>();
 
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void CacheRecastGroups()
         {
             CacheRecastGroupNames();

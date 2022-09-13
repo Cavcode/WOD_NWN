@@ -8,21 +8,22 @@ using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Extension;
 using WOD.Game.Server.Service.QuestService;
 using Player = WOD.Game.Server.Entity.Player;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Core.NWScript.Enum.Creature;
+using WOD.Game.Server.Service.ActivityService;
 
 namespace WOD.Game.Server.Service
 {
     public static class Quest
     {
-        private static readonly Dictionary<string, QuestDetail> _quests = new Dictionary<string, QuestDetail>();
-        private static readonly Dictionary<NPCGroupType, NPCGroupAttribute> _npcGroups = new Dictionary<NPCGroupType, NPCGroupAttribute>();
-        private static readonly Dictionary<NPCGroupType, List<string>> _npcsWithKillQuests = new Dictionary<NPCGroupType, List<string>>();
-        private static readonly Dictionary<GuildType, Dictionary<int, List<QuestDetail>>> _questsByGuildType = new Dictionary<GuildType, Dictionary<int, List<QuestDetail>>>();
+        private static readonly Dictionary<string, QuestDetail> _quests = new();
+        private static readonly Dictionary<NPCGroupType, NPCGroupAttribute> _npcGroups = new();
+        private static readonly Dictionary<NPCGroupType, List<string>> _npcsWithKillQuests = new();
+        private static readonly Dictionary<GuildType, Dictionary<int, List<QuestDetail>>> _questsByGuildType = new();
 
         /// <summary>
         /// When the module loads, data is cached to speed up searches later.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void CacheData()
         {
             RegisterNPCGroups();
@@ -78,6 +79,9 @@ namespace WOD.Game.Server.Service
                     }
                 }
             }
+
+            Console.WriteLine($"Loaded {_quests.Count} quests.");
+            ExecuteScript("qsts_registered", GetModule());
         }
 
         /// <summary>
@@ -97,8 +101,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When the module loads, all of the NPCGroupTypes are iterated over and their data is stored into the cache.
         /// </summary>
-        [NWNEventHandler("mod_load")]
-        public static void RegisterNPCGroups()
+        private static void RegisterNPCGroups()
         {
             var npcGroups = Enum.GetValues(typeof(NPCGroupType)).Cast<NPCGroupType>();
             foreach (var npcGroupType in npcGroups)
@@ -106,6 +109,8 @@ namespace WOD.Game.Server.Service
                 var npcGroupDetail = npcGroupType.GetAttribute<NPCGroupType, NPCGroupAttribute>();
                 _npcGroups[npcGroupType] = npcGroupDetail;
             }
+
+            Console.WriteLine($"Loaded {_npcGroups.Count} NPC groups.");
         }
 
         /// <summary>
@@ -118,7 +123,7 @@ namespace WOD.Game.Server.Service
             if (!GetIsPC(player) || GetIsDM(player)) return;
 
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Player>(playerId) ?? new Player();
+            var dbPlayer = DB.Get<Player>(playerId) ?? new Player(playerId);
 
             // Reapply quest journal entries on log-in.
             // An NWN quirk requires this to be on a short delay because journal entries are wiped on login.
@@ -129,7 +134,7 @@ namespace WOD.Game.Server.Service
                     var quest = _quests[questId];
                     var state = quest.States[playerQuest.CurrentState];
 
-                    Core.NWNX.PlayerPlugin.AddCustomJournalEntry(player, new JournalEntry
+                    PlayerPlugin.AddCustomJournalEntry(player, new JournalEntry
                     {
                         Name = quest.Name,
                         Text = state.JournalText,
@@ -182,7 +187,12 @@ namespace WOD.Game.Server.Service
 
             return _npcsWithKillQuests[npcGroupType];
         }
-            
+
+        public static void AbandonQuest(uint player, string questId)
+        {
+            _quests[questId].Abandon(player);
+        }
+
         /// <summary>
         /// Makes a player accept a quest by the specified Id.
         /// If the quest Id is invalid, an exception will be thrown.
@@ -247,7 +257,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When an NPC is killed, any objectives for quests a player currently has active will be updated.
         /// </summary>
-        [NWNEventHandler("crea_death")]
+        [NWNEventHandler("crea_death_bef")]
         public static void ProgressKillTargetObjectives()
         {
             var creature = OBJECT_SELF;
@@ -256,13 +266,26 @@ namespace WOD.Game.Server.Service
             var possibleQuests = GetQuestsAssociatedWithNPCGroup(npcGroupType);
             if (possibleQuests.Count <= 0) return;
 
-            var killer = GetLastKiller();
+            // We can't use GetLastKiller() as various abilities deal damage that isn't sourced from
+            // the PC.  So use the enmity service to pull the highest enmity PC (i.e. the one that 
+            // did the most attacks).  If we can't find one for some reason, pull the nearest PC.
+            // Note: this event needs to be called before the Enmity tables are cleared up after
+            // creature death. 
+            var killer = Enmity.GetHighestEnmityTarget(creature);
+            if (killer == OBJECT_INVALID) killer = GetNearestCreature(CreatureType.PlayerCharacter, 1, creature);
 
             // Iterate over every player in the killer's party.
-            // Every player who needs this NPCGroupType for a quest will have their objective advanced.
+            // Every player who needs this NPCGroupType for a quest will have their objective advanced if they are within range and in the same area.
             for (var member = GetFirstFactionMember(killer); GetIsObjectValid(member); member = GetNextFactionMember(killer))
             {
-                if (!GetIsPC(member) || GetIsDM(member)) continue;
+                if (!GetIsPC(member) || GetIsDM(member)) 
+                    continue;
+
+                if (GetArea(member) != GetArea(killer))
+                    continue;
+
+                if (GetDistanceBetween(member, creature) > 50f)
+                    continue;
 
                 var playerId = GetObjectUUID(member);
                 var dbPlayer = DB.Get<Player>(playerId);
@@ -333,6 +356,8 @@ namespace WOD.Game.Server.Service
             }
 
             SendMessageToPC(player, text);
+
+            Activity.SetBusy(player, ActivityStatusType.Quest);
         }
 
         /// <summary>
@@ -341,12 +366,18 @@ namespace WOD.Game.Server.Service
         [NWNEventHandler("qst_collect_clsd")]
         public static void CloseItemCollector()
         {
-            for (var item = GetFirstItemInInventory(OBJECT_SELF); GetIsObjectValid(item); item = GetNextItemInInventory(OBJECT_SELF))
+            var player = GetLastClosedBy();
+            DelayCommand(0.02f, () =>
             {
-                DestroyObject(item);
-            }
+                for (var item = GetFirstItemInInventory(OBJECT_SELF); GetIsObjectValid(item); item = GetNextItemInInventory(OBJECT_SELF))
+                {
+                    DestroyObject(item);
+                }
 
-            DestroyObject(OBJECT_SELF);
+                DestroyObject(OBJECT_SELF);
+            });
+
+            Activity.ClearBusy(player);
         }
 
         /// <summary>
@@ -377,18 +408,31 @@ namespace WOD.Game.Server.Service
                 return;
             }
 
-            // Decrement the required items and update the DB.
-            dbPlayer.Quests[questId].ItemProgresses[resref]--;
-            DB.Set(playerId, dbPlayer);
+            var requiredAmount = dbPlayer.Quests[questId].ItemProgresses[resref];
+            var stackSize = GetItemStackSize(item);
 
+            // Decrement the required items and update the DB.
+            if (stackSize > requiredAmount)
+            {
+                dbPlayer.Quests[questId].ItemProgresses[resref] = 0;
+                Item.ReduceItemStack(item, requiredAmount);
+                Item.ReturnItem(player, item);
+            }
+            else
+            {
+                dbPlayer.Quests[questId].ItemProgresses[resref] -= stackSize;
+                Item.ReduceItemStack(item, stackSize);
+            }
+
+            DB.Set(dbPlayer);
+
+            // Give the player an update and reduce the item stack.
+            var itemName = Cache.GetItemNameByResref(resref);
+            SendMessageToPC(player, $"You need {dbPlayer.Quests[questId].ItemProgresses[resref]}x {itemName} to complete this quest.");
+            
             // Attempt to advance the quest.
             // If player hasn't completed the other objectives, nothing will happen when this is called.
             AdvanceQuest(player, owner, questId);
-
-            // Give the player an update and destroy the item.
-            var itemName = Cache.GetItemNameByResref(resref);
-            SendMessageToPC(player, $"You need {dbPlayer.Quests[questId].ItemProgresses[resref]}x {itemName} to complete this quest.");
-            DestroyObject(item);
 
             // If no more items are necessary for this quest, force the player to speak with the NPC again.
             var itemsRequired = dbPlayer.Quests[questId].ItemProgresses.Sum(x => x.Value);

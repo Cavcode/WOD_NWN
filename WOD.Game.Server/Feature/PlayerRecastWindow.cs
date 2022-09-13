@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Linq;
 using WOD.Game.Server.Core;
+using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Entity;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.SpaceService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature
 {
@@ -31,7 +30,7 @@ namespace WOD.Game.Server.Feature
         /// <summary>
         /// Every second, redraw the window for the player. Window drawn depends on the mode the player is currently in (Character or Space).
         /// </summary>
-        [NWNEventHandler("interval_pc_1s")]
+        //[NWNEventHandler("interval_pc_1s")] // todo: temporarily disabled due to performance reasons.
         public static void DrawGuiElements()
         {
             var player = OBJECT_SELF;
@@ -67,6 +66,9 @@ namespace WOD.Game.Server.Feature
 
             var playerId = GetObjectUUID(player);
             var dbPlayer = DB.Get<Player>(playerId);
+            if (dbPlayer == null)
+                return;
+
             var now = DateTime.UtcNow;
 
             var numberOfRecasts = 0;
@@ -122,11 +124,16 @@ namespace WOD.Game.Server.Feature
 
             var playerId = GetObjectUUID(player);
             var dbPlayer = DB.Get<Player>(playerId);
-            var playerShipId = dbPlayer.ActiveShipId;
-            var dbPlayerShip = dbPlayer.Ships[playerShipId];
+            if (dbPlayer == null)
+                return;
+
+            var dbPlayerShip = DB.Get<PlayerShip>(dbPlayer.ActiveShipId);
+
+            if (dbPlayerShip == null)
+                throw new Exception($"Could not locate ship Id '{dbPlayer.ActiveShipId}' for player Id '{playerId}'.");
 
             var now = DateTime.UtcNow;
-            var allModules = dbPlayerShip.HighPowerModules.Concat(dbPlayerShip.LowPowerModules).ToList();
+            var allModules = dbPlayerShip.Status.HighPowerModules.Concat(dbPlayerShip.Status.LowPowerModules).ToList();
 
             var numberOfRecasts = 0;
             foreach (var (_, shipModule) in allModules)
@@ -152,24 +159,34 @@ namespace WOD.Game.Server.Feature
             }
         }
 
-        [NWNEventHandler("interval_pc_1s")]
+        //[NWNEventHandler("interval_pc_1s")] // todo: temporarily disabled due to performance issues
         public static void CleanUpExpiredRecastTimers()
         {
             var player = OBJECT_SELF;
-            if (GetIsDM(player)) return;
+            if (GetIsDM(player) || GetIsDMPossessed(player)) return;
 
+            ProfilerPlugin.PushPerfScope($"{nameof(CleanUpExpiredRecastTimers)}:Retrieval", "RunScript", "Script");
             var playerId = GetObjectUUID(player);
             var dbPlayer = DB.Get<Player>(playerId);
+            ProfilerPlugin.PopPerfScope();
+
+            if (dbPlayer == null)
+                return;
+
             var now = DateTime.UtcNow;
 
+            ProfilerPlugin.PushPerfScope($"{nameof(CleanUpExpiredRecastTimers)}:Iteration", "RunScript", "Script");
             foreach (var (group, dateTime) in dbPlayer.RecastTimes)
             {
                 if (dateTime > now) continue;
 
                 dbPlayer.RecastTimes.Remove(group);
             }
+            ProfilerPlugin.PopPerfScope();
 
-            DB.Set(playerId, dbPlayer);
+            ProfilerPlugin.PushPerfScope($"{nameof(CleanUpExpiredRecastTimers)}:Save", "RunScript", "Script");
+            DB.Set(dbPlayer);
+            ProfilerPlugin.PopPerfScope();
         }
     }
 }

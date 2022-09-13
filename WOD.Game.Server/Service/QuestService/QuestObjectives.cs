@@ -1,7 +1,5 @@
 ﻿using WOD.Game.Server.Entity;
-using WOD.Game.Server.Enumeration;
 using Player = WOD.Game.Server.Entity.Player;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service.QuestService
 {
@@ -10,6 +8,7 @@ namespace WOD.Game.Server.Service.QuestService
         void Initialize(uint player, string questId);
         void Advance(uint player, string questId);
         bool IsComplete(uint player, string questId);
+        string GetCurrentStateText(uint player, string questId);
     }
 
     public class CollectItemObjective : IQuestObjective
@@ -31,7 +30,7 @@ namespace WOD.Game.Server.Service.QuestService
 
             quest.ItemProgresses[_resref] = _quantity;
             dbPlayer.Quests[questId] = quest;
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
         public void Advance(uint player, string questId)
@@ -45,7 +44,7 @@ namespace WOD.Game.Server.Service.QuestService
             if (quest.ItemProgresses[_resref] <= 0) return;
 
             quest.ItemProgresses[_resref]--;
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
 
             var questDetail = Quest.GetQuestById(questId);
             var itemName = Cache.GetItemNameByResref(_resref);
@@ -76,6 +75,20 @@ namespace WOD.Game.Server.Service.QuestService
 
             return true;
         }
+
+        public string GetCurrentStateText(uint player, string questId)
+        {
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+            if (!dbPlayer.Quests.ContainsKey(questId))
+                return "N/A";
+            if (!dbPlayer.Quests[questId].ItemProgresses.ContainsKey(_resref))
+                return "N/A";
+
+            var numberRemaining = dbPlayer.Quests[questId].ItemProgresses[_resref];
+            var itemName = Cache.GetItemNameByResref(_resref);
+            return $"{_quantity - numberRemaining} / {_quantity} {itemName}";
+        }
     }
 
     public class KillTargetObjective : IQuestObjective
@@ -97,7 +110,7 @@ namespace WOD.Game.Server.Service.QuestService
             
             quest.KillProgresses[Group] = _amount;
             dbPlayer.Quests[questId] = quest;
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
         public void Advance(uint player, string questId)
@@ -111,7 +124,7 @@ namespace WOD.Game.Server.Service.QuestService
             if (quest.KillProgresses[Group] <= 0) return;
 
             quest.KillProgresses[Group]--;
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
 
             var npcGroup = Quest.GetNPCGroup(Group);
             var questDetail = Quest.GetQuestById(questId);
@@ -141,6 +154,19 @@ namespace WOD.Game.Server.Service.QuestService
             }
 
             return true;
+        }
+
+        public string GetCurrentStateText(uint player, string questId)
+        {
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+            if (!dbPlayer.Quests.ContainsKey(questId))
+                return "N/A";
+
+            var npcGroup = Quest.GetNPCGroup(Group);
+            var numberRemaining = dbPlayer.Quests[questId].KillProgresses[Group];
+            
+            return $"{_amount - numberRemaining} / {_amount} {npcGroup.Name}";
         }
     }
 }

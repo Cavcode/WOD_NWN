@@ -5,9 +5,9 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Item;
+using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
 using WOD.Game.Server.Feature.AIDefinition;
 using WOD.Game.Server.Service.AIService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
 {
@@ -15,15 +15,20 @@ namespace WOD.Game.Server.Service
     {
         private static readonly Dictionary<uint, HashSet<uint>> _creatureAllies = new Dictionary<uint, HashSet<uint>>();
 
+        private const string StickyTargetRounds = "AI_STICKY_TARGET_ROUNDS";
+
         /// <summary>
         /// Entry point for creature heartbeat logic.
         /// </summary>
         [NWNEventHandler("crea_heartbeat")]
         public static void CreatureHeartbeat()
         {
+            ExecuteScript("crea_hb_bef", OBJECT_SELF);
             RestoreCreatureStats();
-            ProcessRandomWalkFlag();
+            ProcessFlags();
+            AttackHighestEnmityTarget();
             ExecuteScript("cdef_c2_default1", OBJECT_SELF);
+            ExecuteScript("crea_hb_aft", OBJECT_SELF);
         }
 
         /// <summary>
@@ -32,9 +37,11 @@ namespace WOD.Game.Server.Service
         [NWNEventHandler("crea_perception")]
         public static void CreaturePerception()
         {
+            ExecuteScript("crea_perc_bef", OBJECT_SELF);
             // This is a stripped-down version of the default NWN perception event.
             // We handle most of our perception logic with the aggro aura effect.
             ProcessCreatureAllies();
+            ExecuteScript("crea_perc_aft", OBJECT_SELF);
         }
 
         /// <summary>
@@ -45,8 +52,10 @@ namespace WOD.Game.Server.Service
         {
             if (!Activity.IsBusy(OBJECT_SELF))
             {
+                ExecuteScript("crea_rndend_bef", OBJECT_SELF);
                 ProcessPerkAI();
                 ExecuteScript("cdef_c2_default3", OBJECT_SELF);
+                ExecuteScript("crea_rndend_aft", OBJECT_SELF);
             }
         }
 
@@ -56,6 +65,7 @@ namespace WOD.Game.Server.Service
         [NWNEventHandler("crea_convo")]
         public static void CreatureConversation()
         {
+            ExecuteScript("crea_convo_bef", OBJECT_SELF);
             ExecuteScript("cdef_c2_default4", OBJECT_SELF);
 
             var conversation = GetLocalString(OBJECT_SELF, "CONVERSATION");
@@ -64,6 +74,7 @@ namespace WOD.Game.Server.Service
                 var talker = GetLastSpeaker();
                 Dialog.StartConversation(talker, OBJECT_SELF, conversation);
             }
+            ExecuteScript("crea_convo_aft", OBJECT_SELF);
         }
 
         /// <summary>
@@ -72,7 +83,9 @@ namespace WOD.Game.Server.Service
         [NWNEventHandler("crea_attacked")]
         public static void CreaturePhysicalAttacked()
         {
+            ExecuteScript("crea_attack_bef", OBJECT_SELF);
             ExecuteScript("cdef_c2_default5", OBJECT_SELF);
+            ExecuteScript("crea_attack_aft", OBJECT_SELF);
         }
 
         /// <summary>
@@ -81,7 +94,9 @@ namespace WOD.Game.Server.Service
         [NWNEventHandler("crea_damaged")]
         public static void CreatureDamaged()
         {
+            ExecuteScript("crea_damaged_bef", OBJECT_SELF);
             ExecuteScript("cdef_c2_default6", OBJECT_SELF);
+            ExecuteScript("crea_damaged_aft", OBJECT_SELF);
         }
 
         /// <summary>
@@ -90,8 +105,10 @@ namespace WOD.Game.Server.Service
         [NWNEventHandler("crea_death")]
         public static void CreatureDeath()
         {
+            ExecuteScript("crea_death_bef", OBJECT_SELF);
             RemoveFromAlliesCache();
             ExecuteScript("cdef_c2_default7", OBJECT_SELF);
+            ExecuteScript("crea_death_aft", OBJECT_SELF);
         }
 
         /// <summary>
@@ -100,7 +117,9 @@ namespace WOD.Game.Server.Service
         [NWNEventHandler("crea_disturb")]
         public static void CreatureDisturbed()
         {
+            ExecuteScript("crea_disturb_bef", OBJECT_SELF);
             ExecuteScript("cdef_c2_default8", OBJECT_SELF);
+            ExecuteScript("crea_disturb_aft", OBJECT_SELF);
         }
 
         /// <summary>
@@ -109,9 +128,13 @@ namespace WOD.Game.Server.Service
         [NWNEventHandler("crea_spawn")]
         public static void CreatureSpawn()
         {
+            ExecuteScript("crea_spawn_bef", OBJECT_SELF);
             LoadCreatureStats();
             LoadAggroEffect();
+            DoVFX();
+            SetLocalLocation(OBJECT_SELF, "HOME_LOCATION", GetLocation(OBJECT_SELF));
             ExecuteScript("cdef_c2_default9", OBJECT_SELF);
+            ExecuteScript("crea_spawn_aft", OBJECT_SELF);
         }
 
         /// <summary>
@@ -120,7 +143,9 @@ namespace WOD.Game.Server.Service
         [NWNEventHandler("crea_rested")]
         public static void CreatureRested()
         {
+            ExecuteScript("crea_rested_bef", OBJECT_SELF);
             ExecuteScript("cdef_c2_defaulta", OBJECT_SELF);
+            ExecuteScript("crea_rested_aft", OBJECT_SELF);
         }
 
         /// <summary>
@@ -129,7 +154,9 @@ namespace WOD.Game.Server.Service
         [NWNEventHandler("crea_spellcastat")]
         public static void CreatureSpellCastAt()
         {
+            ExecuteScript("crea_splcast_bef", OBJECT_SELF);
             ExecuteScript("cdef_c2_defaultb", OBJECT_SELF);
+            ExecuteScript("crea_splcast_aft", OBJECT_SELF);
         }
 
         /// <summary>
@@ -138,7 +165,9 @@ namespace WOD.Game.Server.Service
         [NWNEventHandler("crea_userdef")]
         public static void CreatureUserDefined()
         {
+            ExecuteScript("crea_userdef_bef", OBJECT_SELF);
             ExecuteScript("cdef_c2_defaultd", OBJECT_SELF);
+            ExecuteScript("crea_userdef_aft", OBJECT_SELF);
         }
 
         /// <summary>
@@ -147,17 +176,31 @@ namespace WOD.Game.Server.Service
         [NWNEventHandler("crea_blocked")]
         public static void CreatureBlocked()
         {
+            ExecuteScript("crea_block_bef", OBJECT_SELF);
             ExecuteScript("cdef_c2_defaulte", OBJECT_SELF);
+            ExecuteScript("crea_block_aft", OBJECT_SELF);
         }
 
         /// <summary>
         /// When a creature enters the aggro aura of another creature, increase their enmity and start the aggro process.
+        /// Invisible creatures do not trigger this.
         /// </summary>
         [NWNEventHandler("crea_aggro_enter")]
         public static void CreatureAggroEnter()
         {
             var entering = GetEnteringObject();
             var self = GetAreaOfEffectCreator(OBJECT_SELF);
+
+            // Target is invisible
+            if (GetHasEffect(entering, EffectTypeScript.Invisibility, EffectTypeScript.ImprovedInvisibility))
+            {
+                return;
+            }
+
+            // Must have line of sight to AOE creator
+            if (!LineOfSightObject(entering, self))
+                return;
+
             if (!GetIsEnemy(entering, self))
             {
                 var attackTarget = Enmity.GetHighestEnmityTarget(entering);
@@ -204,6 +247,31 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
+        /// Fail-safe to ensure the creature attacks 
+        /// </summary>
+        private static void AttackHighestEnmityTarget()
+        {
+            var self = OBJECT_SELF;
+            if (GetIsInCombat(self))
+                return;
+
+            var target = Enmity.GetHighestEnmityTarget(self);
+            if (!GetIsObjectValid(target))
+                return;
+
+            var action = GetCurrentAction(self);
+            if (action != ActionType.RandomWalk && 
+                action != ActionType.Invalid)
+                return;
+
+            AssignCommand(self, () =>
+            {
+                ClearAllActions();
+                ActionAttack(target);
+            });
+        }
+
+        /// <summary>
         /// Handles custom perk usage
         /// </summary>
         private static void ProcessPerkAI()
@@ -211,12 +279,17 @@ namespace WOD.Game.Server.Service
             var self = OBJECT_SELF;
 
             // Petrified - do nothing else.
-            if (GetHasEffect(EffectTypeScript.Petrify, self)) return;
+            if (GetHasEffect(self, EffectTypeScript.Petrify)) 
+                return;
 
             // Attempt to target the highest enmity creature.
             // If no target can be determined, exit early.
-            var target = GetTarget();
-            if (!GetIsObjectValid(target)) return;
+            var target = Enmity.GetHighestEnmityTarget(self);
+            if (!GetIsObjectValid(target))
+            {
+                ClearAllActions();
+                return;
+            }
 
             // If currently randomly walking, clear all actions.
             if (GetCurrentAction(self) == ActionType.RandomWalk)
@@ -224,12 +297,23 @@ namespace WOD.Game.Server.Service
                 ClearAllActions();
             }
 
-            // Switch targets if necessary
-            if (target != GetAttackTarget(self) ||
-                GetCurrentAction(self) == ActionType.Invalid)
+            // Not currently fighting - attack target
+            if (GetCurrentAction(self) == ActionType.Invalid)
             {
+                DeleteLocalInt(self, StickyTargetRounds);
                 ClearAllActions();
                 ActionAttack(target);
+            }
+            // The AI should stick to their same target for 3 rounds before shifting to the next highest enmity target.
+            else if (target != GetAttackTarget(self))
+            {
+                var rounds = GetLocalInt(self, StickyTargetRounds) + 1;
+                if (rounds > 3)
+                {
+                    DeleteLocalInt(self, StickyTargetRounds);
+                    ClearAllActions();
+                    ActionAttack(target);
+                }
             }
             // Perk ability usage
             else
@@ -250,18 +334,23 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// Returns the creature with the highest enmity on this enemy's enmity table.
-        /// If no target can be determined, OBJECT_INVALID will be returned.
+        /// Forces a creature to start attacking a different target, regardless of enmity level.
+        /// This also resets their sticky targeting.
+        /// If either the creature or the target is invalid, nothing will happen.
         /// </summary>
-        /// <returns>The creature with the highest enmity, or OBJECT_INVALID if it cannot be determined.</returns>
-        private static uint GetTarget()
+        /// <param name="creature">The creature to force a target swap upon.</param>
+        /// <param name="target">The new target.</param>
+        public static void ForceTargetSwap(uint creature, uint target)
         {
-            var self = OBJECT_SELF;
-            var enmityTable = Enmity.GetEnmityTable(self);
-            if (enmityTable.Count <= 0) return OBJECT_INVALID;
+            if (!GetIsObjectValid(creature) || !GetIsObjectValid(target))
+                return;
 
-            var highest = enmityTable.OrderByDescending(o => o.Value).First();
-            return highest.Key;
+            DeleteLocalInt(creature, StickyTargetRounds);
+            AssignCommand(creature, () =>
+            {
+                ClearAllActions();
+                ActionAttack(target);
+            });
         }
 
         /// <summary>
@@ -270,12 +359,14 @@ namespace WOD.Game.Server.Service
         /// <param name="effectType">The type of effect to look for.</param>
         /// <param name="creature">The creature to check</param>
         /// <returns>true if creature has the effect, false otherwise</returns>
-        private static bool GetHasEffect(EffectTypeScript effectType, uint creature)
+        private static bool GetHasEffect(uint creature, EffectTypeScript effectType, params EffectTypeScript[] otherEffectTypes)
         {
             var effect = GetFirstEffect(creature);
             while (GetIsEffectValid(effect))
             {
-                if (GetEffectType(effect) == effectType)
+                var type = GetEffectType(effect);
+
+                if (type == effectType || otherEffectTypes.Contains(type))
                 {
                     return true;
                 }
@@ -286,7 +377,7 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// When a creature spawns, store their STM and EP as local variables.
+        /// When a creature spawns, store their STM and FP as local variables.
         /// Also load their HP per their skin, if specified.
         /// </summary>
         private static void LoadCreatureStats()
@@ -312,7 +403,7 @@ namespace WOD.Game.Server.Service
                 ObjectPlugin.SetCurrentHitPoints(self, maxHP);
             }
 
-            SetLocalInt(self, "EP", Stat.GetMaxFP(self));
+            SetLocalInt(self, "FP", Stat.GetMaxFP(self));
             SetLocalInt(self, "STAMINA", Stat.GetMaxStamina(self));
         }
 
@@ -324,6 +415,25 @@ namespace WOD.Game.Server.Service
             var effect = SupernaturalEffect(EffectAreaOfEffect(AreaOfEffect.CustomAoe, "crea_aggro_enter", "crea_aggro_hb", "crea_aggro_exit"));
             effect = TagEffect(effect, "AGGRO_AOE");
             ApplyEffectToObject(DurationType.Permanent, effect, OBJECT_SELF);
+        }
+
+        private static void DoVFX()
+        {
+            // Allow builders to put permanent effects on creatures - e.g. to make them statues, or make them glow.
+            // Index of standard VFX effects here: https://nwnlexicon.com/index.php?title=Vfx_dur
+            var vfx = GetLocalInt(OBJECT_SELF, "PERMANENT_VFX_ID");
+            if (vfx > 0) 
+                ApplyEffectToObject(DurationType.Permanent, EffectVisualEffect((VisualEffect)vfx), OBJECT_SELF);
+
+            // Cutscene paralysis - for statues.
+            var paralyze = GetLocalInt(OBJECT_SELF, "PARALYZE");
+            if (paralyze > 0) 
+                ApplyEffectToObject(DurationType.Permanent, SupernaturalEffect(EffectCutsceneParalyze()), OBJECT_SELF);
+
+            // Daze - for creatures that should not be able to attack.
+            var daze = GetLocalInt(OBJECT_SELF, "DAZE");
+            if (daze > 0) 
+                ApplyEffectToObject(DurationType.Permanent, SupernaturalEffect(EffectDazed()), OBJECT_SELF);
         }
 
         /// <summary>
@@ -356,20 +466,42 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// When a creature's heartbeat fires, if they have the RandomWalk AI flag,
-        /// and they are not currently preoccupied (combat, talking, etc.) force them to randomly walk.
+        /// When a creature's heartbeat fires, if they have the RandomWalk or ReturnHome AI flag,
+        /// and they are not currently preoccupied (combat, talking, etc.) force them to randomly walk or return home if they are too far away.
         /// </summary>
-        private static void ProcessRandomWalkFlag()
+        private static void ProcessFlags()
         {
             var self = OBJECT_SELF;
+
+            // Certain effects should interrupt the random walk process.
+            var effects = new[] {EffectTypeScript.Dazed, EffectTypeScript.Petrify};
+            for (var effect = GetFirstEffect(self); GetIsEffectValid(effect); effect = GetNextEffect(self))
+            {
+                if (effects.Contains(GetEffectType(effect)))
+                {
+                    return;
+                }
+            }
+
             var aiFlags = GetAIFlag(self);
-            if (!aiFlags.HasFlag(AIFlag.RandomWalk) ||
-                IsInConversation(self) ||
+            if (IsInConversation(self) ||
                 GetIsInCombat(self) ||
-                GetCurrentAction(self) == ActionType.RandomWalk)
+                GetCurrentAction(self) == ActionType.RandomWalk ||
+                GetCurrentAction(self) == ActionType.MoveToPoint ||
+                GetIsObjectValid(Enmity.GetHighestEnmityTarget(self)))
                 return;
 
-            if (Random.D100(1) <= 40)
+            // Return Home flag
+            var homeLocation = GetLocalLocation(self, "HOME_LOCATION");
+            if (aiFlags.HasFlag(AIFlag.ReturnHome) &&
+                (GetAreaFromLocation(homeLocation) != GetArea(self) ||
+                 GetDistanceBetweenLocations(GetLocation(self), homeLocation) > 15f))
+            {
+                AssignCommand(self, () => ActionForceMoveToLocation(homeLocation));
+            }
+            // Randomly walk flag
+            else if(aiFlags.HasFlag(AIFlag.RandomWalk) &&
+                Random.D100(1) <= 40)
             {
                 AssignCommand(self, ActionRandomWalk);
             }
@@ -388,7 +520,7 @@ namespace WOD.Game.Server.Service
             var isSeen = GetLastPerceptionSeen();
             var isVanished = GetLastPerceptionVanished();
 
-            if (GetIsPC(lastPerceived)) return;
+            if (GetIsPC(lastPerceived) || GetIsDead(lastPerceived)) return;
             var isSameFaction = GetFactionEqual(self, lastPerceived);
             if (!isSameFaction) return;
 
@@ -417,10 +549,7 @@ namespace WOD.Game.Server.Service
             var self = OBJECT_SELF;
             if (!_creatureAllies.ContainsKey(self)) return;
 
-            var allies = _creatureAllies[self];
-
-            //foreach (var ally in allies)
-            for(var index = allies.Count-1; index >= 0; index--)
+            for(var index = _creatureAllies.Count-1; index >= 0; index--)
             {
                 var ally = _creatureAllies.ElementAt(index).Key;
                 if (_creatureAllies.ContainsKey(ally))

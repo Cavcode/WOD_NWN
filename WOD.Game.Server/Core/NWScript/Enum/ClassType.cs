@@ -45,13 +45,8 @@ namespace WOD.Game.Server.Core.NWScript.Enum
         ShouDisciple = 40,
         PDK = 41,
 
-        Brujah = 66,
-        Tremere = 67,
-        Gangrel = 68,
-        Malkavian = 69,
-        Nosferatu = 70,
-        Toreador = 71,
-        Ventrue = 72,
+        Standard = 66,
+        ForceSensitive = 67,
 
         Invalid = 255
     }

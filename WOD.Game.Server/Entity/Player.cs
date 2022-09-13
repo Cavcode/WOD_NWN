@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using WOD.Game.Server.Core.NWNX.Enum;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
+using WOD.Game.Server.Service.CraftService;
 using WOD.Game.Server.Service.FactionService;
+using WOD.Game.Server.Service.GuiService;
+using WOD.Game.Server.Service.GuiService.Component;
 using WOD.Game.Server.Service.KeyItemService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.QuestService;
 using WOD.Game.Server.Service.SkillService;
-using WOD.Game.Server.Service.SpaceService;
 using WOD.Game.Server.Service.TaxiService;
 
 namespace WOD.Game.Server.Entity
@@ -19,14 +22,26 @@ namespace WOD.Game.Server.Entity
     {
         public Player()
         {
+            Init();
+        }
+
+        public Player(string id)
+        {
+            Init();
+            Id = id;
+        }
+
+        private void Init()
+        {
             Settings = new PlayerSettings();
+            RacialStat = AbilityType.Invalid;
             BaseStats = new Dictionary<AbilityType, int>
             {
                 {AbilityType.Vitality, 0},
                 {AbilityType.Might, 0},
                 {AbilityType.Social, 0},
                 {AbilityType.Perception, 0},
-                {AbilityType.Unused, 0},
+                {AbilityType.Agility, 0},
                 {AbilityType.Willpower, 0}
             };
             UpgradedStats = new Dictionary<AbilityType, int>
@@ -35,23 +50,19 @@ namespace WOD.Game.Server.Entity
                 {AbilityType.Might, 0},
                 {AbilityType.Social, 0},
                 {AbilityType.Perception, 0},
-                {AbilityType.Unused, 0},
+                {AbilityType.Agility, 0},
                 {AbilityType.Willpower, 0}
             };
 
-            Defenses = new Dictionary<CombatDamageType, int>
-            {
-                {CombatDamageType.Physical, 0},
-                {CombatDamageType.Force, 0},
-                {CombatDamageType.Fire, 0},
-                {CombatDamageType.Poison, 0},
-                {CombatDamageType.Electrical, 0},
-                {CombatDamageType.Ice, 0}
-            };   
+            Defenses = new Dictionary<CombatDamageType, int>();
 
-            ShowHelmet = true;
+            foreach (var type in Combat.GetAllDamageTypes())
+            {
+                Defenses[type] = 0;
+            }
+
+            ActiveShipId = Guid.Empty.ToString();
             IsUsingDualPistolMode = false;
-            IsHolonetEnabled = true;
             EmoteStyle = EmoteStyle.Regular;
             MovementRate = 1.0f;
             MapPins = new Dictionary<string, List<MapPin>>();
@@ -63,14 +74,19 @@ namespace WOD.Game.Server.Entity
             Quests = new Dictionary<string, PlayerQuest>();
             UnlockedPerks = new Dictionary<PerkType, DateTime>();
             UnlockedRecipes = new Dictionary<RecipeType, DateTime>();
+            CraftedRecipes = new Dictionary<RecipeType, DateTime>();
             CharacterType = CharacterType.Invalid;
             KeyItems = new Dictionary<KeyItemType, DateTime>();
             Guilds = new Dictionary<GuildType, PlayerGuild>();
-            Ships = new Dictionary<Guid, ShipStatus>();
             Factions = new Dictionary<FactionType, PlayerFactionStanding>();
             TaxiDestinations = new Dictionary<int, List<TaxiDestinationType>>();
-            AbilityPointsByLevel = new Dictionary<int, int>();
             ObjectVisibilities = new Dictionary<string, VisibilityType>();
+            WindowGeometries = new Dictionary<GuiWindowType, GuiRectangle>();
+            AppearanceScale = 1.0f;
+            Control = new Dictionary<SkillType, int>();
+            Craftsmanship = new Dictionary<SkillType, int>();
+            CPBonus = new Dictionary<SkillType, int>();
+            AbilityToggles = new Dictionary<AbilityToggleType, bool>();
         }
 
 
@@ -84,10 +100,9 @@ namespace WOD.Game.Server.Entity
         public int HP { get; set; }
         public int FP { get; set; }
         public int Stamina { get; set; }
+        public int TemporaryFoodHP { get; set; }
         public int BAB { get; set; }
-        public int Fortitude { get; set; }
-        public int Reflex { get; set; }
-        public int Will { get; set; }
+
         [Indexed]
         public string LocationAreaResref { get; set; }
         public float LocationX { get; set; }
@@ -110,25 +125,35 @@ namespace WOD.Game.Server.Entity
         public int FPRegen { get; set; }
         public int STMRegen { get; set; }
         public int XPDebt { get; set; }
+        public int DMXPBonus { get; set; }
         public int NumberPerkResetsAvailable { get; set; }
+        public int NumberRebuildsAvailable { get; set; }
         [Indexed]
         public bool IsDeleted { get; set; }
-        public bool ShowHelmet { get; set; }
         public bool IsUsingDualPistolMode { get; set; }
         public DateTime? DatePerkRefundAvailable { get; set; }
         [Indexed]
         public CharacterType CharacterType { get; set; }
-        public bool IsHolonetEnabled { get; set; }
         public EmoteStyle EmoteStyle { get; set; }
         public string SerializedHotBar { get; set; }
-        public Guid ActiveShipId { get; set; }
-        public Guid SelectedShipId { get; set; }
+        public string ActiveShipId { get; set; }
         public AppearanceType OriginalAppearanceType { get; set; }
         public float MovementRate { get; set; }
         public int AbilityRecastReduction { get; set; }
         public int MarketTill { get; set; }
+        [Indexed]
+        public string CitizenPropertyId { get; set; }
+        public int PropertyOwedTaxes { get; set; }
+        public int Attack { get; set; }
+        public int ForceAttack { get; set; }
+        public int Evasion { get; set; }
+        public bool RebuildComplete { get; set; }
 
         public PlayerSettings Settings { get; set; }
+        public Dictionary<SkillType, int> Control { get; set; }
+        public Dictionary<SkillType, int> Craftsmanship { get; set; }
+        public Dictionary<SkillType, int> CPBonus { get; set; }
+        public AbilityType RacialStat { get; set; }
         public Dictionary<AbilityType, int> BaseStats { get; set; }
         public Dictionary<AbilityType, int> UpgradedStats { get; set; }
         public RoleplayProgress RoleplayProgress { get; set; }
@@ -140,14 +165,16 @@ namespace WOD.Game.Server.Entity
         public Dictionary<string, PlayerQuest> Quests { get; set; }
         public Dictionary<PerkType, DateTime> UnlockedPerks { get; set; }
         public Dictionary<RecipeType, DateTime> UnlockedRecipes { get; set; }
+        public Dictionary<RecipeType, DateTime> CraftedRecipes { get; set; }
         public Dictionary<KeyItemType, DateTime> KeyItems{ get; set; }
         public Dictionary<GuildType, PlayerGuild> Guilds { get; set; }
-        public Dictionary<Guid, ShipStatus> Ships { get; set; }
         public Dictionary<FactionType, PlayerFactionStanding> Factions { get; set; }
         public Dictionary<int, List<TaxiDestinationType>> TaxiDestinations { get; set; }
-        public Dictionary<int, int> AbilityPointsByLevel { get; set; }
         public Dictionary<string, VisibilityType> ObjectVisibilities { get; set; }
         public Dictionary<CombatDamageType, int> Defenses { get; set; }
+        public Dictionary<GuiWindowType, GuiRectangle> WindowGeometries { get; set; }
+        public Dictionary<AbilityToggleType, bool> AbilityToggles { get; set; }
+        public float AppearanceScale { get; set; }
     }
 
     public class MapPin
@@ -186,10 +213,20 @@ namespace WOD.Game.Server.Entity
     {
         public int? BattleThemeId { get; set; }
         public bool DisplayAchievementNotification { get; set; }
+        public bool IsHolonetEnabled { get; set; }
+        public bool ShowHelmet { get; set; }
+        public bool ShowCloak { get; set; }
+        public bool IsSubdualModeEnabled { get; set; }
+        public bool IsLightsaberForceShareEnabled { get; set; }
 
         public PlayerSettings()
         {
             DisplayAchievementNotification = true;
+            ShowHelmet = true;
+            ShowCloak = true;
+            IsHolonetEnabled = true;
+            IsSubdualModeEnabled = false;
+            IsLightsaberForceShareEnabled = true;
         }
     }
 

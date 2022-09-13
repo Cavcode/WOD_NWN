@@ -1,10 +1,11 @@
 ﻿
 using System;
+using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.FactionService;
 using WOD.Game.Server.Service.KeyItemService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.PerkService;
 
 namespace WOD.Game.Server.Service.QuestService
 {
@@ -35,16 +36,32 @@ namespace WOD.Game.Server.Service.QuestService
         public int Amount { get; }
         public bool IsSelectable { get; }
         public string MenuName => Amount + " Credits";
+        public bool IsGuildQuest { get; }
 
-        public GoldReward(int amount, bool isSelectable)
+        public GoldReward(int amount, bool isSelectable, bool isGuildQuest)
         {
             Amount = amount;
             IsSelectable = isSelectable;
+            IsGuildQuest = isGuildQuest;
         }
 
         public void GiveReward(uint player)
         {
-            GiveGoldToCreature(player, Amount);
+            // 5% credit bonus per social modifier.
+            var social = GetAbilityModifier(AbilityType.Social, player) * 0.05f;
+
+            // 5% credit bonus per Guild Relations perk level, if quest is associated with a guild.
+            var guildRelations = 0f;
+            if (IsGuildQuest)
+            {
+                var perkLevel = Perk.GetEffectivePerkLevel(player, PerkType.GuildRelations);
+                guildRelations = perkLevel * 0.05f;
+            }
+
+            var amount = Amount + 
+                         (int)(Amount * social) +
+                         (int)(Amount * guildRelations);
+            GiveGoldToCreature(player, amount);
         }
     }
 
@@ -66,7 +83,7 @@ namespace WOD.Game.Server.Service.QuestService
             var dbPlayer = DB.Get<Player>(playerId);
             dbPlayer.UnallocatedXP += Amount;
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
             SendMessageToPC(player, $"You earned {Amount} XP!");
         }
     }
@@ -85,15 +102,12 @@ namespace WOD.Game.Server.Service.QuestService
             _quantity = quantity;
             IsSelectable = isSelectable;
 
-            var tempStorage = GetObjectByTag("TEMP_QUEST_ITEM_STORAGE");
-            var tempItem = CreateItemOnObject(resref, tempStorage, quantity);
-            var name = GetName(tempItem);
-            DestroyObject(tempItem, 0.1f);
+            var itemName = Cache.GetItemNameByResref(resref);
 
             if (_quantity > 1)
-                MenuName = _quantity + "x " + name;
+                MenuName = _quantity + "x " + itemName;
             else
-                MenuName = name;
+                MenuName = itemName;
         }
 
         public void GiveReward(uint player)

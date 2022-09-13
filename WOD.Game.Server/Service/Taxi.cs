@@ -5,7 +5,6 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Extension;
 using WOD.Game.Server.Service.TaxiService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
 {
@@ -17,7 +16,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When the module loads, cache all taxi destinations.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void LoadTaxiDestinations()
         {
             var taxiDestinationTypes = Enum.GetValues(typeof(TaxiDestinationType)).Cast<TaxiDestinationType>();
@@ -63,7 +62,7 @@ namespace WOD.Game.Server.Service
             dbPlayer.TaxiDestinations[detail.RegionId].Add(type);
             SendMessageToPC(player, $"'{detail.Name}' registered into taxi destinations!");
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
         /// <summary>

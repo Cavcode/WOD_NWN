@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.PerkService;
+using WOD.Game.Server.Service.PropertyService;
 
 namespace WOD.Game.Server.Service.SpaceService
 {
@@ -9,8 +9,8 @@ namespace WOD.Game.Server.Service.SpaceService
     {
         public string Name { get; set; }
         public AppearanceType Appearance { get; set; }
+        public PropertyLayoutType Layout { get; set; }
         public string ItemResref { get; set; }
-
         public int MaxShield { get; set; }
         public int MaxHull { get; set; }
         public int MaxCapacitor { get; set; }

@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using WOD.Game.Server.Core;
+using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Extension;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.QuestService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
 {
     public static class Guild
     {
-        private static readonly Dictionary<GuildType, GuildAttribute> _activeGuilds = new Dictionary<GuildType, GuildAttribute>();
-        private static readonly Dictionary<int, int> _rankProgression = new Dictionary<int, int>
+        private static readonly Dictionary<GuildType, GuildAttribute> _activeGuilds = new();
+        private static readonly Dictionary<int, int> _rankProgression = new()
         {
             // Level, Points Needed
             { 0, 1000 },
@@ -27,13 +27,13 @@ namespace WOD.Game.Server.Service
 
         public static int MaxRank { get; private set; }
         public static DateTime? DateTasksLoaded { get; private set; }
-        private static readonly Dictionary<GuildType, Dictionary<int, List<QuestDetail>>> _activeGuildTasksByRank = new Dictionary<GuildType, Dictionary<int, List<QuestDetail>>>();
-        private static readonly Dictionary<GuildType, Dictionary<string, QuestDetail>> _activeGuildTasks = new Dictionary<GuildType, Dictionary<string, QuestDetail>>();
+        private static readonly Dictionary<GuildType, Dictionary<int, List<QuestDetail>>> _activeGuildTasksByRank = new();
+        private static readonly Dictionary<GuildType, Dictionary<string, QuestDetail>> _activeGuildTasks = new();
 
         /// <summary>
-        /// When the module loads, cache relevant data and load guild tasks.
+        /// When the module caches, cache relevant data and load guild tasks.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void LoadData()
         {
             var guildTypes = Enum.GetValues(typeof(GuildType)).Cast<GuildType>();
@@ -48,8 +48,6 @@ namespace WOD.Game.Server.Service
             }
 
             MaxRank = _rankProgression.Keys.Max();
-
-            RefreshGuildTasks();
         }
 
         /// <summary>
@@ -72,19 +70,23 @@ namespace WOD.Game.Server.Service
 
             var dbGuild = dbPlayer.Guilds[guild];
             var rankBonus = 0.25f * dbGuild.Rank;
-            var perkBonus = Perk.GetEffectivePerkLevel(player, PerkType.GuildRelations);
-            var amount = baseAmount + perkBonus * baseAmount;
+            var perkBonus = Perk.GetEffectivePerkLevel(player, PerkType.GuildRelations) * 0.05f;
+            var socialBonus = GetAbilityModifier(AbilityType.Social, player) * 0.05f;
+            var amount = baseAmount + 
+                         (perkBonus * baseAmount) + 
+                         (rankBonus * baseAmount) + 
+                         (socialBonus * baseAmount);
 
-            return amount + (int) (amount * rankBonus);
+            return (int)amount;
         }
 
-        public static void GiveGuildPoints(uint player, GuildType guild, int baseAmount)
+        public static void GiveGuildPoints(uint player, GuildType guild, int amount)
         {
-            if (baseAmount <= 0) return;
+            if (amount <= 0) return;
 
             // Clamp max GP baseAmount
-            if (baseAmount > 1000)
-                baseAmount = 1000;
+            if (amount > 1000)
+                amount = 1000;
 
             var playerId = GetObjectUUID(player);
             var dbPlayer = DB.Get<Player>(playerId);
@@ -93,7 +95,7 @@ namespace WOD.Game.Server.Service
                 dbPlayer.Guilds[guild] = new PlayerGuild();
 
             var dbGuild = dbPlayer.Guilds[guild];
-            dbGuild.Points += baseAmount;
+            dbGuild.Points += amount;
 
             // Clamp player GP to the highest rank.
             var maxGP = _rankProgression[MaxRank];
@@ -101,7 +103,7 @@ namespace WOD.Game.Server.Service
                 dbGuild.Points = maxGP - 1;
 
             var detail = _activeGuilds[guild];
-            SendMessageToPC(player, $"You earned {baseAmount} {detail.Name} guild points");
+            SendMessageToPC(player, $"You earned {amount} {detail.Name} guild points");
 
             // Are we able to rank up?
             if (dbGuild.Rank < MaxRank)
@@ -117,10 +119,14 @@ namespace WOD.Game.Server.Service
             }
 
             dbPlayer.Guilds[guild] = dbGuild;
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
-        private static void RefreshGuildTasks()
+        /// <summary>
+        /// After quests are registered, refresh the available guild tasks.
+        /// </summary>
+        [NWNEventHandler("qsts_registered")]
+        public static void RefreshGuildTasks()
         {
             if (DateTasksLoaded != null) return;
 

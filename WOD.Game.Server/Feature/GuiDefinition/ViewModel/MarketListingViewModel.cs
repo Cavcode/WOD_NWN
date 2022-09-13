@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Entity;
@@ -10,7 +8,6 @@ using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.DBService;
 using WOD.Game.Server.Service.GuiService;
 using WOD.Game.Server.Service.PlayerMarketService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 {
@@ -116,7 +113,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                     !record.Name.ToLower().Contains(SearchText.ToLower()))
                     continue;
 
-                _itemIds.Add(record.ItemId);
+                _itemIds.Add(record.Id);
                 itemIconResrefs.Add(record.IconResref);
                 itemNames.Add($"{record.Quantity}x {record.Name}");
                 _itemPrices.Add(record.Price);
@@ -162,19 +159,11 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
         public Action OnClickAddItem() => () =>
         {
             ClosePriceWindow();
-            EnterTargetingMode(Player, ObjectType.Item);
-        };
 
-        [NWNEventHandler("mod_p_target")]
-        public static void SelectItem()
-        {
-            var player = GetLastPlayerToSelectTarget();
-            var target = GetTargetingModeSelectedObject();
-            var window = Gui.GetPlayerWindow(player, GuiWindowType.MarketListing);
-            var vm = (MarketListingViewModel)window.ViewModel;
-            
-            vm.AddItem(target);
-        }
+            Targeting.EnterTargetingMode(Player, ObjectType.Item, "Please click on an item within your inventory.", AddItem);
+            EnterTargetingMode(Player, ObjectType.Item);
+            SetLocalBool(Player, "MARKET_LISTING_TARGETING_MODE", true);
+        };
 
         public void AddItem(uint item)
         {
@@ -203,11 +192,17 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 return;
             }
 
+            if (Item.IsLegacyItem(item))
+            {
+                FloatingTextStringOnCreature($"Legacy items cannot be sold on the market.", Player, false);
+                return;
+            }
+
             var marketDetail = PlayerMarket.GetMarketRegion(_regionType);
             var listing = new MarketItem
             {
                 MarketId = marketDetail.MarketId,
-                ItemId = GetObjectUUID(item),
+                Id = GetObjectUUID(item),
                 MarketName = marketDetail.Name,
                 PlayerId = GetObjectUUID(Player),
                 SellerName = GetName(Player),
@@ -218,14 +213,14 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 Resref = GetResRef(item),
                 Data = ObjectPlugin.Serialize(item),
                 Quantity = GetItemStackSize(item),
-                IconResref = PlayerMarket.GetIconResref(item),
+                IconResref = Item.GetIconResref(item),
                 Category = PlayerMarket.GetItemMarketCategory(item)
             };
 
-            DB.Set(listing.ItemId, listing);
+            DB.Set(listing);
             DestroyObject(item);
 
-            _itemIds.Add(listing.ItemId);
+            _itemIds.Add(listing.Id);
             ItemIconResrefs.Add(listing.IconResref);
             ItemNames.Add($"{listing.Quantity}x {listing.Name}");
             _itemPrices.Add(listing.Price);
@@ -308,7 +303,11 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 // Do the update for this record.
                 dbListing.Price = _itemPrices[index];
                 dbListing.IsListed = ItemListed[index];
-                DB.Set(id, dbListing);
+
+                if(dbListing.IsListed)
+                    dbListing.DateListed = DateTime.UtcNow;
+
+                DB.Set(dbListing);
             }
             
             LoadData();
@@ -332,7 +331,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             var recordId = _itemIds[index];
             var currentPrice = _itemPrices[index];
             var itemName = ItemNames[index];
-            var payload = new PriceSelectionPayload(GuiWindowType.MarketListing, recordId, currentPrice, itemName);
+            var payload = new PriceSelectionPayload(GuiWindowType.MarketListing, recordId, currentPrice, itemName, "Price For:");
             Gui.TogglePlayerWindow(Player, GuiWindowType.PriceSelection, payload);
         };
 
@@ -369,7 +368,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 
             GiveGoldToCreature(Player, credits);
             dbPlayer.MarketTill = 0;
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
 
             IsShopTillEnabled = false;
             ShopTill = "Shop Till: 0 cr";

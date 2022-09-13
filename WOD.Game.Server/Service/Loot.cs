@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using WOD.Game.Server.Core;
-using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Core.NWScript.Enum;
+using WOD.Game.Server.Service.LogService;
 using WOD.Game.Server.Service.LootService;
 using WOD.Game.Server.Service.PerkService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
 {
@@ -13,7 +13,7 @@ namespace WOD.Game.Server.Service
     {
         private static readonly Dictionary<string, LootTable> _lootTables = new Dictionary<string, LootTable>();
 
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void RegisterLootTables()
         {
             // Get all implementations of spawn table definitions.
@@ -49,7 +49,7 @@ namespace WOD.Game.Server.Service
         /// When a creature spawns, items which can be stolen are spawned and marked as undroppable.
         /// These items are only available with the Thief ability "Steal" and related perks.
         /// </summary>
-        [NWNEventHandler("crea_spawn")]
+        [NWNEventHandler("crea_spawn_bef")]
         public static void SpawnStealLoot()
         {
             var creature = OBJECT_SELF;
@@ -120,6 +120,10 @@ namespace WOD.Game.Server.Service
 
             var lootList = new List<uint>();
             var table = GetLootTableByName(lootTableName);
+            if (treasureHunterLevel > 0 && table.IsRare)
+            {
+                chance += treasureHunterLevel * 10;
+            }
             for (int x = 1; x <= attempts; x++)
             {
                 if (Random.D100(1) > chance) continue;
@@ -143,7 +147,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When a creature dies, loot tables are spawned based on local variables.
         /// </summary>
-        [NWNEventHandler("crea_death")]
+        [NWNEventHandler("crea_death_bef")]
         public static void SpawnLoot()
         {
             var creature = OBJECT_SELF;
@@ -237,6 +241,137 @@ namespace WOD.Game.Server.Service
             if (effectiveTreasureHunterLevel > currentTreasureHunter)
             {
                 SetLocalInt(target, "TREASURE_HUNTER_LEVEL", effectiveTreasureHunterLevel);
+            }
+        }
+
+
+        /// <summary>
+        /// Handles creating a corpse placeable on a creature's death, copying its inventory to the placeable,
+        /// and changing the name of the placeable to match the creature.
+        /// </summary>
+        [NWNEventHandler("crea_death_bef")]
+        public static void ProcessCorpse()
+        {
+            var self = OBJECT_SELF;
+            SetIsDestroyable(false);
+
+            var area = GetArea(self);
+            var position = GetPosition(self);
+            var facing = GetFacing(self);
+            var lootPosition = Vector3(position.X, position.Y, position.Z - 0.11f);
+            Location spawnLocation = Location(area, lootPosition, facing);
+
+            var container = CreateObject(ObjectType.Placeable, "corpse", spawnLocation);
+            SetLocalObject(container, "CORPSE_BODY", self);
+            SetName(container, $"{GetName(self)}'s Corpse");
+
+            AssignCommand(container, () =>
+            {
+                var gold = GetGold(self);
+                TakeGoldFromCreature(gold, self);
+            });
+
+            // Dump equipped items in container
+            for (int slot = 0; slot < NumberOfInventorySlots; slot++)
+            {
+                if (slot == (int)InventorySlot.CreatureArmor ||
+                    slot == (int)InventorySlot.CreatureBite ||
+                    slot == (int)InventorySlot.CreatureLeft ||
+                    slot == (int)InventorySlot.CreatureRight)
+                    continue;
+
+                var item = GetItemInSlot((InventorySlot)slot, self);
+                if (GetIsObjectValid(item) && !GetItemCursedFlag(item) && GetDroppableFlag(item))
+                {
+                    var copy = CopyItem(item, container, true);
+
+                    if (slot == (int)InventorySlot.Head ||
+                        slot == (int)InventorySlot.Chest)
+                    {
+                        SetLocalObject(copy, "CORPSE_ITEM_COPY", item);
+                    }
+                    else
+                    {
+                        DestroyObject(item);
+                    }
+                }
+            }
+
+            for (var item = GetFirstItemInInventory(self); GetIsObjectValid(item); item = GetNextItemInInventory(self))
+            {
+                if (GetIsObjectValid(item) && !GetItemCursedFlag(item) && GetDroppableFlag(item))
+                {
+                    CopyItem(item, container, true);
+                    DestroyObject(item);
+                }
+            }
+
+            DelayCommand(360.0f, () =>
+            {
+                if (!GetIsObjectValid(container)) return;
+
+                var body = GetLocalObject(container, "CORPSE_BODY");
+                AssignCommand(body, () => SetIsDestroyable());
+
+                for (var item = GetFirstItemInInventory(body); GetIsObjectValid(item); item = GetNextItemInInventory(body))
+                {
+                    DestroyObject(item);
+                }
+                DestroyObject(body);
+
+                for (var item = GetFirstItemInInventory(container); GetIsObjectValid(item); item = GetNextItemInInventory(container))
+                {
+                    DestroyObject(item);
+                }
+                DestroyObject(container);
+            });
+        }
+
+        [NWNEventHandler("corpse_closed")]
+        public static void CloseCorpseContainer()
+        {
+            var container = OBJECT_SELF;
+            var firstItem = GetFirstItemInInventory(container);
+            var corpseOwner = GetLocalObject(container, "CORPSE_BODY");
+
+            if (!GetIsObjectValid(firstItem))
+            {
+                DestroyObject(container);
+
+                AssignCommand(corpseOwner, () =>
+                {
+                    SetIsDestroyable();
+                });
+            }
+        }
+
+        [NWNEventHandler("corpse_disturbed")]
+        public static void DisturbCorpseContainer()
+        {
+            var looter = GetLastDisturbed();
+            var item = GetInventoryDisturbItem();
+            var type = GetInventoryDisturbType();
+
+            AssignCommand(looter, () =>
+            {
+                ActionPlayAnimation(Animation.LoopingGetLow, 1.0f, 1.0f);
+            });
+
+            if (type == DisturbType.Added)
+            {
+                Item.ReturnItem(looter, item);
+                SendMessageToPC(looter, "You cannot place items inside of corpses.");
+            }
+            else if (type == DisturbType.Removed)
+            {
+                var copy = GetLocalObject(item, "CORPSE_ITEM_COPY");
+
+                if (GetIsObjectValid(copy))
+                {
+                    DestroyObject(copy);
+                }
+
+                DeleteLocalObject(item, "CORPSE_ITEM_COPY");
             }
         }
     }

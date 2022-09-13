@@ -2,7 +2,6 @@
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature
 {
@@ -15,13 +14,20 @@ namespace WOD.Game.Server.Feature
         /// <param name="player">The player whose data will be stored to the database.</param>
         public static void SaveLocation(uint player)
         {
-            if (!GetIsPC(player) || GetIsDM(player)) return;
-
             var area = GetArea(player);
+            var areaResref = GetResRef(area);
+            var isSpace = GetLocalBool(area, "SPACE") || GetName(area).StartsWith("Space -");
+
+            if (!GetIsPC(player) || GetIsDM(player) || GetIsDMPossessed(player) || areaResref == "ooc_area" || isSpace || areaResref == "char_migration" || areaResref == "spending_area")
+                return;
+
+            // If the area isn't in the cache, it must be an instance. Don't save locations inside instances.
+            if (Area.GetAreaByResref(areaResref) == OBJECT_INVALID) return;
+
             var position = GetPosition(player);
             var orientation = GetFacing(player);
-            var playerID = GetObjectUUID(player);
-            var entity = DB.Get<Player>(playerID) ?? new Player();
+            var playerId = GetObjectUUID(player);
+            var entity = DB.Get<Player>(playerId) ?? new Player(playerId);
 
             entity.LocationX = position.X;
             entity.LocationY = position.Y;
@@ -29,7 +35,7 @@ namespace WOD.Game.Server.Feature
             entity.LocationOrientation = orientation;
             entity.LocationAreaResref = GetResRef(area);
 
-            DB.Set(playerID, entity);
+            DB.Set(entity);
         }
 
         /// <summary>
@@ -39,13 +45,6 @@ namespace WOD.Game.Server.Feature
         public static void SaveLocationOnAreaEnter()
         {
             var player = GetEnteringObject();
-            var area = GetArea(player);
-            var areaResref = GetResRef(area);
-            if (!GetIsPC(player) || GetIsDM(player) || areaResref == "ooc_area") return;
-
-            // If the area isn't in the cache, it must be an instance. Don't save locations inside instances.
-            if (Cache.GetAreaByResref(areaResref) == OBJECT_INVALID) return;
-
             SaveLocation(player);
         }
 
@@ -56,19 +55,8 @@ namespace WOD.Game.Server.Feature
         public static void SaveLocationOnRest()
         {
             var player = GetLastPCRested();
-            if (!GetIsPC(player) || GetIsDM(player) || GetLastRestEventType() != RestEventType.Started) return;
-
-            SaveLocation(player);
-        }
-
-        /// <summary>
-        /// Saves a player's location on module exit.
-        /// </summary>
-        [NWNEventHandler("mod_exit")]
-        public static void SaveLocationOnModuleExit()
-        {
-            var player = GetExitingObject();
-            if (!GetIsPC(player) || GetIsDM(player)) return;
+            if (GetLastRestEventType() != RestEventType.Started) 
+                return;
 
             SaveLocation(player);
         }
@@ -98,18 +86,34 @@ namespace WOD.Game.Server.Feature
         {
             if (!GetIsPC(player) || GetIsDM(player)) return;
 
-            var playerID = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Player>(playerID);
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
 
-            if (dbPlayer == null || string.IsNullOrWhiteSpace(dbPlayer.LocationAreaResref)) return;
+            if (dbPlayer == null)
+                return;
 
-            var locationArea = Cache.GetAreaByResref(dbPlayer.LocationAreaResref);
+            // Rebuilds - Send player to rebuild area if they didn't finish their rebuild.
+            if (!dbPlayer.RebuildComplete)
+            {
+                var rebuildLocation = GetLocation(GetWaypointByTag("REBUILD_LANDING"));
+                AssignCommand(player, () =>
+                {
+                    ClearAllActions();
+                    ActionJumpToLocation(rebuildLocation);
+                });
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(dbPlayer.LocationAreaResref)) return;
+
+            var locationArea = Area.GetAreaByResref(dbPlayer.LocationAreaResref);
             var position = Vector3(dbPlayer.LocationX, dbPlayer.LocationY, dbPlayer.LocationZ);
 
             var location = Location(locationArea, position, dbPlayer.LocationOrientation);
 
             AssignCommand(player, () =>
             {
+                ClearAllActions();
                 ActionJumpToLocation(location);
             });
         }

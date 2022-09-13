@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.StatusEffectService;
 
@@ -60,7 +59,7 @@ namespace WOD.Game.Server.Service.AbilityService
 
             return this;
         }
-        
+
         /// <summary>
         /// Indicates this is a concentration ability which stays active and drains resources until turned off or player runs out of required resources.
         /// A corresponding status effect must also be defined and this will be applied when the concentration ability is activated and removed when it ends.
@@ -100,12 +99,23 @@ namespace WOD.Game.Server.Service.AbilityService
         }
 
         /// <summary>
+        /// The ability will not display an activation message to nearby players if this is set.
+        /// </summary>
+        /// <returns>An ability builder with the configured options.</returns>
+        public AbilityBuilder HideActivationMessage()
+        {
+            _activeAbility.DisplaysActivationMessage = false;
+
+            return this;
+        }
+
+        /// <summary>
         /// Assigns a visual effect to the caster of the spell. This will display while casting.
         /// Calling this more than once will replace the previous visual effect.
         /// </summary>
         /// <param name="vfx">The visual effect to display.</param>
         /// <returns>An ability builder with the configured options</returns>
-        public AbilityBuilder DisplaysVisualEffectWhenActivating(VisualEffect vfx = VisualEffect.Vfx_Dur_Elemental_Shield)
+        public AbilityBuilder DisplaysVisualEffectWhenActivating(VisualEffect vfx = VisualEffect.Vfx_Dur_Iounstone_Yellow)
         {
             _activeAbility.ActivationVisualEffect = vfx;
 
@@ -211,9 +221,20 @@ namespace WOD.Game.Server.Service.AbilityService
         /// <returns>An ability builder with the configured options</returns>
         public AbilityBuilder RequirementFP(int requiredFP)
         {
-            var requirement = new PerkFPRequirement(requiredFP);
+            var requirement = new AbilityRequirementFP(requiredFP);
             _activeAbility.Requirements.Add(requirement);
 
+            return this;
+        }
+
+        /// <summary>
+        /// Updates the max range of this ability (default is 5.0, i.e. melee range).
+        /// </summary>
+        /// <param name="maxRange">The maximum range of the ability.</param>
+        /// <returns>An ability builder with the configured options</returns>
+        public AbilityBuilder HasMaxRange(float maxRange)
+        {
+            _activeAbility.MaxRange = maxRange;
             return this;
         }
 
@@ -224,7 +245,7 @@ namespace WOD.Game.Server.Service.AbilityService
         /// <returns>An ability builder with the configured options</returns>
         public AbilityBuilder RequirementStamina(int requiredSTM)
         {
-            var requirement = new AbilityStaminaRequirement(requiredSTM);
+            var requirement = new AbilityRequirementStamina(requiredSTM);
             _activeAbility.Requirements.Add(requirement);
 
             return this;
@@ -237,6 +258,29 @@ namespace WOD.Game.Server.Service.AbilityService
         public AbilityBuilder UnaffectedByHeavyArmor()
         {
             _activeAbility.IgnoreHeavyArmorPenalty = true;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Indicates this ability is a hostile ability and should not target friendlies.
+        /// </summary>
+        /// <returns>An ability builder with the configured options</returns>
+        public AbilityBuilder IsHostileAbility()
+        {
+            _activeAbility.IsHostileAbility = true;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Saves the ability level of the ability to be pulled when used later.
+        /// </summary>
+        /// <param name="level">The level of the ability</param>
+        /// <returns>An ability builder with the configured options</returns>
+        public AbilityBuilder Level(int level)
+        {
+            _activeAbility.AbilityLevel = level;
 
             return this;
         }

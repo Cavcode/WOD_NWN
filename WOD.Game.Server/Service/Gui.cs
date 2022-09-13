@@ -4,9 +4,10 @@ using System.Linq;
 using System.Reflection;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Feature.DialogDefinition;
+using WOD.Game.Server.Entity;
+using WOD.Game.Server.Feature.GuiDefinition.RefreshEvent;
 using WOD.Game.Server.Service.GuiService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.GuiService.Component;
 
 namespace WOD.Game.Server.Service
 {
@@ -14,9 +15,9 @@ namespace WOD.Game.Server.Service
     {
         private static readonly Dictionary<GuiWindowType, GuiConstructedWindow> _windowTemplates = new();
         private static readonly Dictionary<string, Dictionary<GuiWindowType, GuiPlayerWindow>> _playerWindows = new();
-        private static readonly Dictionary<string, Dictionary<GuiWindowType, GuiPlayerWindow>> _playerModals = new();
         private static readonly Dictionary<string, Dictionary<string, MethodInfo>> _elementEvents = new();
         private static readonly Dictionary<string, GuiWindowType> _windowTypesByKey = new();
+        private static readonly Dictionary<Type, List<GuiWindowType>> _windowTypesByRefreshEvent = new();
 
         /// <summary>
         /// When the module loads, cache all of the GUI windows for later retrieval.
@@ -25,6 +26,7 @@ namespace WOD.Game.Server.Service
         public static void CacheData()
         {
             LoadWindowTemplates();
+            LoadRefreshableViewModels();
         }
 
         /// <summary>
@@ -50,10 +52,38 @@ namespace WOD.Game.Server.Service
                 // Register the window template into the cache.
                 _windowTemplates[constructedWindow.Type] = constructedWindow;
                 _windowTypesByKey[BuildWindowId(constructedWindow.Type)] = constructedWindow.Type;
-                _windowTypesByKey[BuildWindowId(constructedWindow.Type) + "_MODAL"] = constructedWindow.Type;
             }
 
             Console.WriteLine($"Loaded {_windowTemplates.Count} GUI window templates.");
+        }
+
+        /// <summary>
+        /// After the window definitions have been cached, we need to associate refresh events to each window type.
+        /// This will let us individually refresh specific player view models when needed by external events.
+        /// </summary>
+        private static void LoadRefreshableViewModels()
+        {
+            foreach (var (windowType, window) in _windowTemplates)
+            {
+                var tempWindow = window.CreatePlayerWindowAction();
+                var vm = tempWindow.ViewModel;
+                var vmType = vm.GetType();
+
+                var refreshables = vmType
+                    .GetInterfaces()
+                    .Where(x => x.IsGenericType &&
+                                x.GetGenericTypeDefinition() == typeof(IGuiRefreshable<>));
+
+                foreach (var refreshable in refreshables)
+                {
+                    var eventType = refreshable.GenericTypeArguments[0];
+
+                    if (!_windowTypesByRefreshEvent.ContainsKey(eventType))
+                        _windowTypesByRefreshEvent[eventType] = new List<GuiWindowType>();
+
+                    _windowTypesByRefreshEvent[eventType].Add(windowType);
+                }
+            }
         }
 
         /// <summary>
@@ -68,21 +98,57 @@ namespace WOD.Game.Server.Service
             if (_playerWindows.ContainsKey(playerId))
                 return;
 
+            var dbPlayer = DB.Get<Player>(playerId) ?? new Player(playerId);
             _playerWindows[playerId] = new Dictionary<GuiWindowType, GuiPlayerWindow>();
-            _playerModals[playerId] = new Dictionary<GuiWindowType, GuiPlayerWindow>();
 
             foreach (var (type, window) in _windowTemplates)
             {
+                var defaultGeometry = window.InitialGeometry;
+                var playerGeometry = dbPlayer.WindowGeometries.ContainsKey(type)
+                    ? dbPlayer.WindowGeometries[type]
+                    : defaultGeometry;
+                var resizable = JsonObjectGet(window.Window, "resizable");
+
+                // If the window cannot be resized and there isn't a bind on it, 
+                // the default width and height are used.
+                var forceResize = JsonGetInt(resizable) != 1 &&
+                                  string.IsNullOrWhiteSpace(JsonGetString(JsonObjectGet(resizable, "bind")));
+                if (forceResize)
+                {
+                    playerGeometry.Width = defaultGeometry.Width;
+                    playerGeometry.Height = defaultGeometry.Height;
+                }
+
                 // Add the window
                 var playerWindow = window.CreatePlayerWindowAction();
-                playerWindow.ViewModel.Geometry = window.InitialGeometry;
+                playerWindow.ViewModel.Geometry = playerGeometry;
                 _playerWindows[playerId][type] = playerWindow;
-
-                // All windows also get a separate modal window added to the cache.
-                var modalWindow = _windowTemplates[GuiWindowType.Modal].CreatePlayerWindowAction();
-                modalWindow.ViewModel.Geometry = window.InitialGeometry;
-                _playerModals[playerId][type] = modalWindow;
             }
+        }
+
+        /// <summary>
+        /// When a player exits the server, save the geometry positions of any open windows.
+        /// </summary>
+        [NWNEventHandler("mod_exit")]
+        public static void SavePlayerWindowGeometry()
+        {
+            var player = GetExitingObject();
+            if (!GetIsPC(player) || GetIsDM(player))
+                return;
+
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+
+            foreach (var (type, _) in _windowTemplates)
+            {
+                if (IsWindowOpen(player, type))
+                {
+                    var window = GetPlayerWindow(player, type);
+                    dbPlayer.WindowGeometries[type] = window.ViewModel.Geometry;
+                }
+            }
+
+            DB.Set(dbPlayer);
         }
 
         /// <summary>
@@ -99,6 +165,17 @@ namespace WOD.Game.Server.Service
             _elementEvents[elementId][eventName] = eventAction;
         }
 
+        private static void SaveWindowGeometry(string playerId, GuiWindowType windowType, GuiRectangle geometry)
+        {
+            var dbPlayer = DB.Get<Player>(playerId);
+            if (dbPlayer == null)
+                return;
+
+            dbPlayer.WindowGeometries[windowType] = geometry;
+
+            DB.Set(dbPlayer);
+        }
+
         /// <summary>
         /// When a NUI event is fired, look for an associated event on the specified element
         /// and execute the cached action.
@@ -107,36 +184,49 @@ namespace WOD.Game.Server.Service
         public static void HandleNuiEvents()
         {
             var player = NuiGetEventPlayer();
+            var uiTarget = player;
+
+            if (GetIsDMPossessed(player))
+                player = GetMaster(player);
+
             var playerId = GetObjectUUID(player);
             var windowToken = NuiGetEventWindow();
-            var windowId = NuiGetWindowId(player, windowToken);
-            var parentWindowType = GuiWindowType.Invalid;
-
-            var isModal = windowId.EndsWith("_MODAL");
-            if (isModal)
-            {
-                var parentWindowId = windowId;
-                parentWindowType = _windowTypesByKey[parentWindowId];
-                windowId = BuildWindowId(GuiWindowType.Modal);
-            }
-
+            var windowId = NuiGetWindowId(uiTarget, windowToken);
             var eventType = NuiGetEventType();
             var elementId = NuiGetEventElement();
             var eventKey = BuildEventKey(windowId, elementId);
+            if (string.IsNullOrWhiteSpace(windowId))
+                return;
+
+            var windowType = _windowTypesByKey[windowId];
+            var playerWindow = _playerWindows[playerId][windowType];
+            var viewModel = playerWindow.ViewModel;
 
             if (!_elementEvents.ContainsKey(eventKey))
+            {
+                if (eventType == "close")
+                {
+                    SaveWindowGeometry(playerId, windowType, viewModel.Geometry);
+                }
                 return;
+            }
 
             var eventGroup = _elementEvents[eventKey];
 
             if (!eventGroup.ContainsKey(eventType))
                 return;
 
-            var windowType = _windowTypesByKey[windowId];
-            var playerWindow = isModal
-                ? _playerModals[playerId][parentWindowType]
-                : _playerWindows[playerId][windowType];
-            var viewModel = playerWindow.ViewModel;
+            // Player moved more than 5 meters away from the tether.
+            // Automatically close the window.
+            if (GetIsObjectValid(viewModel.TetherObject))
+            {
+                if (GetDistanceBetween(uiTarget, viewModel.TetherObject) > 5f)
+                {
+                    TogglePlayerWindow(uiTarget, windowType);
+                    SendMessageToPC(uiTarget, ColorToken.Red($"You have moved too far away from the {GetName(viewModel.TetherObject)}."));
+                    return;
+                }
+            }
 
             // Note: This section has the possibility of being slow.
             // If it is, look into building the methods and caching them at the time of window creation.
@@ -144,6 +234,12 @@ namespace WOD.Game.Server.Service
             var method = viewModel.GetType().GetMethod(methodInfo.Name);
             var action = method?.Invoke(playerWindow.ViewModel, null);
             ((Action)action)?.Invoke();
+
+            // If the window was closed, save its geometry 
+            if (eventType == "close")
+            {
+                SaveWindowGeometry(playerId, windowType, viewModel.Geometry);
+            }
         }
 
         /// <summary>
@@ -195,12 +291,38 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
+        /// Determines whether a player currently has a window of the specified type open on screen.
+        /// </summary>
+        /// <param name="player">The player to check</param>
+        /// <param name="type">The type of window to look for</param>
+        /// <returns>true if the window is open, false otherwise</returns>
+        public static bool IsWindowOpen(uint player, GuiWindowType type)
+        {
+            var windowId = BuildWindowId(type);
+            return NuiFindWindow(player, windowId) != 0;
+        }
+
+        /// <summary>
         /// Shows or hides a specific window for a given player.
         /// </summary>
         /// <param name="player">The player to toggle the window for.</param>
         /// <param name="type">The type of window to toggle.</param>
-        public static void TogglePlayerWindow(uint player, GuiWindowType type)
+        /// <param name="payload">An optional payload to pass to the view model.</param>
+        /// <param name="tetherObject">The object the window is tethered to. If specified, the window will automatically close if the player moves more than 5 meters away from it.</param>
+        /// <param name="uiTarget">Useful for DM possessions. Can override the target of the UI to target the proper NPC a DM has possessed.</param>
+        public static void TogglePlayerWindow(
+            uint player,
+            GuiWindowType type,
+            GuiPayloadBase payload = null,
+            uint tetherObject = OBJECT_INVALID,
+            uint uiTarget = OBJECT_INVALID)
         {
+            if (!GetIsPC(player) && uiTarget == OBJECT_INVALID)
+                return;
+
+            if (uiTarget == OBJECT_INVALID)
+                uiTarget = player;
+
             var playerId = GetObjectUUID(player);
             var template = _windowTemplates[type];
             var playerWindow = _playerWindows[playerId][type];
@@ -209,90 +331,124 @@ namespace WOD.Game.Server.Service
             // If the window is closed, open it.
             if (NuiFindWindow(player, windowId) == 0)
             {
-                playerWindow.WindowToken = NuiCreate(player, template.Window, template.WindowId);
-                playerWindow.ViewModel.Bind(player, playerWindow.WindowToken, template.InitialGeometry, type);
+                //Console.WriteLine(JsonDump(template.Window));
+
+                playerWindow.WindowToken = NuiCreate(uiTarget, template.Window, template.WindowId);
+                playerWindow.ViewModel.Bind(uiTarget, playerWindow.WindowToken, template.InitialGeometry, type, payload, tetherObject);
             }
             // Otherwise the window must already be open. Close it.
             else
             {
+                SaveWindowGeometry(playerId, type, playerWindow.ViewModel.Geometry);
                 NuiDestroy(player, playerWindow.WindowToken);
-
-                // Also destroy the modal, if it's open.
-                var modalWindowId = windowId + "_MODAL";
-                if (NuiFindWindow(player, modalWindowId) != 0)
-                {
-                    NuiDestroy(player, _playerModals[playerId][type].WindowToken);
-                }
             }
         }
 
         /// <summary>
-        /// Shows the modal associated with the specified parent window type for the player.
-        /// If the modal is already open, nothing will happen.
+        /// Publishes a refresh event. All subscribed view models will be refreshed for this particular player.
+        /// This can be useful for pushing updates to a window based on external circumstances.
+        /// For example: Refreshing the XP bar when a player gains XP.
+        /// If the player does not have the window open on-screen, nothing will happen.
         /// </summary>
-        /// <param name="player">The player who will be shown the modal.</param>
-        /// <param name="parentType">The parent window type.</param>
-        public static void ShowModal(uint player, GuiWindowType parentType)
+        /// <param name="player">The player to refresh.</param>
+        /// <param name="payload">The refresh payload.</param>
+        public static void PublishRefreshEvent<T>(uint player, T payload)
+            where T : IGuiRefreshEvent
         {
-            var modalWindowId = BuildWindowId(parentType) + "_MODAL";
-
-            // If the modal is already open, don't do anything else.
-            if (NuiFindWindow(player, modalWindowId) != 0)
+            if (!GetIsPC(player))
                 return;
 
-            var playerId = GetObjectUUID(player);
-            var playerModal = _playerModals[playerId][parentType];
-            var template = _windowTemplates[GuiWindowType.Modal];
-            var parentWindow = _playerWindows[playerId][parentType];
-            playerModal.WindowToken = NuiCreate(player, template.Window, modalWindowId);
-            playerModal.ViewModel.Bind(player, playerModal.WindowToken, parentWindow.ViewModel.Geometry, parentType);
+            foreach (var windowType in _windowTypesByRefreshEvent[typeof(T)])
+            {
+                var playerId = GetObjectUUID(player);
+                var playerWindow = _playerWindows[playerId][windowType];
+                var windowId = BuildWindowId(windowType);
+
+                if(NuiFindWindow(player, windowId) != 0)
+                    ((IGuiRefreshable<T>)playerWindow.ViewModel).Refresh(payload);
+            }
         }
 
         /// <summary>
-        /// Closes the modal associated with the specified parent window type for the player.
-        /// If the modal isn't open, nothing will happen.
-        /// </summary>
-        /// <param name="player">The player to close the modal for.</param>
-        /// <param name="parentType">The parent window type.</param>
-        public static void CloseModal(uint player, GuiWindowType parentType)
-        {
-            var modalWindowId = BuildWindowId(parentType) + "_MODAL";
-
-            // If the modal is not open, don't do anything else.
-            if (NuiFindWindow(player, modalWindowId) == 0)
-                return;
-
-            var playerId = GetObjectUUID(player);
-            NuiDestroy(player, _playerModals[playerId][parentType].WindowToken);
-        }
-
-        /// <summary>
-        /// Skips the character sheet panel open event and shows the WOD character sheet instead.
+        /// Skips the default NWN window open events and shows the WOD windows instead.
+        /// Applies to the Journal and Character Sheet.
         /// </summary>
         [NWNEventHandler("mod_gui_event")]
-        public static void CharacterSheetGui()
+        public static void ReplaceNWNGuis()
         {
             var player = GetLastGuiEventPlayer();
             var type = GetLastGuiEventType();
             if (type != GuiEventType.DisabledPanelAttemptOpen) return;
 
             var panelType = (GuiPanel)GetLastGuiEventInteger();
-            if (panelType != GuiPanel.CharacterSheet)
-                return;
-
-            TogglePlayerWindow(player, GuiWindowType.CharacterSheet);
+            if (panelType == GuiPanel.CharacterSheet)
+            {
+                TogglePlayerWindow(player, GuiWindowType.CharacterSheet);
+            }
+            else if (panelType == GuiPanel.Journal)
+            {
+                TogglePlayerWindow(player, GuiWindowType.Quests);
+            }
         }
 
         /// <summary>
-        /// Retrieves the modal instance of a player's window.
+        /// Retrieves the window instance of a player's window.
         /// </summary>
         /// <param name="player">The player to retrieve for.</param>
         /// <param name="type">The type of window to retrieve.</param>
         /// <returns>A player's window instance of the specified type.</returns>
-        public static GuiPlayerWindow GetPlayerModal(uint player, GuiWindowType type)
+        public static GuiPlayerWindow GetPlayerWindow(uint player, GuiWindowType type)
         {
             var playerId = GetObjectUUID(player);
-            return _playerModals[playerId][type];
+            return _playerWindows[playerId][type];
+        }
+
+        /// <summary>
+        /// Retrieves a window's template by the given type.
+        /// </summary>
+        /// <param name="type">The type of window to search for.</param>
+        /// <returns>A window template.</returns>
+        public static GuiConstructedWindow GetWindowTemplate(GuiWindowType type)
+        {
+            return _windowTemplates[type];
+        }
+
+        /// <summary>
+        /// When a player enters an area, close all NUI windows.
+        /// </summary>
+        [NWNEventHandler("area_enter")]
+        public static void CloseAllWindows()
+        {
+            var player = GetEnteringObject();
+            if (!GetIsPC(player))
+                return;
+
+            foreach (var (type, _) in _windowTemplates)
+            {
+                if (IsWindowOpen(player, type))
+                    TogglePlayerWindow(player, type);
+            }
+        }
+
+        /// <summary>
+        /// Force closes a specified window, if open on the player's screen.
+        /// This does NOT save the geometry of the window. Typically used for DM-specific functionality.
+        /// </summary>
+        /// <param name="player">The player whose window will close</param>
+        /// <param name="type">The type of window</param>
+        /// <param name="uiTarget">The UI target</param>
+        public static void CloseWindow(uint player, GuiWindowType type, uint uiTarget)
+        {
+            if (uiTarget == OBJECT_INVALID)
+                uiTarget = player;
+
+            if (IsWindowOpen(player, type))
+            {
+                var playerId = GetObjectUUID(uiTarget);
+                var playerWindow = _playerWindows[playerId][type];
+
+                NuiDestroy(player, playerWindow.WindowToken);
+            }
         }
 
         public class IdReservation
@@ -347,8 +503,8 @@ namespace WOD.Game.Server.Service
         public static int ColorFuschia = Convert.ToInt32("0xFF00FFFF", 16);
         public static int ColorPurple = Convert.ToInt32("0x800080FF", 16);
 
-        public static int ColorHealthBar = Convert.ToInt32("0x008080FF", 16);
-        public static int ColorFPBar = Convert.ToInt32("0xFF0000FF", 16);
+        public static int ColorHealthBar = Convert.ToInt32("0x8B0000FF", 16);
+        public static int ColorFPBar = Convert.ToInt32("0x00008BFF", 16);
         public static int ColorStaminaBar = Convert.ToInt32("0x008B00FF", 16);
 
         public static int ColorShieldsBar = Convert.ToInt32("0x00AAE4FF", 16);
@@ -450,6 +606,26 @@ namespace WOD.Game.Server.Service
         public static int CenterStringInWindow(string text, int windowX, int windowWidth)
         {
             return (windowX + (windowWidth / 2)) - ((text.Length + 2) / 2);
+        }
+
+        [NWNEventHandler("mod_equip")]
+        public static void RefreshOnEquip()
+        {
+            var player = GetPCItemLastEquippedBy();
+            if (!GetIsPC(player))
+                return;
+
+            DelayCommand(0.1f, () => PublishRefreshEvent(player, new EquipItemRefreshEvent()));
+        }
+
+        [NWNEventHandler("mod_unequip")]
+        public static void RefreshOnUnequip()
+        {
+            var player = GetPCItemLastUnequippedBy();
+            if (!GetIsPC(player))
+                return;
+
+            DelayCommand(0.1f, () => PublishRefreshEvent(player, new UnequipItemRefreshEvent()));
         }
 
     }

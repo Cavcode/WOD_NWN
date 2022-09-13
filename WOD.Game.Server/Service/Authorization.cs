@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using WOD.Game.Server.Entity;
-using WOD.Game.Server.Enumeration;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.DBService;
+using AuthorizationLevel = WOD.Game.Server.Enumeration.AuthorizationLevel;
 
 namespace WOD.Game.Server.Service
 {
@@ -25,9 +25,9 @@ namespace WOD.Game.Server.Service
                     return AuthorizationLevel.Admin;
             }
 
-            var dmList = DB.GetList<AuthorizedDM>("All", "AuthorizedDM") ?? new EntityList<AuthorizedDM>();
-
-            var existing = dmList.FirstOrDefault(x => x.CDKey == cdKey);
+            var query = new DBQuery<AuthorizedDM>()
+                .AddFieldSearch(nameof(AuthorizedDM.CDKey), cdKey, false);
+            var existing = DB.Search(query).FirstOrDefault();
             if (existing == null)
                 return AuthorizationLevel.Player;
 

@@ -1,32 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
-using WOD.Game.Server.Core.NWNX.Enum;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.ChatCommandService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.GuiService;
 
 namespace WOD.Game.Server.Service
 {
     public static class ChatCommand
     {
-        private static readonly Dictionary<string, ChatCommandDetail> _chatCommands = new Dictionary<string, ChatCommandDetail>();
+        private static readonly Dictionary<string, ChatCommandDetail> _chatCommands = new();
+        private static readonly Dictionary<string, ChatCommandDetail> _emoteCommands = new();
         public static string HelpTextPlayer { get; private set; }
+        public static string HelpTextEmote { get; private set; }
         public static string HelpTextDM { get; private set; }
         public static string HelpTextAdmin { get; private set; }
+
+        public static GuiBindingList<string> EmoteNames { get; } = new();
+        public static GuiBindingList<string> EmoteDescriptions { get; } = new();
+        public static List<Animation> EmoteAnimations { get; } = new();
+        public static GuiBindingList<bool> EmoteIsLooping { get; } = new();
 
         /// <summary>
         /// Loads all chat commands into cache and builds the related help text.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void OnModuleLoad()
         {
             LoadChatCommands();
             BuildHelpText();
+            BuildEmoteUILists();
         }
 
         /// <summary>
@@ -78,23 +84,15 @@ namespace WOD.Game.Server.Service
                     return;
                 }
                 
-                SetLocalString(sender, "CHAT_COMMAND", command);
-                SetLocalString(sender, "CHAT_COMMAND_ARGS", args);
-                SendMessageToPC(sender, "Please use your 'Chat Command Targeter' feat to select the target of this chat command.");
-
-                if (!GetHasFeat(FeatType.ChatCommandTargeter, sender) || GetIsDM(sender) || GetIsDMPossessed(sender))
+                Targeting.EnterTargetingMode(sender, chatCommand.ValidTargetTypes, "Please click on a target for this chat command.",
+                    target =>
                 {
-                    CreaturePlugin.AddFeatByLevel(sender, FeatType.ChatCommandTargeter, 1);
+                    var location = GetIsObjectValid(target)
+                        ? GetLocation(target)
+                        : Location(GetArea(sender), GetTargetingModeSelectedPosition(), 0.0f);
+                    ProcessChatCommand(command, sender, target, location, args);
+                });
 
-                    if (GetIsDM(sender) || GetIsDMPossessed(sender))
-                    {
-                        var qbs = PlayerPlugin.GetQuickBarSlot(sender, 11);
-                        if (qbs.ObjectType == QuickBarSlotType.Empty)
-                        {
-                            PlayerPlugin.SetQuickBarSlot(sender, 11, PlayerQuickBarSlot.UseFeat(FeatType.ChatCommandTargeter));
-                        }
-                    }
-                }
             }
 
         }
@@ -168,6 +166,11 @@ namespace WOD.Game.Server.Service
                 foreach (var (key, value) in commands)
                 {
                     _chatCommands[key] = value;
+
+                    if (value.IsEmote)
+                    {
+                        _emoteCommands[key] = value;
+                    }
                 }
             }
 
@@ -189,52 +192,40 @@ namespace WOD.Game.Server.Service
 
                 if (definition.Authorization.HasFlag(AuthorizationLevel.Player))
                 {
-                    HelpTextPlayer += ColorToken.Green("/" + text) + ColorToken.White(": " + definition.Description) + "\n";
+                    if (definition.IsEmote)
+                    {
+                        HelpTextEmote += ColorToken.Green("/" + text) + ColorToken.White(": " + definition.Description) + "\n";
+                    }
+                    else
+                    {
+                        HelpTextPlayer += ColorToken.Green("/" + text) + ColorToken.White(": " + definition.Description) + "\n";
+                    }
                 }
 
                 if (definition.Authorization.HasFlag(AuthorizationLevel.DM))
                 {
-                    HelpTextDM += ColorToken.Green("/" + text) + ColorToken.White(": " + definition.Description) + "\n";
+                    if(!definition.IsEmote)
+                        HelpTextDM += ColorToken.Green("/" + text) + ColorToken.White(": " + definition.Description) + "\n";
                 }
 
                 if (definition.Authorization.HasFlag(AuthorizationLevel.Admin))
                 {
-                    HelpTextAdmin += ColorToken.Green("/" + text) + ColorToken.White(": " + definition.Description) + "\n";
+                    if (!definition.IsEmote)
+                        HelpTextAdmin += ColorToken.Green("/" + text) + ColorToken.White(": " + definition.Description) + "\n";
                 }
             }
         }
 
-
-        /// <summary>
-        /// When a player uses the "Open Rest Menu" feat, open the rest menu dialog conversation.
-        /// </summary>
-        [NWNEventHandler("feat_use_bef")]
-        public static void UseOpenRestMenuFeat()
+        private static void BuildEmoteUILists()
         {
-            var player = OBJECT_SELF;
-            var feat = (FeatType)Convert.ToInt32(EventsPlugin.GetEventData("FEAT_ID"));
-            if (feat != FeatType.ChatCommandTargeter) return;
-
-            var target = StringToObject(EventsPlugin.GetEventData("TARGET_OBJECT_ID"));
-            var area = StringToObject(EventsPlugin.GetEventData("AREA_OBJECT_ID"));
-            var targetX = (float)Convert.ToDouble(EventsPlugin.GetEventData("TARGET_POSITION_X"));
-            var targetY = (float)Convert.ToDouble(EventsPlugin.GetEventData("TARGET_POSITION_Y"));
-            var targetZ = (float)Convert.ToDouble(EventsPlugin.GetEventData("TARGET_POSITION_Z"));
-
-            var targetLocation = Location(area, new Vector3(targetX, targetY, targetZ), 0.0f);
-            var command = GetLocalString(player, "CHAT_COMMAND");
-            var args = GetLocalString(player, "CHAT_COMMAND_ARGS");
-
-            if (string.IsNullOrWhiteSpace(command))
+            foreach (var (text, command) in _emoteCommands)
             {
-                SendMessageToPC(player, "Please enter a chat command and then use this feat. Type /help to learn more about the available chat commands.");
-                return;
+                EmoteNames.Add(text);
+                EmoteDescriptions.Add(command.Description);
+                EmoteAnimations.Add(command.EmoteAnimation);
+                EmoteIsLooping.Add(command.IsEmoteLooping);
             }
-
-            ProcessChatCommand(command, player, target, targetLocation, args);
-
-            DeleteLocalString(player, "CHAT_COMMAND");
-            DeleteLocalString(player, "CHAT_COMMAND_ARGS");
         }
+
     }
 }

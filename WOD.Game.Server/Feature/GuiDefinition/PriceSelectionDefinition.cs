@@ -12,7 +12,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
         {
             _builder.CreateWindow(GuiWindowType.PriceSelection)
                 .SetIsResizable(true)
-                .SetInitialGeometry(0, 0, 321f, 162f)
+                .SetIsCollapsible(false)
+                .SetInitialGeometry(0, 0, 400f, 240f)
                 .SetTitle("Change Price")
                 
                 .AddColumn(col =>

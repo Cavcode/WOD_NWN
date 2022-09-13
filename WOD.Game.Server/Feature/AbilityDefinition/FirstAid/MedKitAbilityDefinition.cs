@@ -2,10 +2,11 @@
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Entity;
+using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.PerkService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.SkillService;
 using Random = WOD.Game.Server.Service.Random;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
@@ -51,15 +52,34 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
             ApplyEffectToObject(DurationType.Instant, EffectHeal(amount), target);
             ApplyEffectToObject(DurationType.Instant, EffectVisualEffect(VisualEffect.Vfx_Imp_Head_Heal), target);
             TakeMedicalSupplies(activator);
+
+            Enmity.ModifyEnmityOnAll(activator, 250 + amount);
+            CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
+            if (CombatPoint.GetTaggedCreatureCount(activator) == 0)
+            {
+                // Scale XP to the thing we just fought -- only give XP if we're not in combat.
+                // Retrieve the level of our recent enemy from the CombatPoint service, and use the Skill service 
+                // delta function to get base XP based on relative level.
+                // If AddCombatPoint... returns 0, but GetRecentEnemyLevel returns > -1, then we are out of combat but recently were in combat.
+                var enemyLevel = CombatPoint.GetRecentEnemyLevel(activator);
+                var playerId = GetObjectUUID(activator);
+                var dbPlayer = DB.Get<Player>(playerId);
+                var firstAidLevel = dbPlayer.Skills[SkillType.FirstAid].Rank;
+                var nXP = enemyLevel != -1 ? Skill.GetDeltaXP(enemyLevel - firstAidLevel) : 0;
+                Skill.GiveSkillXP(activator, SkillType.FirstAid, nXP);
+                CombatPoint.ClearRecentEnemyLevel(activator);
+            }
         }
 
         private void MedKit1()
         {
             Builder.Create(FeatType.MedKit1, PerkType.MedKit)
                 .Name("Med Kit I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.MedKit, 6f)
                 .HasActivationDelay(2f)
-                .RequirementStamina(1)
+                .HasMaxRange(30.0f)
+                .RequirementStamina(4)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()
@@ -74,9 +94,11 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.MedKit2, PerkType.MedKit)
                 .Name("Med Kit II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.MedKit, 6f)
                 .HasActivationDelay(2f)
-                .RequirementStamina(2)
+                .HasMaxRange(30.0f)
+                .RequirementStamina(6)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()
@@ -91,16 +113,18 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.MedKit3, PerkType.MedKit)
                 .Name("Med Kit III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.MedKit, 6f)
                 .HasActivationDelay(2f)
-                .RequirementStamina(3)
+                .HasMaxRange(30.0f)
+                .RequirementStamina(8)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction((activator, target, _, _) =>
                 {
-                    Impact(activator, target, 90);
+                    Impact(activator, target, 80);
                 });
         }
 
@@ -108,9 +132,29 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.MedKit4, PerkType.MedKit)
                 .Name("Med Kit IV")
+                .Level(4)
                 .HasRecastDelay(RecastGroup.MedKit, 6f)
                 .HasActivationDelay(2f)
-                .RequirementStamina(4)
+                .HasMaxRange(30.0f)
+                .RequirementStamina(10)
+                .UsesAnimation(Animation.LoopingGetMid)
+                .IsCastedAbility()
+                .UnaffectedByHeavyArmor()
+                .HasCustomValidation(Validation)
+                .HasImpactAction((activator, target, _, _) =>
+                {
+                    Impact(activator, target, 110);
+                });
+        }
+        private void MedKit5()
+        {
+            Builder.Create(FeatType.MedKit5, PerkType.MedKit)
+                .Name("Med Kit V")
+                .Level(5)
+                .HasRecastDelay(RecastGroup.MedKit, 6f)
+                .HasActivationDelay(2f)
+                .HasMaxRange(30.0f)
+                .RequirementStamina(12)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()
@@ -118,22 +162,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 .HasImpactAction((activator, target, _, _) =>
                 {
                     Impact(activator, target, 140);
-                });
-        }
-        private void MedKit5()
-        {
-            Builder.Create(FeatType.MedKit5, PerkType.MedKit)
-                .Name("Med Kit V")
-                .HasRecastDelay(RecastGroup.MedKit, 6f)
-                .HasActivationDelay(2f)
-                .RequirementStamina(5)
-                .UsesAnimation(Animation.LoopingGetMid)
-                .IsCastedAbility()
-                .UnaffectedByHeavyArmor()
-                .HasCustomValidation(Validation)
-                .HasImpactAction((activator, target, _, _) =>
-                {
-                    Impact(activator, target, 180);
                 });
         }
     }

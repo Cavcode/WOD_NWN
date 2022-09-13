@@ -2,7 +2,6 @@
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Item;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature
 {

@@ -5,10 +5,11 @@ using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Feature.GuiDefinition.RefreshEvent;
 using WOD.Game.Server.Service;
+using WOD.Game.Server.Service.GuiService;
 using WOD.Game.Server.Service.ChatCommandService;
 using WOD.Game.Server.Service.FactionService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 using Faction = WOD.Game.Server.Service.Faction;
 
 namespace WOD.Game.Server.Feature.ChatCommandDefinition
@@ -19,8 +20,40 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
 
         public Dictionary<string, ChatCommandDetail> BuildChatCommands()
         {
+            CopyTargetItem();
+            Day();
+            Night();
+            GetPlot();
+            Kill();
+            Resurrect();
+            SpawnGold();
+            TeleportWaypoint();
+            GetLocalVariable();
+            SetLocalVariable();
+            SetPortrait();
+            SpawnItem();
+            GiveRPXP();
+            ResetPerkCooldown();
+            PlayVFX();
+            ResetAbilityRecastTimers();
+            AdjustFactionStanding();
+            GetFactionStanding();
+            RestartServer();
+            SetXPBonus();
+            GetXPBonus();
+            GetPlayerId();
+            GetTag();
+            Notes();
+            CreatureManager();
+
+            return _builder.Build();
+        }
+
+        private void CopyTargetItem()
+        {
             _builder.Create("copyitem")
                 .Description("Copies the targeted item.")
+                .RequiresTarget()
                 .Permissions(AuthorizationLevel.DM, AuthorizationLevel.Admin)
                 .Action((user, target, location, args) =>
                 {
@@ -33,7 +66,10 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                     CopyItem(target, user, true);
                     SendMessageToPC(user, "Item copied successfully.");
                 });
+        }
 
+        private void Day()
+        {
             _builder.Create("day")
                 .Description("Sets the world time to 8 AM.")
                 .Permissions(AuthorizationLevel.DM, AuthorizationLevel.Admin)
@@ -41,7 +77,10 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                 {
                     SetTime(8, 0, 0, 0);
                 });
+        }
 
+        private void Night()
+        {
             _builder.Create("night")
                 .Description("Sets the world time to 8 PM.")
                 .Permissions(AuthorizationLevel.DM, AuthorizationLevel.Admin)
@@ -49,7 +88,10 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                 {
                     SetTime(20, 0, 0, 0);
                 });
+        }
 
+        private void GetPlot()
+        {
             _builder.Create("getplot")
                 .Description("Gets whether an object is marked plot.")
                 .Permissions(AuthorizationLevel.DM, AuthorizationLevel.Admin)
@@ -58,7 +100,10 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                     SendMessageToPC(user, GetPlotFlag(target) ? "Target is marked plot." : "Target is NOT marked plot.");
                 })
                 .RequiresTarget();
+        }
 
+        private void Kill()
+        {
             _builder.Create("kill")
                 .Description("Kills your target.")
                 .Permissions(AuthorizationLevel.DM, AuthorizationLevel.Admin)
@@ -69,44 +114,29 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                     ApplyEffectToObject(DurationType.Instant, damage, target);
                 })
                 .RequiresTarget();
+        }
 
-            _builder.Create("name")
-                .Description("Renames your target.")
-                .Permissions(AuthorizationLevel.DM, AuthorizationLevel.Admin)
-                .Validate((user, args) => args.Length <= 0 ? "Please enter a name. Example: /name My Creature" : string.Empty)
-                .Action((user, target, location, args) =>
-                {
-                    if (GetIsPC(target) || GetIsDM(target))
-                    {
-                        SendMessageToPC(user, "PCs cannot be targeted with this command.");
-                        return;
-                    }
-
-                    var name = string.Empty;
-                    foreach (var arg in args)
-                    {
-                        name += " " + arg;
-                    }
-
-                    SetName(target, name);
-                })
-                .RequiresTarget();
-
+        private void Resurrect()
+        {
             _builder.Create("rez")
                 .Description("Revives you, heals you to full, and restores all FP/STM.")
                 .Permissions(AuthorizationLevel.DM, AuthorizationLevel.Admin)
+                .RequiresTarget(ObjectType.Creature)
                 .Action((user, target, location, args) =>
                 {
-                    if (GetIsDead(user))
+                    if (GetIsDead(target))
                     {
-                        ApplyEffectToObject(DurationType.Instant, EffectResurrection(), user);
+                        ApplyEffectToObject(DurationType.Instant, EffectResurrection(), target);
                     }
 
-                    ApplyEffectToObject(DurationType.Instant, EffectHeal(999), user);
-                    Stat.RestoreFP(user, Stat.GetMaxFP(user));
-                    Stat.RestoreStamina(user, Stat.GetMaxStamina(user));
+                    ApplyEffectToObject(DurationType.Instant, EffectHeal(999), target);
+                    Stat.RestoreFP(target, Stat.GetMaxFP(target));
+                    Stat.RestoreStamina(target, Stat.GetMaxStamina(target));
                 });
+        }
 
+        private void SpawnGold()
+        {
             _builder.Create("spawngold")
                 .Description("Spawns gold of a specific quantity on your character. Example: /spawngold 33")
                 .Permissions(AuthorizationLevel.DM, AuthorizationLevel.Admin)
@@ -132,7 +162,10 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
 
                     GiveGoldToCreature(user, quantity);
                 });
+        }
 
+        private void TeleportWaypoint()
+        {
             _builder.Create("tpwp")
                 .Description("Teleports you to a waypoint with a specified tag.")
                 .Permissions(AuthorizationLevel.DM, AuthorizationLevel.Admin)
@@ -158,19 +191,6 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
 
                     AssignCommand(user, () => ActionJumpToLocation(GetLocation(wp)));
                 });
-
-            GetLocalVariable();
-            SetLocalVariable();
-            SetPortrait();
-            SpawnItem();
-            GiveRPXP();
-            ResetPerkCooldown();
-            PlayVFX();
-            ResetAbilityRecastTimers();
-            AdjustFactionStanding();
-            GetFactionStanding();
-            
-            return _builder.Build();
         }
 
         private void GetLocalVariable()
@@ -439,7 +459,7 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
 
         private void GiveRPXP()
         {
-            const int MaxAmount = 10000;
+            const int MaxAmount = 500000;
             
             _builder.Create("giverpxp")
                 .Description("Gives Roleplay XP to a target player.")
@@ -480,8 +500,9 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                     var dbPlayer = DB.Get<Player>(playerId);
                     dbPlayer.UnallocatedXP += amount;
                     
-                    DB.Set(playerId, dbPlayer);
+                    DB.Set(dbPlayer);
                     SendMessageToPC(target, $"A DM has awarded you with {amount} roleplay XP.");
+                    Gui.PublishRefreshEvent(target, new RPXPRefreshEvent());
                 });
         }
 
@@ -503,7 +524,7 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                     var dbPlayer = DB.Get<Player>(playerId);
                     dbPlayer.DatePerkRefundAvailable = DateTime.UtcNow;
 
-                    DB.Set(playerId, dbPlayer);
+                    DB.Set(dbPlayer);
                     SendMessageToPC(target, $"A DM has reset your perk refund cooldown.");
                 });
         }
@@ -564,7 +585,7 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                     var playerId = GetObjectUUID(target);
                     var dbPlayer = DB.Get<Player>(playerId);
                     dbPlayer.RecastTimes.Clear();
-                    DB.Set(playerId, dbPlayer);
+                    DB.Set(dbPlayer);
                     
                     SendMessageToPC(user, $"You have reset all of {targetName}'s cooldowns.");
                     SendMessageToPC(target, "A DM has reset all of your cooldowns.");
@@ -656,7 +677,7 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                 .Permissions(AuthorizationLevel.Admin, AuthorizationLevel.DM)
                 .Validate((user, args) =>
                 {
-                    if (args.Length < 0)
+                    if (args.Length <= 0)
                     {
                         return "Requires CD Key to be entered. Example: /restartserver XXXXYYYY";
                     }
@@ -682,6 +703,118 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                         player = GetNextPC();
                     }
                     Core.NWNX.AdministrationPlugin.ShutdownServer();
+                });
+        }
+
+        private void SetXPBonus()
+        {
+            _builder.Create("setxpbonus")
+                .Description("Sets a player's XP bonus to the specified value. Example: /setxpbonus 10")
+                .Permissions(AuthorizationLevel.Admin, AuthorizationLevel.DM)
+                .RequiresTarget(ObjectType.Creature)
+                .Validate((user, args) =>
+                {
+                    if (args.Length <= 0)
+                    {
+                        return "Requires a number to be entered. Example: /setxpbonus 10";
+                    }
+
+                    var amount = Convert.ToInt32(args[0]);
+                    if (amount < 0 || amount > 25)
+                    {
+                        return "Value must be between 0 and 25.";
+                    }
+
+                    return string.Empty;
+                })
+                .Action((user, target, location, args) =>
+                {
+                    if (!GetIsPC(target) || GetIsDM(target))
+                    {
+                        SendMessageToPC(user, "Only players may be targeted with this command.");
+                        return;
+                    }
+
+                    var amount = Convert.ToInt32(args[0]);
+                    var playerId = GetObjectUUID(target);
+                    var dbPlayer = DB.Get<Player>(playerId);
+                    dbPlayer.DMXPBonus = amount;
+
+                    DB.Set(dbPlayer);
+
+                    SendMessageToPC(user, $"{GetName(target)}'s DM XP bonus set to {amount}%.");
+                    SendMessageToPC(target, $"Your DM XP bonus has been changed to {amount}%.");
+                });
+        }
+
+        private void GetXPBonus()
+        {
+            _builder.Create("getxpbonus")
+                .Description("Gets a player's DM XP bonus.")
+                .Permissions(AuthorizationLevel.Admin, AuthorizationLevel.DM)
+                .RequiresTarget(ObjectType.Creature)
+                .Action((user, target, location, args) =>
+                {
+                    if (!GetIsPC(target) || GetIsDM(target))
+                    {
+                        SendMessageToPC(user, "Only players may be targeted with this command.");
+                        return;
+                    }
+                    
+                    var playerId = GetObjectUUID(target);
+                    var dbPlayer = DB.Get<Player>(playerId);
+                    
+                    SendMessageToPC(user, $"{GetName(target)}'s DM XP bonus is {dbPlayer.DMXPBonus}%.");
+                });
+        }
+
+        private void GetPlayerId()
+        {
+            _builder.Create("playerid")
+                .Description("Gets a player's Id.")
+                .Permissions(AuthorizationLevel.Admin, AuthorizationLevel.DM)
+                .RequiresTarget(ObjectType.Creature)
+                .Action((user, target, location, args) =>
+                {
+                    var playerId = GetObjectUUID(target);
+                    
+                    SendMessageToPC(user, $"{GetName(target)}'s player Id is {playerId}.");
+                });
+        }
+
+        private void GetTag()
+        {
+            _builder.Create("gettag")
+                .Description("Gets a target's tag.")
+                .Permissions(AuthorizationLevel.Admin, AuthorizationLevel.DM)
+                .RequiresTarget()
+                .Action((user, target, location, args) =>
+                {
+                    var tag = NWScript.GetTag(target);
+
+                    SendMessageToPC(user, $"Target's tag: {tag}");
+                });
+        }
+
+        private void Notes()
+        {
+            _builder.Create("notes", "note")
+                .Description("Toggles the area notes window.")
+                .Permissions(AuthorizationLevel.DM, AuthorizationLevel.Admin)
+                .Action((user, target, location, args) =>
+                {
+                    Gui.TogglePlayerWindow(user, GuiWindowType.AreaNotes);
+                });
+        }
+
+        private void CreatureManager()
+        {
+            _builder.Create("cm")
+                .Description("Toggles the Creature Manager window.")
+                .Permissions(AuthorizationLevel.DM, AuthorizationLevel.Admin)
+                .Action((user, target, location, args) =>
+                {
+                    Gui.TogglePlayerWindow(user, GuiWindowType.CreatureManager);
                 });
         }
     }

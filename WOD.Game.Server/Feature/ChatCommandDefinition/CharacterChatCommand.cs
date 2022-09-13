@@ -6,12 +6,10 @@ using System.Text;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Enumeration;
-using WOD.Game.Server.Feature.DialogDefinition;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.ChatCommandService;
+using WOD.Game.Server.Service.GuiService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
-using Dialog = WOD.Game.Server.Service.Dialog;
 using HoloCom = WOD.Game.Server.Service.HoloCom;
 using Player = WOD.Game.Server.Entity.Player;
 
@@ -19,11 +17,30 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
 {
     public class CharacterChatCommand: IChatCommandListDefinition
     {
+        private readonly ChatCommandBuilder _builder = new ChatCommandBuilder();
+
         public Dictionary<string, ChatCommandDetail> BuildChatCommands()
         {
-            var builder = new ChatCommandBuilder();
+            CDKey();
+            Save();
+            Skills();
+            EndCall();
+            Recipes();
+            Perks();
+            DeleteCommand();
+            LanguageCommand();
+            ToggleEmoteStyle();
+            ChangeItemDescription();
+            ConcentrationAbility();
+            Customize();
+            AlwaysWalk();
 
-            builder.Create("cdkey")
+            return _builder.Build();
+        }
+
+        private void CDKey()
+        {
+            _builder.Create("cdkey")
                 .Description("Displays your public CD key.")
                 .Permissions(AuthorizationLevel.All)
                 .Action((user, target, location, args) =>
@@ -31,17 +48,11 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                     var cdKey = GetPCPublicCDKey(user);
                     SendMessageToPC(user, "Your public CD Key is: " + cdKey);
                 });
+        }
 
-            builder.Create("rest")
-                .Description("Opens the rest menu.")
-                .Permissions(AuthorizationLevel.Player)
-                .Action((user, target, location, args) =>
-                {
-                    Dialog.StartConversation(user, user, nameof(RestMenuDialog));
-                });
-
-
-            builder.Create("save")
+        private void Save()
+        {
+            _builder.Create("save")
                 .Description("Manually saves your character. Your character also saves automatically every few minutes.")
                 .Permissions(AuthorizationLevel.Player)
                 .Action((user, target, location, args) =>
@@ -49,59 +60,58 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                     ExportSingleCharacter(user);
                     SendMessageToPC(user, "Character saved successfully.");
                 });
+        }
 
-            builder.Create("skills")
-                .Description("Opens the skills menu.")
+        private void Skills()
+        {
+            _builder.Create("skills")
+                .Description("Toggles the skills menu.")
                 .Permissions(AuthorizationLevel.Player)
                 .Action((user, target, location, args) =>
                 {
-                    Dialog.StartConversation(user, user, nameof(ViewSkillsDialog));
+                    Gui.TogglePlayerWindow(user, GuiWindowType.Skills);
                 });
+        }
 
-            builder.Create("endcall")
+        private void EndCall()
+        {
+            _builder.Create("endcall")
                 .Description("Ends your current HoloCom call.")
                 .Permissions(AuthorizationLevel.Player, AuthorizationLevel.DM, AuthorizationLevel.Admin)
                 .Action((user, target, location, args) =>
                 {
                     HoloCom.SetIsInCall(user, HoloCom.GetCallReceiver(user), false);
                 });
-
-            builder.Create("recipe", "recipes")
-                .Description("Opens the recipes menu.")
-                .Permissions(AuthorizationLevel.Player)
-                .Action((user, target, location, args) =>
-                {
-                    Dialog.StartConversation(user, user, nameof(RecipeDialog));
-                });
-
-            builder.Create("perk", "perks")
-                .Description("Opens the perks menu.")
-                .Permissions(AuthorizationLevel.Player)
-                .Action((user, target, location, args) =>
-                {
-                    Dialog.StartConversation(user, user, nameof(ViewPerksDialog));
-                });
-
-            DeleteCommand(builder);
-            LanguageCommand(builder);
-            CustomizeCommand(builder);
-            ToggleHelmet(builder);
-            ToggleDualPistolMode(builder);
-            ToggleEmoteStyle(builder);
-            ToggleHolonet(builder);
-            ChangeItemName(builder);
-            ChangeItemDescription(builder);
-            ChangePlayerDescription(builder);
-            ConcentrationAbility(builder);
-            
-            return builder.Build();
         }
 
-        private static void LanguageCommand(ChatCommandBuilder builder)
+        private void Recipes()
         {
-            builder.Create("language")
-                .Description("Switches the active language. Use /language help for more information.")
+            _builder.Create("recipe", "recipes")
+                .Description("Toggles the recipes menu.")
                 .Permissions(AuthorizationLevel.Player)
+                .Action((user, target, location, args) =>
+                {
+                    Gui.TogglePlayerWindow(user, GuiWindowType.Recipes);
+                });
+        }
+
+        private void Perks()
+        {
+            _builder.Create("perk", "perks")
+                .Description("Toggles the perks menu.")
+                .Permissions(AuthorizationLevel.Player)
+                .Action((user, target, location, args) =>
+                {
+                    Gui.TogglePlayerWindow(user, GuiWindowType.Perks);
+                });
+
+        }
+
+        private void LanguageCommand()
+        {
+            _builder.Create("language")
+                .Description("Switches the active language. Use /language help for more information.")
+                .Permissions(AuthorizationLevel.All)
                 .Validate((user, args) =>
                 {
                     if (args.Length < 1)
@@ -141,6 +151,15 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                         return;
                     }
 
+                    // Wookiees cannot speak any language besides Shyriiwook.
+                    if (race == RacialType.Wookiee &&
+                        command != SkillType.Shyriiwook.ToString().ToLower())
+                    {
+                        Language.SetActiveLanguage(user, SkillType.Shyriiwook);
+                        SendMessageToPC(user, ColorToken.Red("Wookiees can only speak Shyriiwook."));
+                        return;
+                    }
+
 
                     foreach (var language in Language.Languages)
                     {
@@ -156,11 +175,11 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                 });
         }
 
-        private static void DeleteCommand(ChatCommandBuilder builder)
+        private void DeleteCommand()
         {
-            builder.Create("delete")
+            _builder.Create("delete")
                 .Description("Permanently deletes your character.")
-                .Permissions(AuthorizationLevel.Player)
+                .Permissions(AuthorizationLevel.All)
                 .Validate((user, args) =>
                 {
                     if (!GetIsPC(user) || GetIsDM(user))
@@ -172,6 +191,11 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                     if (cdKey != enteredCDKey)
                     {
                         return "Invalid CD key entered. Please enter the command as follows: \"/delete <CD Key>\". You can retrieve your CD key with the /CDKey chat command.";
+                    }
+
+                    if (GetIsDM(user) || GetIsDMPossessed(user))
+                    {
+                        return "DM characters cannot use this chat command.";
                     }
 
                     return string.Empty;
@@ -197,89 +221,29 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                     // Player hasn't submitted or time has elapsed
                     if (isFirstSubmission)
                     {
-                        SetLocalString(user, "DELETE_CHARACTER_LAST_SUBMISSION", DateTime.UtcNow.ToString(CultureInfo.InvariantCulture));
+                        SetLocalString(user, "DELETE_CHARACTER_LAST_SUBMISSION", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
                         FloatingTextStringOnCreature("Please confirm your deletion by entering another \"/delete <CD Key>\" command within 30 seconds.", user, false);
                     }
                     else
                     {
-                        var playerID = GetObjectUUID(user);
-                        var entity = DB.Get<Player>(playerID);
+                        var playerId = GetObjectUUID(user);
+                        var entity = DB.Get<Player>(playerId);
                         entity.IsDeleted = true;
-                        DB.Set(playerID, entity);
+                        DB.Set(entity);
 
-                        BootPC(user, "Your character has been deleted.");
-                        AdministrationPlugin.DeletePlayerCharacter(user, true);
+                        var playerName = GetPCPlayerName(user);
+                        var characterName = GetName(user);
+                        AdministrationPlugin.DeletePlayerCharacter(user, true, "Your character has been deleted.");
+                        AdministrationPlugin.DeleteTURD(playerName, characterName);
                     }
                 });
         }
-
-        private static void CustomizeCommand(ChatCommandBuilder builder)
+        
+        private void ToggleEmoteStyle()
         {
-            builder.Create("customize", "customise")
-                .Description("Customizes your character appearance. Only available for use in the entry area or DM customization area.")
-                .Permissions(AuthorizationLevel.Player)
-                .Validate((user, args) =>
-                {
-                    // DMs can use this command anywhere.
-                    if (GetIsDM(user)) return string.Empty;
-
-                    // Players can only do this in certain areas.
-                    var areaResref = GetResRef(GetArea(user));
-                    if (areaResref != "ooc_area" && areaResref != "customize_char")
-                    {
-                        return "Customization can only occur in the starting area or the DM customization area. You can't use this command here.";
-                    }
-
-                    return string.Empty;
-                })
-                .Action((user, target, location, args) =>
-                {
-                    Dialog.StartConversation(user, user, nameof(CharacterCustomizationDialog));
-                });
-        }
-
-        private static void ToggleHelmet(ChatCommandBuilder builder)
-        {
-            builder.Create("togglehelmet")
-                .Description("Toggles whether your helmet will be shown when equipped.")
-                .Permissions(AuthorizationLevel.Player)
-                .Action((user, target, location, args) =>
-                {
-                    var playerId = GetObjectUUID(user);
-                    var dbPlayer = DB.Get<Player>(playerId);
-                    dbPlayer.ShowHelmet = !dbPlayer.ShowHelmet;
-                    
-                    DB.Set(playerId, dbPlayer);
-
-                    FloatingTextStringOnCreature(
-                        dbPlayer.ShowHelmet ? "Now showing equipped helmet." : "Now hiding equipped helmet.",
-                        user,
-                        false);
-
-                    var helmet = GetItemInSlot(InventorySlot.Head, user);
-                    if (GetIsObjectValid(helmet))
-                    {
-                        SetHiddenWhenEquipped(helmet, !dbPlayer.ShowHelmet);
-                    }
-                });
-        }
-
-        private static void ToggleDualPistolMode(ChatCommandBuilder builder)
-        {
-            builder.Create("toggledualpistolmode")
-                .Description("Toggles whether or not your pistol will be dual wielded when equipped.")
-                .Permissions(AuthorizationLevel.Player)
-                .Action((user, target, location, args) =>
-                {
-                    DualPistolService.ToggleDualPistolMode(user);
-                });
-        }
-
-        private static void ToggleEmoteStyle(ChatCommandBuilder builder)
-        {
-            builder.Create("emotestyle")
+            _builder.Create("emotestyle")
                 .Description("Toggles your emote style between regular and novel.")
-                .Permissions(AuthorizationLevel.Player)
+                .Permissions(AuthorizationLevel.All)
                 .Action((user, target, location, args) =>
                 {
                     var curStyle = Communication.GetEmoteStyle(user);
@@ -289,65 +253,11 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                 });
         }
 
-        private static void ToggleHolonet(ChatCommandBuilder builder)
+        private void ChangeItemDescription()
         {
-            builder.Create("toggleholonet")
-                .Description("Enables or disables holonet chat channel.")
-                .Permissions(AuthorizationLevel.Player)
-                .Action((user, target, location, args) =>
-                {
-                    var playerId = GetObjectUUID(user);
-                    var dbPlayer = DB.Get<Player>(playerId);
-                    dbPlayer.IsHolonetEnabled = !dbPlayer.IsHolonetEnabled;
-                    DB.Set(playerId, dbPlayer);
-                    
-                    SetLocalBool(user, "DISPLAY_HOLONET", dbPlayer.IsHolonetEnabled);
-
-                    if (dbPlayer.IsHolonetEnabled)
-                    {
-                        SendMessageToPC(user, $"Holonet chat: {ColorToken.Green("ENABLED")}");
-                    }
-                    else
-                    {
-                        SendMessageToPC(user, $"Holonet chat: {ColorToken.Red("DISABLED")}");
-                    }
-                    
-                });
-        }
-
-        private static void ChangeItemName(ChatCommandBuilder builder)
-        {
-            builder.Create("changeitemname", "itemname")
-                .Description("Changes the name of an item in your inventory. Example: /changeitemname New Name")
-                .Permissions(AuthorizationLevel.Player, AuthorizationLevel.DM, AuthorizationLevel.Admin)
-                .RequiresTarget()
-                .Action((user, target, location, args) =>
-                {
-                    if (!GetIsObjectValid(target) ||
-                        GetItemPossessor(target) != user ||
-                        GetObjectType(target) != ObjectType.Item)
-                    {
-                        SendMessageToPC(user, "Only items in your inventory may be targeted with this command.");
-                        return;
-                    }
-
-                    var sb = new StringBuilder();
-
-                    foreach (var arg in args)
-                    {
-                        sb.Append(' ').Append(arg);
-                    }
-
-                    SetName(target, sb.ToString());
-                    SendMessageToPC(user, "New name set!");
-                });
-        }
-
-        private static void ChangeItemDescription(ChatCommandBuilder builder)
-        {
-            builder.Create("changeitemdescription", "itemdesc")
+            _builder.Create("changeitemdescription", "itemdesc")
                 .Description("Changes the description of an item in your inventory. Example: /changeitemdescription New Name")
-                .Permissions(AuthorizationLevel.Player, AuthorizationLevel.DM, AuthorizationLevel.Admin)
+                .Permissions(AuthorizationLevel.All)
                 .RequiresTarget()
                 .Action((user, target, location, args) =>
                 {
@@ -371,30 +281,11 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                 });
         }
 
-        private static void ChangePlayerDescription(ChatCommandBuilder builder)
+        private void ConcentrationAbility()
         {
-            builder.Create("changeplayerdescription", "mydesc")
-                .Description("Changes your character's description. Example: /changedescription My new description.")
-                .Permissions(AuthorizationLevel.Player, AuthorizationLevel.DM, AuthorizationLevel.Admin)
-                .Action((user, target, location, args) =>
-                {
-                    var sb = new StringBuilder();
-                    
-                    foreach (var arg in args)
-                    {
-                        sb.Append(' ').Append(arg);
-                    }
-
-                    SetDescription(user, sb.ToString());
-                    SendMessageToPC(user, "New description set!");
-                });
-        }
-
-        private static void ConcentrationAbility(ChatCommandBuilder builder)
-        {
-            builder.Create("concentration", "conc")
+            _builder.Create("concentration", "conc")
                 .Description("Tells you what concentration ability you have active. Follow with 'end' (no quotes) to turn your concentration ability off. Example: /concentration end")
-                .Permissions(AuthorizationLevel.Player, AuthorizationLevel.DM, AuthorizationLevel.Admin)
+                .Permissions(AuthorizationLevel.All)
                 .Action((user, target, location, args) =>
                 {
                     var doEnd = args.Length > 0 && args[0].ToLower() == "end";
@@ -418,6 +309,45 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                     }
                 });
         }
-        
+
+        private void Customize()
+        {
+            _builder.Create("customize", "customise")
+                .Description("Opens the appearance editor window.")
+                .Permissions(AuthorizationLevel.All)
+                .Action((user, target, location, args) =>
+                {
+                    var player = user;
+                    var uiTarget = OBJECT_INVALID;
+                    if (GetIsDMPossessed(player))
+                    {
+                        uiTarget = player;
+                        player = GetMaster(player);
+                    }
+                    Gui.TogglePlayerWindow(player, GuiWindowType.AppearanceEditor, null, OBJECT_INVALID, uiTarget);
+                });
+        }
+
+        private void AlwaysWalk()
+        {
+            _builder.Create("alwayswalk", "walk")
+                .Description("Toggles forced walking when moving your character.")
+                .Permissions(AuthorizationLevel.All)
+                .Action((user, _, _, _) =>
+                {
+                    var wasWalking = GetLocalInt(user, "WALK_TOGGLE") == 1;
+                    PlayerPlugin.SetAlwaysWalk(user, !wasWalking);
+
+                    if (wasWalking)
+                    {
+                        SetLocalInt(user, "WALK_TOGGLE", 0);
+                        SendMessageToPC(user, $"Walk mode {ColorToken.Red("disabled")}.");
+                    } else
+                    {
+                        SetLocalInt(user, "WALK_TOGGLE", 1);
+                        SendMessageToPC(user, $"Walk mode {ColorToken.Green("enabled")}.");
+                    }
+                });
+        }
     }
 }

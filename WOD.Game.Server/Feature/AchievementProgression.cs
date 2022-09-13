@@ -1,14 +1,15 @@
 ﻿using WOD.Game.Server.Core;
 using WOD.Game.Server.Entity;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AchievementService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature
 {
     public static class AchievementProgression
     {
+        /// <summary>
+        /// When a player enters the mod, increase their number of logins
+        /// </summary>
         [NWNEventHandler("mod_enter")]
         public static void LogIn()
         {
@@ -16,16 +17,32 @@ namespace WOD.Game.Server.Feature
             if (!GetIsPC(player) || GetIsDM(player)) return;
 
             var cdKey = GetPCPublicCDKey(player);
-            var dbAccount = DB.Get<Account>(cdKey) ?? new Account();
+            var dbAccount = DB.Get<Account>(cdKey) ?? new Account(cdKey);
 
             dbAccount.TimesLoggedIn++;
-            DB.Set(cdKey, dbAccount);
+            DB.Set(dbAccount);
+        }
+
+        /// <summary>
+        /// When a player enters an area, if an achievement is assigned to the area grant it to them.
+        /// </summary>
+        [NWNEventHandler("area_enter")]
+        public static void EnterArea()
+        {
+            var area = OBJECT_SELF;
+            var player = GetEnteringObject();
+            var exploreAchievementType = (AchievementType)GetLocalInt(area, "EXPLORE_ACHIEVEMENT_ID");
+
+            if (exploreAchievementType == AchievementType.Invalid)
+                return;
+
+            Achievement.GiveAchievement(player, exploreAchievementType);
         }
 
         /// <summary>
         /// Handles the Kill Enemy line of achievements.
         /// </summary>
-        [NWNEventHandler("crea_death")]
+        [NWNEventHandler("crea_death_bef")]
         public static void KillEnemy()
         {
             var killer = GetLastKiller();
@@ -35,7 +52,7 @@ namespace WOD.Game.Server.Feature
             var dbAccount = DB.Get<Account>(cdKey);
 
             dbAccount.AchievementProgress.EnemiesKilled++;
-            DB.Set(cdKey, dbAccount);
+            DB.Set(dbAccount);
 
             var kills = dbAccount.AchievementProgress.EnemiesKilled;
 
@@ -78,7 +95,7 @@ namespace WOD.Game.Server.Feature
             var dbAccount = DB.Get<Account>(cdKey);
 
             dbAccount.AchievementProgress.PerksLearned++;
-            DB.Set(cdKey, dbAccount);
+            DB.Set(dbAccount);
 
             var numberLearned = dbAccount.AchievementProgress.PerksLearned;
 
@@ -117,7 +134,7 @@ namespace WOD.Game.Server.Feature
             var dbAccount = DB.Get<Account>(cdKey);
 
             dbAccount.AchievementProgress.SkillsLearned++;
-            DB.Set(cdKey, dbAccount);
+            DB.Set(dbAccount);
 
             var numberLearned = dbAccount.AchievementProgress.SkillsLearned;
 
@@ -160,7 +177,7 @@ namespace WOD.Game.Server.Feature
             var dbAccount = DB.Get<Account>(cdKey);
 
             dbAccount.AchievementProgress.QuestsCompleted++;
-            DB.Set(cdKey, dbAccount);
+            DB.Set(dbAccount);
 
             var numberCompleted = dbAccount.AchievementProgress.QuestsCompleted;
 
@@ -219,7 +236,7 @@ namespace WOD.Game.Server.Feature
             var dbAccount = DB.Get<Account>(cdKey);
 
             dbAccount.AchievementProgress.ItemsCrafted++;
-            DB.Set(cdKey, dbAccount);
+            DB.Set(dbAccount);
 
             var numberCompleted = dbAccount.AchievementProgress.ItemsCrafted;
             if (numberCompleted >= 1)

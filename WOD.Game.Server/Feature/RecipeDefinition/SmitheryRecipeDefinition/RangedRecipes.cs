@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.CraftService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
@@ -28,9 +27,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(6)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 1)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_veldite", 7)
-                .Component("elec_ruined", 4);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_veldite", 4)
+                .Component("elec_ruined", 2);
 
             // Titan Pistol
             _builder.Create(RecipeType.TitanPistol, SkillType.Smithery)
@@ -39,9 +38,20 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(16)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 2)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_scordspar", 7)
-                .Component("elec_flawed", 4);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_scordspar", 4)
+                .Component("elec_flawed", 2);
+
+            // Sith Pistol
+            _builder.Create(RecipeType.SithPistol, SkillType.Smithery)
+                .Category(RecipeCategoryType.Pistol)
+                .Resref("sith_pistol")
+                .Level(19)
+                .Quantity(1)
+                .RequirementPerk(PerkType.RangedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_scordspar", 5)
+                .Component("elec_flawed", 3);
 
             // Delta Pistol
             _builder.Create(RecipeType.DeltaPistol, SkillType.Smithery)
@@ -50,9 +60,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(26)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 3)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_plagionite", 7)
-                .Component("elec_good", 4);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_plagionite", 4)
+                .Component("elec_good", 2);
 
             // Proto Pistol
             _builder.Create(RecipeType.ProtoPistol, SkillType.Smithery)
@@ -61,9 +71,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(36)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 4)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_keromber", 7)
-                .Component("elec_imperfect", 4);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_keromber", 4)
+                .Component("elec_imperfect", 2);
 
             // Ophidian Pistol
             _builder.Create(RecipeType.OphidianPistol, SkillType.Smithery)
@@ -72,9 +82,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(46)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 5)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_jasioclase", 7)
-                .Component("elec_high", 4);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_jasioclase", 4)
+                .Component("elec_high", 2);
         }
 
         private void Shurikens()
@@ -86,9 +96,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(2)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 1)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_veldite", 3)
-                .Component("wood", 2);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_veldite", 2)
+                .Component("wood", 1);
 
             // Titan Shuriken
             _builder.Create(RecipeType.TitanShuriken, SkillType.Smithery)
@@ -97,7 +107,18 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(12)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 2)
-                .ModSlots(RecipeModType.Weapon, 1)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_scordspar", 2)
+                .Component("fine_wood", 1);
+
+            // Sith Shuriken
+            _builder.Create(RecipeType.SithShuriken, SkillType.Smithery)
+                .Category(RecipeCategoryType.Shuriken)
+                .Resref("sith_shuriken")
+                .Level(18)
+                .Quantity(1)
+                .RequirementPerk(PerkType.RangedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
                 .Component("ref_scordspar", 3)
                 .Component("fine_wood", 2);
 
@@ -108,9 +129,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(22)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 3)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_plagionite", 3)
-                .Component("ancient_wood", 2);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_plagionite", 2)
+                .Component("ancient_wood", 1);
 
             // Proto Shuriken
             _builder.Create(RecipeType.ProtoShuriken, SkillType.Smithery)
@@ -119,9 +140,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(32)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 4)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_keromber", 3)
-                .Component("aracia_wood", 2);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_keromber", 2)
+                .Component("aracia_wood", 1);
 
             // Ophidian Shuriken
             _builder.Create(RecipeType.OphidianShuriken, SkillType.Smithery)
@@ -130,9 +151,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(42)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 5)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_jasioclase", 3)
-                .Component("hyphae_wood", 2);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_jasioclase", 2)
+                .Component("hyphae_wood", 1);
         }
 
         private void Rifles()
@@ -144,9 +165,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(9)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 1)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_veldite", 10)
-                .Component("elec_ruined", 5);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_veldite", 5)
+                .Component("elec_ruined", 3);
 
             // Titan Rifle
             _builder.Create(RecipeType.TitanRifle, SkillType.Smithery)
@@ -155,9 +176,20 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(19)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 2)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_scordspar", 10)
-                .Component("elec_flawed", 5);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_scordspar", 5)
+                .Component("elec_flawed", 3);
+
+            // Sith Rifle
+            _builder.Create(RecipeType.SithRifle, SkillType.Smithery)
+                .Category(RecipeCategoryType.Rifle)
+                .Resref("sith_rifle")
+                .Level(15)
+                .Quantity(1)
+                .RequirementPerk(PerkType.RangedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_scordspar", 3)
+                .Component("elec_flawed", 2);
 
             // Delta Rifle
             _builder.Create(RecipeType.DeltaRifle, SkillType.Smithery)
@@ -166,9 +198,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(29)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 3)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_plagionite", 10)
-                .Component("elec_good", 5);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_plagionite", 5)
+                .Component("elec_good", 3);
 
             // Proto Rifle
             _builder.Create(RecipeType.ProtoRifle, SkillType.Smithery)
@@ -177,9 +209,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(39)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 4)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_keromber", 10)
-                .Component("elec_imperfect", 5);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_keromber", 5)
+                .Component("elec_imperfect", 3);
 
             // Ophidian Rifle
             _builder.Create(RecipeType.OphidianRifle, SkillType.Smithery)
@@ -188,9 +220,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(49)
                 .Quantity(1)
                 .RequirementPerk(PerkType.RangedBlueprints, 5)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_jasioclase", 10)
-                .Component("elec_high", 5);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_jasioclase", 5)
+                .Component("elec_high", 3);
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.StatusEffectService;
 
@@ -21,8 +21,8 @@ namespace WOD.Game.Server.Feature.StatusEffectDefinition
             {
                 builder.Create(StatusEffectType.ForcePack1)
                     .Name(name)
-                    .EffectIcon(2) // 2 = Regenerate
-                    .TickAction((source, target) =>
+                    .EffectIcon(EffectIconType.Regenerate)
+                    .TickAction((source, target, effectData) =>
                     {
                         Stat.RestoreFP(target, amount);
                     });

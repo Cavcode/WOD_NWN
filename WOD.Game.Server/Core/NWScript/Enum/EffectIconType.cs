@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WOD.Game.Server.Core.NWScript.Enum
+﻿namespace WOD.Game.Server.Core.NWScript.Enum
 {
     public enum EffectIconType
     {
@@ -137,6 +131,10 @@ namespace WOD.Game.Server.Core.NWScript.Enum
         DamageImmunityNegativeDecrease = 126,
         DamageImmunityPositiveDecrease = 127,
         DamageImmunitySonicDecrease = 128,
-        DamageImmunityWounding = 129,
+        Wounding = 129,
+        Food = 130,
+        Dash = 131,
+        Shocked = 132,
+        Burning = 133
     }
 }

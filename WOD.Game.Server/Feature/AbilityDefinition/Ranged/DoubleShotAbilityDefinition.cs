@@ -1,15 +1,11 @@
-﻿//using Random = WOD.Game.Server.Service.Random;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
 {
@@ -39,7 +35,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
 
         private static void ImpactAction(uint activator, uint target, int level, Location targetLocation)
         {
-            var dmg = 0.0f;
+            var dmg = 0;
 
             // If activator is in stealth mode, force them out of stealth mode.
             if (GetActionMode(activator, ActionMode.Stealth) == true)
@@ -48,45 +44,59 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
             switch (level)
             {
                 case 1:
-                    dmg = 1.5f;
+                    dmg = 8;
                     break;
                 case 2:
-                    dmg = 4.0f;
+                    dmg = 18;
                     break;
                 case 3:
-                    dmg = 6.5f;
+                    dmg = 28;
                     break;
                 default:
                     break;
             }
 
+            dmg += Combat.GetAbilityDamageBonus(activator, SkillType.Ranged);
+
+            CombatPoint.AddCombatPoint(activator, target, SkillType.Ranged, 3);
+
             // First attack
-            var perception = GetAbilityModifier(AbilityType.Perception, activator);
-            var defense = Stat.GetDefense(target, CombatDamageType.Physical);
-            var vitality = GetAbilityModifier(AbilityType.Vitality, target);
-            var damage = Combat.CalculateDamage(dmg, perception, defense, vitality, false);
+            var attackerStat = GetAbilityScore(activator, AbilityType.Perception);
+            var attack = Stat.GetAttack(activator, AbilityType.Perception, SkillType.Ranged);
+            var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
+            var defenderStat = GetAbilityScore(target, AbilityType.Vitality);
+            var damage = Combat.CalculateDamage(
+                attack, 
+                dmg, 
+                attackerStat, 
+                defense, 
+                defenderStat, 
+                0);
             ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Piercing), target);
 
             // Second attack
-            damage = Combat.CalculateDamage(dmg, perception, defense, vitality, false);
+            damage = Combat.CalculateDamage(attack, dmg, attackerStat, defense, defenderStat, 0);
             ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Piercing), target);
+            AssignCommand(activator, () => ActionPlayAnimation(Animation.DoubleShot));
+            AssignCommand(activator, () => ActionPlayAnimation(Animation.DoubleShot));
 
-            CombatPoint.AddCombatPoint(activator, target, SkillType.Ranged, 3);
+            Enmity.ModifyEnmity(activator, target, 450 * level + damage);
         }
 
         private static void DoubleShot1(AbilityBuilder builder)
         {
             builder.Create(FeatType.DoubleShot1, PerkType.DoubleShot)
                 .Name("Double Shot I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.DoubleShot, 60f)
-                .HasActivationDelay(2.0f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(3)
-                .IsCastedAbility()
+                .IsWeaponAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction((activator, target, level, targetLocation) =>
                 {
-                    ImpactAction(activator, target, level, targetLocation);
                     ImpactAction(activator, target, level, targetLocation);
                 });
         }
@@ -94,15 +104,16 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
         {
             builder.Create(FeatType.DoubleShot2, PerkType.DoubleShot)
                 .Name("Double Shot II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.DoubleShot, 60f)
-                .HasActivationDelay(2.0f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(5)
-                .IsCastedAbility()
+                .IsWeaponAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction((activator, target, level, targetLocation) =>
                 {
-                    ImpactAction(activator, target, level, targetLocation);
                     ImpactAction(activator, target, level, targetLocation);
                 });
         }
@@ -110,15 +121,16 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
         {
             builder.Create(FeatType.DoubleShot3, PerkType.DoubleShot)
                 .Name("Double Shot III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.DoubleShot, 60f)
-                .HasActivationDelay(2.0f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(8)
-                .IsCastedAbility()
+                .IsWeaponAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction((activator, target, level, targetLocation) =>
                 {
-                    ImpactAction(activator, target, level, targetLocation);
                     ImpactAction(activator, target, level, targetLocation);
                 });
         }

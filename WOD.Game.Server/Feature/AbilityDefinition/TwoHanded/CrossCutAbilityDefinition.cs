@@ -3,13 +3,11 @@
 using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
 {
@@ -39,7 +37,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
 
         private static void ImpactAction(uint activator, uint target, int level, Location targetLocation)
         {
-            var dmg = 0.0f;
+            var dmg = 0;
             var acLoss = 0;
             // If activator is in stealth mode, force them out of stealth mode.
             if (GetActionMode(activator, ActionMode.Stealth) == true)
@@ -48,38 +46,60 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
             switch (level)
             {
                 case 1:
-                    dmg = 1.5f;
+                    dmg = 8;
                     acLoss = 2;
                     break;
                 case 2:
-                    dmg = 4.0f;
+                    dmg = 17;
                     acLoss = 4;
                     break;
                 case 3:
-                    dmg = 6.5f;
+                    dmg = 25;
                     acLoss = 6;
                     break;
                 default:
                     break;
             }
 
-            var might = GetAbilityModifier(AbilityType.Might, activator);
-            var defense = Stat.GetDefense(target, CombatDamageType.Physical);
-            var vitality = GetAbilityModifier(AbilityType.Vitality, target);
-            var damage = Combat.CalculateDamage(dmg, might, defense, vitality, false);
+            dmg += Combat.GetAbilityDamageBonus(activator, SkillType.TwoHanded);
+
+            var attackerStat = GetAbilityScore(activator, AbilityType.Might);
+            var attack = Stat.GetAttack(activator, AbilityType.Might, SkillType.TwoHanded);
+            var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
+            var defenderStat = GetAbilityScore(target, AbilityType.Vitality);
+            var damage = Combat.CalculateDamage(
+                attack, 
+                dmg, 
+                attackerStat, 
+                defense,
+                defenderStat, 
+                0);
             ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Slashing), target);
-            ApplyEffectToObject(DurationType.Temporary, EffectACDecrease(acLoss), target, 60f);
+
+            RemoveEffectByTag(target, "CROSS_CUT");
+            var breach = TagEffect(EffectACDecrease(acLoss), "CROSS_CUT");
+            ApplyEffectToObject(DurationType.Temporary, breach, target, 60f);
+
+            AssignCommand(activator, () => ActionPlayAnimation(Animation.CrossCut));
+            DelayCommand(0.2f, () =>
+            {
+                AssignCommand(activator, () => ActionPlayAnimation(Animation.DoubleStrike));
+            });
+
             CombatPoint.AddCombatPoint(activator, target, SkillType.TwoHanded, 3);
+            Enmity.ModifyEnmity(activator, target, 250 * level + damage);
         }
 
         private static void CrossCut1(AbilityBuilder builder)
         {
             builder.Create(FeatType.CrossCut1, PerkType.CrossCut)
                 .Name("Cross Cut I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.CrossCut, 60f)
-                .HasActivationDelay(2.0f)
+                .HasActivationDelay(0.5f)
                 .RequirementStamina(3)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction((activator, target, level, targetLocation) =>
@@ -92,10 +112,12 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
         {
             builder.Create(FeatType.CrossCut2, PerkType.CrossCut)
                 .Name("Cross Cut II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.CrossCut, 60f)
-                .HasActivationDelay(2.0f)
+                .HasActivationDelay(0.5f)
                 .RequirementStamina(5)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction((activator, target, level, targetLocation) =>
@@ -108,10 +130,12 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
         {
             builder.Create(FeatType.CrossCut3, PerkType.CrossCut)
                 .Name("Cross Cut III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.CrossCut, 60f)
-                .HasActivationDelay(2.0f)
+                .HasActivationDelay(0.5f)
                 .RequirementStamina(8)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction((activator, target, level, targetLocation) =>

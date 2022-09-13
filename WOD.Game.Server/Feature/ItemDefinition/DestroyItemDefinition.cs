@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Feature.DialogDefinition;
 using WOD.Game.Server.Service.ItemService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 using Dialog = WOD.Game.Server.Service.Dialog;
 
 namespace WOD.Game.Server.Feature.ItemDefinition

@@ -1,6 +1,5 @@
 ﻿using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.DialogService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.DialogDefinition
 {

@@ -1,6 +1,5 @@
 ﻿using WOD.Game.Server.Core.Beamdog;
 using WOD.Game.Server.Feature.GuiDefinition.ViewModel;
-using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.GuiService;
 
 namespace WOD.Game.Server.Feature.GuiDefinition
@@ -13,69 +12,77 @@ namespace WOD.Game.Server.Feature.GuiDefinition
         {
             _builder.CreateWindow(GuiWindowType.Achievements)
                 .SetIsResizable(true)
+                .SetIsCollapsible(true)
                 .SetInitialGeometry(0, 0, 545f, 295.5f)
                 .SetTitle("Achievements")
-                .AddColumn(column =>
+                .AddColumn(col =>
                 {
-                    column.AddRow(row =>
-                    {
-                        row.AddSpacer();
-
-                        row.AddCheckBox()
-                            .BindIsChecked(model => model.ShowAll)
-                            .SetText("Show All");
-
-                        row.AddSpacer();
-                    });
-
-                    column.AddRow(row =>
-                    {
-                        row.AddLabel()
-                            .SetText("Name")
-                            .SetHorizontalAlign(NuiHorizontalAlign.Center)
-                            .SetVerticalAlign(NuiVerticalAlign.Top);
-
-                        row.AddLabel()
-                            .SetText("Description")
-                            .SetHorizontalAlign(NuiHorizontalAlign.Center)
-                            .SetVerticalAlign(NuiVerticalAlign.Top);
-
-                        row.AddLabel()
-                            .SetText("Date Unlocked")
-                            .SetHorizontalAlign(NuiHorizontalAlign.Center)
-                            .SetVerticalAlign(NuiVerticalAlign.Top);
-
-                        row.SetHeight(20f);
-                    });
-
-                    column.AddRow(row =>
+                    col.AddRow(row =>
                     {
                         row.AddList(template =>
+                        {
+                            template.AddCell(cell =>
                             {
-                                template.AddCell(cell =>
-                                {
-                                    cell.AddLabel()
-                                        .BindText(model => model.Names)
-                                        .BindColor(model => model.Colors);
-                                });
-
-                                template.AddCell(cell =>
-                                {
-                                    cell.AddLabel()
-                                        .BindText(model => model.Descriptions)
-                                        .BindColor(model => model.Colors);
-                                });
-
-                                template.AddCell(cell =>
-                                {
-                                    cell.AddLabel()
-                                        .BindText(model => model.AcquiredDates)
-                                        .BindColor(model => model.Colors);
-                                });
-                            })
+                                cell.AddToggleButton()
+                                    .BindText(model => model.Names)
+                                    .BindIsToggled(model => model.Toggles)
+                                    .BindOnClicked(model => model.OnClickAchievement())
+                                    .BindColor(model => model.Colors);
+                            });
+                        })
                             .BindRowCount(model => model.Names);
                     });
-                });
+
+                    col.AddRow(row =>
+                    {
+                        row.AddSpacer();
+                        row.AddButton()
+                            .SetText("<")
+                            .SetWidth(32f)
+                            .SetHeight(35f)
+                            .BindOnClicked(model => model.OnClickPreviousPage());
+
+                        row.AddComboBox()
+                            .BindOptions(model => model.PageNumbers)
+                            .BindSelectedIndex(model => model.SelectedPageIndex);
+
+                        row.AddButton()
+                            .SetText(">")
+                            .SetWidth(32f)
+                            .SetHeight(35f)
+                            .BindOnClicked(model => model.OnClickNextPage());
+
+                        row.AddSpacer();
+                    });
+                })
+                
+                .AddColumn(col =>
+                {
+                    col.AddRow(row =>
+                    {
+                        row.AddLabel()
+                            .BindText(model => model.Name)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Center)
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHeight(20f);
+                    });
+
+                    col.AddRow(row =>
+                    {
+                        row.AddText()
+                            .BindText(model => model.Description);
+                    });
+
+                    col.AddRow(row =>
+                    {
+                        row.AddLabel()
+                            .BindText(model => model.AcquiredDate)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Center)
+                            .SetVerticalAlign(NuiVerticalAlign.Middle)
+                            .SetHeight(20f);
+                    });
+                })
+                ;
 
             return _builder.Build();
         }

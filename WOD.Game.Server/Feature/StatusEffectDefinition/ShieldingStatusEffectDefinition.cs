@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Service.StatusEffectService;
 
 namespace WOD.Game.Server.Feature.StatusEffectDefinition
@@ -19,19 +19,25 @@ namespace WOD.Game.Server.Feature.StatusEffectDefinition
         {
             _builder.Create(StatusEffectType.Shielding1)
                 .Name("Shielding I")
-                .EffectIcon(35);
+                .EffectIcon(EffectIconType.DamageImmunityIncrease)
+                .CannotReplace(StatusEffectType.Shielding2, StatusEffectType.Shielding3, StatusEffectType.Shielding4);
 
             _builder.Create(StatusEffectType.Shielding2)
                 .Name("Shielding II")
-                .EffectIcon(35);
+                .EffectIcon(EffectIconType.DamageImmunityIncrease)
+                .Replaces(StatusEffectType.Shielding1)
+                .CannotReplace(StatusEffectType.Shielding3, StatusEffectType.Shielding4);
 
             _builder.Create(StatusEffectType.Shielding3)
                 .Name("Shielding III")
-                .EffectIcon(35);
+                .EffectIcon(EffectIconType.DamageImmunityIncrease)
+                .Replaces(StatusEffectType.Shielding1, StatusEffectType.Shielding2)
+                .CannotReplace(StatusEffectType.Shielding4);
 
             _builder.Create(StatusEffectType.Shielding4)
                 .Name("Shielding IV")
-                .EffectIcon(35);
+                .EffectIcon(EffectIconType.DamageImmunityIncrease)
+                .Replaces(StatusEffectType.Shielding1, StatusEffectType.Shielding2, StatusEffectType.Shielding3);
         }
     }
 }

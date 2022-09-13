@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.ChatCommandService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.ChatCommandDefinition
 {

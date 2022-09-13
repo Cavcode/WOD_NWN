@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Enumeration;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service.ChatCommandService
 {
@@ -87,6 +86,17 @@ namespace WOD.Game.Server.Service.ChatCommandService
             return this;
         }
         /// <summary>
+        /// Indicates the chat command is an emote and should be categorized under that instead of
+        /// the general purpose chat commands.
+        /// </summary>
+        /// <returns>A configured ChatCommandBuilder.</returns>
+        public ChatCommandBuilder IsEmote()
+        {
+            _currentDetail.IsEmote = true;
+
+            return this;
+        }
+        /// <summary>
         /// Sets the action to play an animation.
         /// </summary>
         /// <param name="animation">The animation to play.</param>
@@ -97,6 +107,8 @@ namespace WOD.Game.Server.Service.ChatCommandService
             {
                 AssignCommand(user, () => ActionPlayAnimation(animation));
             };
+            _currentDetail.EmoteAnimation = animation;
+            _currentDetail.IsEmoteLooping = false;
 
             return this;
         }
@@ -122,17 +134,21 @@ namespace WOD.Game.Server.Service.ChatCommandService
 
                 AssignCommand(user, () => ActionPlayAnimation(animation, 1f, duration));
             };
+            _currentDetail.EmoteAnimation = animation;
+            _currentDetail.IsEmoteLooping = true;
 
             return this;
         }
 
         /// <summary>
         /// If specified, this command requires a target to run.
+        /// The objectTypes argument determines the type of objects that can be selected.
         /// </summary>
         /// <returns>A configured ChatCommandBuilder.</returns>
-        public ChatCommandBuilder RequiresTarget()
+        public ChatCommandBuilder RequiresTarget(ObjectType objectTypes = ObjectType.All)
         {
             _currentDetail.RequiresTarget = true;
+            _currentDetail.ValidTargetTypes = objectTypes;
 
             return this;
         }

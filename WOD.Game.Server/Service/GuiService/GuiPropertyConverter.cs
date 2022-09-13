@@ -1,10 +1,8 @@
 ﻿using System;
-using System.ComponentModel;
 using Newtonsoft.Json.Linq;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.Beamdog;
 using WOD.Game.Server.Service.GuiService.Component;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service.GuiService
 {

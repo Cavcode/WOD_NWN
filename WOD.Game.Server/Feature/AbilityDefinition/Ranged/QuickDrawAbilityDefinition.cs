@@ -3,13 +3,11 @@
 using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
 {
@@ -39,7 +37,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
 
         private static void ImpactAction(uint activator, uint target, int level, Location targetLocation)
         {
-            var dmg = 0.0f;
+            var dmg = 0;
 
             // If activator is in stealth mode, force them out of stealth mode.
             if (GetActionMode(activator, ActionMode.Stealth) == true)
@@ -48,34 +46,49 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
             switch (level)
             {
                 case 1:
-                    dmg = 2.0f;
+                    dmg = 10;
                     break;
                 case 2:
-                    dmg = 4.5f;
+                    dmg = 20;
                     break;
                 case 3:
-                    dmg = 7.0f;
+                    dmg = 30;
                     break;
                 default:
                     break;
             }
-            var perception = GetAbilityModifier(AbilityType.Perception, activator);
-            var defense = Stat.GetDefense(target, CombatDamageType.Physical);
-            var vitality = GetAbilityModifier(AbilityType.Vitality, target);
-            var damage = Combat.CalculateDamage(dmg, perception, defense, vitality, false);
+
+            dmg += Combat.GetAbilityDamageBonus(activator, SkillType.Ranged);
+
+
+            var attackerStat = GetAbilityScore(activator, AbilityType.Perception);
+            var attack = Stat.GetAttack(activator, AbilityType.Perception, SkillType.Ranged);
+            var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
+            var defenderStat = GetAbilityScore(target, AbilityType.Vitality);
+            var damage = Combat.CalculateDamage(
+                attack,
+                dmg, 
+                attackerStat, 
+                defense, 
+                defenderStat, 
+                0);
             ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Piercing), target);
+            AssignCommand(activator, () => ActionPlayAnimation(Animation.QuickDraw));
 
             CombatPoint.AddCombatPoint(activator, target, SkillType.Ranged, 3);
+            Enmity.ModifyEnmity(activator, target, 250 * level + damage);
         }
 
         private static void QuickDraw1(AbilityBuilder builder)
         {
             builder.Create(FeatType.QuickDraw1, PerkType.QuickDraw)
                 .Name("Quick Draw I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.QuickDraw, 30f)
-                .HasActivationDelay(2.0f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(3)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -84,10 +97,12 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
         {
             builder.Create(FeatType.QuickDraw2, PerkType.QuickDraw)
                 .Name("Quick Draw II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.QuickDraw, 30f)
-                .HasActivationDelay(2.0f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(4)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -96,10 +111,12 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
         {
             builder.Create(FeatType.QuickDraw3, PerkType.QuickDraw)
                 .Name("Quick Draw III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.QuickDraw, 30f)
-                .HasActivationDelay(2.0f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(5)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using WOD.Game.Server.Entity;
+using System.Globalization;
 using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
+using WOD.Game.Server.Service.GuiService;
 using WOD.Game.Server.Service.ChatCommandService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Core.NWScript.Enum;
 
 namespace WOD.Game.Server.Feature.ChatCommandDefinition
 {
@@ -16,59 +17,37 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
 
             BugCommand(builder);
             HelpCommand(builder);
+            ListEmotesCommand(builder);
+            StuckCommand(builder);
+            EmotesWindowCommand(builder);
 
             return builder.Build();
         }
 
         private static void BugCommand(ChatCommandBuilder builder)
         {
+
             builder.Create("bug")
-                .Description("Report a bug to the developers. Please include as much detail as possible.")
+                .Description("Toggles the bug report window to submit bugs to the developers. Please include as much detail as possible.")
                 .Permissions(AuthorizationLevel.All)
                 .Validate((user, args) =>
                 {
-                    if (args.Length <= 0 || args[0].Length <= 0)
+                    var lastSubmission = GetLocalString(user, "BUG_REPORT_LAST_SUBMISSION");
+                    if (!string.IsNullOrWhiteSpace(lastSubmission))
                     {
-                        return "Please enter in a description for the bug.";
+                        var dateTime = DateTime.ParseExact(lastSubmission, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+                        if (DateTime.UtcNow <= dateTime)
+                        {
+                            return "You may only submit one bug report per minute. Please wait and try again.";
+                        }                        
                     }
 
                     return string.Empty;
                 })
                 .Action((user, target, location, args) =>
                 {
-                    string message = string.Empty;
-
-                    foreach (var arg in args)
-                    {
-                        message += " " + arg;
-                    }
-
-                    if (message.Length > 1000)
-                    {
-                        SendMessageToPC(user, "Your message was too long. Please shorten it to no longer than 1000 characters and resubmit the bug. For reference, your message was: \"" + message + "\"");
-                        return;
-                    }
-                    var isPlayer = GetIsPC(user);
-                    var area = GetArea(user);
-                    var areaResref = GetResRef(area);
-                    var position = GetPosition(user);
-                    var orientation = GetFacing(user);
-
-                    BugReport report = new BugReport
-                    {
-                        SenderPlayerID = isPlayer ? (Guid?)Guid.Parse(GetObjectUUID(user)) : null,
-                        CDKey = GetPCPublicCDKey(user),
-                        Text = message,
-                        AreaResref = areaResref,
-                        SenderLocationX = position.X,
-                        SenderLocationY = position.Y,
-                        SenderLocationZ = position.X,
-                        SenderLocationOrientation = orientation
-                    };
-
-                    var key = Guid.NewGuid().ToString();
-                    DB.Set(key, report);
-                    SendMessageToPC(user, "Bug report submitted! Thank you for your report.");
+                    Gui.TogglePlayerWindow(user, GuiWindowType.BugReport);
                 });
         }
 
@@ -83,16 +62,68 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
 
                     if (authorization == AuthorizationLevel.DM)
                     {
-                        SendMessageToPC(user, Service.ChatCommand.HelpTextDM);
+                        SendMessageToPC(user, ChatCommand.HelpTextDM);
                     }
                     else if (authorization == AuthorizationLevel.Admin)
                     {
-                        SendMessageToPC(user, Service.ChatCommand.HelpTextAdmin);
+                        SendMessageToPC(user, ChatCommand.HelpTextAdmin);
                     }
                     else
                     {
-                        SendMessageToPC(user, Service.ChatCommand.HelpTextPlayer);
+                        SendMessageToPC(user, ChatCommand.HelpTextPlayer);
                     }
+                });
+        }
+        private static void ListEmotesCommand(ChatCommandBuilder builder)
+        {
+            builder.Create("emotes")
+                .Description("Displays all emotes available to you.")
+                .Permissions(AuthorizationLevel.All)
+                .Action((user, target, location, args) =>
+                {
+                    SendMessageToPC(user, ChatCommand.HelpTextEmote);
+                });
+        }
+        private static void StuckCommand(ChatCommandBuilder builder)
+        {
+
+            builder.Create("stuck")
+                .Description("Emergency Escape Command. Use this if you get stuck on a map.")
+                .Permissions(AuthorizationLevel.All)
+                .Validate((user, args) =>
+                {
+                    var lastSubmission = GetLocalString(user, "STUCK_REPORT_LAST_SUBMISSION");                    
+                    if (!string.IsNullOrWhiteSpace(lastSubmission))
+                    {
+                        var dateTime = DateTime.ParseExact(lastSubmission, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+                        if (DateTime.UtcNow <= dateTime)
+                        {
+                            return "You may only use the stuck command every five minutes. Please wait and try again.";
+                        }                        
+                    }
+
+                    return string.Empty;
+                })
+                .Action((user, target, location, args) =>
+                {
+                    var nextStuckAllowed = DateTime.UtcNow.AddMinutes(30);
+                    var waypoint = GetNearestObject(ObjectType.Waypoint,user);
+                    if (GetIsObjectValid(waypoint))
+                    {
+                        AssignCommand(user, () => { JumpToObject(waypoint); });
+                        SetLocalString(user, "STUCK_REPORT_LAST_SUBMISSION", nextStuckAllowed.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+                    }
+                });
+        }
+        private static void EmotesWindowCommand(ChatCommandBuilder builder)
+        {
+            builder.Create("emotegui", "emotesgui")
+                .Description("Displays the Emotes window.")
+                .Permissions(AuthorizationLevel.All)
+                .Action((user, target, location, args) =>
+                {
+                    Gui.TogglePlayerWindow(user, GuiWindowType.Emotes);
                 });
         }
     }

@@ -3,7 +3,6 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature
 {
@@ -23,7 +22,7 @@ namespace WOD.Game.Server.Feature
             if (dbPlayer == null) return;
             dbPlayer.HP = GetCurrentHitPoints(player);
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
         /// <summary>

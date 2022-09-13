@@ -5,7 +5,6 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Extension;
 using WOD.Game.Server.Service.FactionService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
 {
@@ -16,9 +15,9 @@ namespace WOD.Game.Server.Service
         public const int MaximumFaction = 5000;
 
         /// <summary>
-        /// When the module loads, cache all faction details into memory.
+        /// When the module caches, cache all faction details into memory.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void LoadFactions()
         {
             var factionTypes = Enum.GetValues(typeof(FactionType)).Cast<FactionType>();
@@ -112,7 +111,7 @@ namespace WOD.Game.Server.Service
                 }
             }
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
         /// <summary>
@@ -140,7 +139,7 @@ namespace WOD.Game.Server.Service
             if (dbPlayer.Factions[faction].Points < 0)
                 dbPlayer.Factions[faction].Points = 0;
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
 
             if (adjustBy > 0)
             {

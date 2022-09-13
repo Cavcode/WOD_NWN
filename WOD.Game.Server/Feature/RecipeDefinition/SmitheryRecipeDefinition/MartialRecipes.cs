@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.CraftService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
@@ -27,9 +26,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(3)
                 .Quantity(1)
                 .RequirementPerk(PerkType.MartialBlueprints, 1)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_veldite", 4)
-                .Component("wood", 2);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_veldite", 2)
+                .Component("wood", 1);
 
             // Titan Katar
             _builder.Create(RecipeType.TitanKatar, SkillType.Smithery)
@@ -38,8 +37,19 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(13)
                 .Quantity(1)
                 .RequirementPerk(PerkType.MartialBlueprints, 2)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_scordspar", 4)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_scordspar", 2)
+                .Component("fine_wood", 1);
+
+            // Sith Katar
+            _builder.Create(RecipeType.SithKatar, SkillType.Smithery)
+                .Category(RecipeCategoryType.Katar)
+                .Resref("sith_katar")
+                .Level(18)
+                .Quantity(1)
+                .RequirementPerk(PerkType.MartialBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_scordspar", 3)
                 .Component("fine_wood", 2);
 
             // Delta Katar
@@ -49,9 +59,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(23)
                 .Quantity(1)
                 .RequirementPerk(PerkType.MartialBlueprints, 3)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_plagionite", 4)
-                .Component("ancient_wood", 2);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_plagionite", 2)
+                .Component("ancient_wood", 1);
 
             // Proto Katar
             _builder.Create(RecipeType.ProtoKatar, SkillType.Smithery)
@@ -60,9 +70,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(33)
                 .Quantity(1)
                 .RequirementPerk(PerkType.MartialBlueprints, 4)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_keromber", 4)
-                .Component("aracia_wood", 2);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_keromber", 2)
+                .Component("aracia_wood", 1);
 
             // Ophidian Katar
             _builder.Create(RecipeType.OphidianKatar, SkillType.Smithery)
@@ -71,9 +81,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(43)
                 .Quantity(1)
                 .RequirementPerk(PerkType.MartialBlueprints, 5)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_jasioclase", 4)
-                .Component("hyphae_wood", 2);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_jasioclase", 2)
+                .Component("hyphae_wood", 1);
         }
 
         private void Staffs()
@@ -85,9 +95,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(5)
                 .Quantity(1)
                 .RequirementPerk(PerkType.MartialBlueprints, 1)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_veldite", 6)
-                .Component("wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_veldite", 3)
+                .Component("wood", 2);
 
             // Titan Staff
             _builder.Create(RecipeType.TitanStaff, SkillType.Smithery)
@@ -96,9 +106,20 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(15)
                 .Quantity(1)
                 .RequirementPerk(PerkType.MartialBlueprints, 2)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_scordspar", 6)
-                .Component("fine_wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_scordspar", 3)
+                .Component("fine_wood", 2);
+
+            // Sith Staff
+            _builder.Create(RecipeType.SithStaff, SkillType.Smithery)
+                .Category(RecipeCategoryType.Staff)
+                .Resref("sith_staff")
+                .Level(12)
+                .Quantity(1)
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_scordspar", 2)
+                .Component("fine_wood", 1);
 
             // Delta Staff
             _builder.Create(RecipeType.DeltaStaff, SkillType.Smithery)
@@ -107,9 +128,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(25)
                 .Quantity(1)
                 .RequirementPerk(PerkType.MartialBlueprints, 3)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_plagionite", 6)
-                .Component("ancient_wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_plagionite", 3)
+                .Component("ancient_wood", 2);
 
             // Proto Staff
             _builder.Create(RecipeType.ProtoStaff, SkillType.Smithery)
@@ -118,9 +139,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(35)
                 .Quantity(1)
                 .RequirementPerk(PerkType.MartialBlueprints, 4)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_keromber", 6)
-                .Component("aracia_wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_keromber", 3)
+                .Component("aracia_wood", 2);
 
             // Ophidian Staff
             _builder.Create(RecipeType.OphidianStaff, SkillType.Smithery)
@@ -129,9 +150,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(45)
                 .Quantity(1)
                 .RequirementPerk(PerkType.MartialBlueprints, 5)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_jasioclase", 6)
-                .Component("hyphae_wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_jasioclase", 3)
+                .Component("hyphae_wood", 2);
         }
 
     }

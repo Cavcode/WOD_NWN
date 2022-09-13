@@ -3,13 +3,11 @@
 using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
 {
@@ -39,7 +37,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
 
         private static void ImpactAction(uint activator, uint target, int level, Location targetLocation)
         {
-            var dmg = 0.0f;
+            var dmg = 0;
             // If activator is in stealth mode, force them out of stealth mode.
             if (GetActionMode(activator, ActionMode.Stealth) == true)
                 SetActionMode(activator, ActionMode.Stealth, false);
@@ -47,42 +45,67 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
             switch (level)
             {
                 case 1:
-                    dmg = 2.0f;
+                    dmg = 10;
                     break;
                 case 2:
-                    dmg = 4.5f;
+                    dmg = 18;
                     break;
                 case 3:
-                    dmg = 6.5f;
+                    dmg = 28;
                     break;
                 default:
                     break;
             }
 
+            dmg += Combat.GetAbilityDamageBonus(activator, SkillType.TwoHanded);
+
+            var stat = AbilityType.Perception;
+            if (Ability.IsAbilityToggled(activator, AbilityToggleType.StrongStyleSaberstaff))
+            {
+                stat = AbilityType.Might;
+            }
+
             var count = 0;
-            var creature = GetFirstObjectInShape(Shape.Sphere, RadiusSize.Small, GetLocation(activator), true);
+            var creature = GetFirstObjectInShape(Shape.Sphere, RadiusSize.Large, GetLocation(activator), true);
             while (GetIsObjectValid(creature) && count < 3)
             {
-                var willpower = GetAbilityModifier(AbilityType.Willpower, activator);
-                var defense = Stat.GetDefense(target, CombatDamageType.Physical);
-                var vitality = GetAbilityModifier(AbilityType.Vitality, target);
-                var damage = Combat.CalculateDamage(dmg, willpower, defense, vitality, false);
-                ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Slashing), target);
+                if (GetIsReactionTypeHostile(creature, activator))
+                {
+                    var attackerStat = GetAbilityScore(activator, stat);
+                    var attack = Stat.GetAttack(activator, stat, SkillType.TwoHanded);
+                    var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
+                    var defenderStat = GetAbilityScore(target, AbilityType.Vitality);
+                    var damage = Combat.CalculateDamage(
+                        attack,
+                        dmg,
+                        attackerStat,
+                        defense,
+                        defenderStat,
+                        0);
 
-                creature = GetNextObjectInShape(Shape.Sphere, RadiusSize.Small, GetLocation(activator), true);
-                count++;
-            }            
+                    var dTarget = creature;
 
-            Enmity.ModifyEnmityOnAll(activator, 1);
-            CombatPoint.AddCombatPointToAllTagged(activator, SkillType.TwoHanded, 3);
+                    DelayCommand(0.1f, () =>
+                        ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Slashing), dTarget));
+
+                    CombatPoint.AddCombatPoint(activator, creature, SkillType.TwoHanded, 3);
+                    Enmity.ModifyEnmity(activator, creature, 250 * level + damage);
+                    count++;
+                }
+
+                creature = GetNextObjectInShape(Shape.Sphere, RadiusSize.Large, GetLocation(activator), true);
+            }
+
+            AssignCommand(activator, () => ActionPlayAnimation(Animation.Whirlwind));
         }
 
         private static void CircleSlash1(AbilityBuilder builder)
         {
             builder.Create(FeatType.CircleSlash1, PerkType.CircleSlash)
                 .Name("Circle Slash I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.CircleSlash, 30f)
-                .HasActivationDelay(2.0f)
+                .HasActivationDelay(0.5f)
                 .RequirementStamina(3)
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()
@@ -93,8 +116,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
         {
             builder.Create(FeatType.CircleSlash2, PerkType.CircleSlash)
                 .Name("Circle Slash II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.CircleSlash, 30f)
-                .HasActivationDelay(2.0f)
+                .HasActivationDelay(0.5f)
                 .RequirementStamina(4)
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()
@@ -105,8 +129,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
         {
             builder.Create(FeatType.CircleSlash3, PerkType.CircleSlash)
                 .Name("Circle Slash III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.CircleSlash, 30f)
-                .HasActivationDelay(2.0f)
+                .HasActivationDelay(0.5f)
                 .RequirementStamina(5)
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()

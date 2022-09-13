@@ -3,7 +3,6 @@ using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Area;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
 using WOD.Game.Server.Enumeration;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
 {

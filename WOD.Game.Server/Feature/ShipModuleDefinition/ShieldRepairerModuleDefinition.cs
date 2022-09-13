@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
 using WOD.Game.Server.Service.SpaceService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.ShipModuleDefinition
 {
@@ -16,11 +14,11 @@ namespace WOD.Game.Server.Feature.ShipModuleDefinition
 
         public Dictionary<string, ShipModuleDetail> BuildShipModules()
         {
-            ShieldRepairer("shld_rep_b", "Basic Shield Repairer", "B. Shld. Rep.", "Restores your target's shield HP.", 1, 10f, 8, 8);
-            ShieldRepairer("shld_rep_1", "Shield Repairer I", "Shld. Rep. I", "Restores your target's shield HP.", 2, 12f, 9, 10);
-            ShieldRepairer("shld_rep_2", "Shield Repairer II", "Shld. Rep. II", "Restores your target's shield HP.", 3, 14f, 10, 12);
-            ShieldRepairer("shld_rep_3", "Shield Repairer III", "Shld. Rep. III", "Restores your target's shield HP.", 4, 16f, 11, 14);
-            ShieldRepairer("shld_rep_4", "Shield Repairer IV", "Shld. Rep. IV", "Restores your target's shield HP.", 5, 18f, 12, 16);
+            ShieldRepairer("shld_rep_b", "Basic Shield Repairer", "B. Shld. Rep.", "Restores another ship's shield HP by 8.", 1, 10f, 8, 8);
+            ShieldRepairer("shld_rep_1", "Shield Repairer I", "Shld. Rep. I", "Restores another ship's shield HP by 10.", 2, 12f, 9, 10);
+            ShieldRepairer("shld_rep_2", "Shield Repairer II", "Shld. Rep. II", "Restores another ship's shield HP by 12.", 3, 14f, 10, 12);
+            ShieldRepairer("shld_rep_3", "Shield Repairer III", "Shld. Rep. III", "Restores another ship's shield HP by 14.", 4, 16f, 11, 14);
+            ShieldRepairer("shld_rep_4", "Shield Repairer IV", "Shld. Rep. IV", "Restores another ship's shield HP by 16.", 5, 18f, 12, 16);
 
             return _builder.Build();
         }
@@ -33,13 +31,14 @@ namespace WOD.Game.Server.Feature.ShipModuleDefinition
                 .ShortName(shortName)
                 .Texture("iit_ess_040")
                 .Type(ShipModuleType.ShieldRepairer)
+                .MaxDistance(20f)
                 .ValidTargetType(ObjectType.Creature)
                 .Description(description)
                 .PowerType(ShipModulePowerType.High)
                 .RequirePerk(PerkType.DefensiveModules, requiredLevel)
                 .Recast(recast)
                 .Capacitor(capacitor)
-                .ActivatedAction((activator, activatorShipStatus, target, targetShipStatus) =>
+                .ActivatedAction((activator, activatorShipStatus, target, targetShipStatus, moduleBonus) =>
                 {
                     if (!GetIsObjectValid(target))
                     {
@@ -58,9 +57,8 @@ namespace WOD.Game.Server.Feature.ShipModuleDefinition
 
                     ApplyEffectToObject(DurationType.Instant, EffectVisualEffect(VisualEffect.Vfx_Imp_Ac_Bonus), target);
 
-                    targetShipStatus.Shield += baseRecovery;
-                    if (targetShipStatus.Shield > targetShipStatus.MaxShield)
-                        targetShipStatus.Shield = targetShipStatus.MaxShield;
+                    var recovery = baseRecovery + moduleBonus * 2;
+                    Space.RestoreShield(target, targetShipStatus, recovery);
 
                     Messaging.SendMessageNearbyToPlayers(activator, $"{GetName(activator)} restores {baseRecovery} shield HP to {GetName(target)}'s ship.");
                     CombatPoint.AddCombatPointToAllTagged(activator, SkillType.Piloting);

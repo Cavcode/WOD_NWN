@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
+using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
+using WOD.Game.Server.Service.AnimationService;
 using WOD.Game.Server.Service.SpawnService;
 
 namespace WOD.Game.Server.Feature.SpawnDefinition
@@ -22,10 +24,14 @@ namespace WOD.Game.Server.Feature.SpawnDefinition
                 .AddSpawn(ObjectType.Creature, "malsecdroid")
                 .WithFrequency(50)
                 .RandomlyWalks()
+                .ReturnsHome()
+                .PlayAnimation(DurationType.Instant, AnimationEvent.CreatureOnDeath, VisualEffect.Fnf_Fireball)
 
                 .AddSpawn(ObjectType.Creature, "malspiderdroid")
                 .WithFrequency(50)
-                .RandomlyWalks();
+                .RandomlyWalks()
+                .ReturnsHome()
+                .PlayAnimation(DurationType.Instant, AnimationEvent.CreatureOnDeath, VisualEffect.Fnf_Fireball);
         }
 
         private void MynockSpawns(SpawnTableBuilder builder)
@@ -33,7 +39,8 @@ namespace WOD.Game.Server.Feature.SpawnDefinition
             builder.Create("CZ220_MYNOCKS", "CZ-220 Mynocks")
                 .AddSpawn(ObjectType.Creature, "mynock")
                 .WithFrequency(100)
-                .RandomlyWalks();
+                .RandomlyWalks()
+                .ReturnsHome();
         }
 
         private void ColicoidExperimentSpawn(SpawnTableBuilder builder)
@@ -41,7 +48,8 @@ namespace WOD.Game.Server.Feature.SpawnDefinition
             builder.Create("CZ220_COLICOID_EXPERIMENT", "Colicoid Experiment")
                 .AddSpawn(ObjectType.Creature, "colicoidexp")
                 .WithFrequency(100)
-                .RandomlyWalks();
+                .RandomlyWalks()
+                .ReturnsHome();
         }
     }
 }

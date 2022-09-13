@@ -2,10 +2,8 @@
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Creature;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.PerkService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 using Random = WOD.Game.Server.Service.Random;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.NPC
@@ -33,7 +31,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.NPC
                 {
                     var count = 1;
                     var nearest = GetNearestCreature(CreatureType.IsAlive, 1, activator, count);
-                    while (GetIsObjectValid(nearest))
+                    while (GetIsObjectValid(nearest) && GetDistanceBetween(activator, nearest) <= 30f)
                     {
                         if (GetIsEnemy(nearest, activator))
                         {
@@ -41,6 +39,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.NPC
 
                             ApplyEffectToObject(DurationType.Temporary, EffectKnockdown(), nearest, duration);
                             ApplyEffectToObject(DurationType.Instant, EffectVisualEffect(VisualEffect.Vfx_Com_Chunk_Stone_Small), nearest);
+
+                            SendMessageToPC(nearest, "The earthquake knocks you down!");
                         }
 
                         count++;

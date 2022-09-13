@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
 
@@ -8,25 +7,120 @@ namespace WOD.Game.Server.Feature.PerkDefinition
 {
     public class SmitheryPerkDefinition : IPerkListDefinition
     {
+        private readonly PerkBuilder _builder = new();
+
         public Dictionary<PerkType, PerkDetail> BuildPerks()
         {
-            var builder = new PerkBuilder();
+            Synthesis();
+            Touch();
+            Abilities();
 
-            OneHandedBlueprints(builder);
-            TwoHandedBlueprints(builder);
-            MartialBlueprints(builder);
-            RangedBlueprints(builder);
+            OneHandedBlueprints();
+            TwoHandedBlueprints();
+            MartialBlueprints();
+            RangedBlueprints();
 
-            ArmorBlueprints(builder);
-            AccessoryBlueprints(builder);
+            ArmorBlueprints();
+            AccessoryBlueprints();
 
-            return builder.Build();
+            SmitheryEquipment();
+
+            return _builder.Build();
         }
 
-        private void OneHandedBlueprints(PerkBuilder builder)
+        private void Synthesis()
         {
-            builder.Create(PerkCategoryType.Smithery, PerkType.OneHandedBlueprints)
-                .Name("Vibroblade Blueprints")
+            _builder.Create(PerkCategoryType.Smithery, PerkType.RapidSynthesisSmithery)
+                .Name("Rapid Synthesis (Smithery)")
+
+                .AddPerkLevel()
+                .Description("Increases progress by 30. (75% success rate)")
+                .Price(1)
+                .RequirementSkill(SkillType.Smithery, 10);
+
+
+            _builder.Create(PerkCategoryType.Smithery, PerkType.CarefulSynthesisSmithery)
+                .Name("Careful Synthesis (Smithery)")
+
+                .AddPerkLevel()
+                .Description("Increases progress by 80. (50% success rate)")
+                .Price(1)
+                .RequirementSkill(SkillType.Smithery, 30);
+        }
+
+        private void Touch()
+        {
+            _builder.Create(PerkCategoryType.Smithery, PerkType.BasicTouchSmithery)
+                .Name("Basic Touch (Smithery)")
+
+                .AddPerkLevel()
+                .Description("Increases quality by 10. (90% success rate)")
+                .Price(1)
+                .RequirementSkill(SkillType.Smithery, 5);
+
+            _builder.Create(PerkCategoryType.Smithery, PerkType.StandardTouchSmithery)
+                .Name("Standard Touch (Smithery)")
+
+                .AddPerkLevel()
+                .Description("Increases quality by 30. (75% success rate)")
+                .Price(1)
+                .RequirementSkill(SkillType.Smithery, 15);
+
+            _builder.Create(PerkCategoryType.Smithery, PerkType.PreciseTouchSmithery)
+                .Name("Precise Touch (Smithery)")
+
+                .AddPerkLevel()
+                .Description("Increases quality by 80. (50% success rate)")
+                .Price(1)
+                .RequirementSkill(SkillType.Smithery, 35);
+        }
+
+        private void Abilities()
+        {
+            _builder.Create(PerkCategoryType.Smithery, PerkType.MastersMendSmithery)
+                .Name("Master's Mend (Smithery)")
+
+                .AddPerkLevel()
+                .Description("Restores item durability by 30.")
+                .Price(1)
+                .RequirementSkill(SkillType.Smithery, 10);
+
+            _builder.Create(PerkCategoryType.Smithery, PerkType.SteadyHandSmithery)
+                .Name("Steady Hand (Smithery)")
+
+                .AddPerkLevel()
+                .Description("Increases success rate of next synthesis ability to 100%.")
+                .Price(1)
+                .RequirementSkill(SkillType.Smithery, 20);
+
+            _builder.Create(PerkCategoryType.Smithery, PerkType.MuscleMemorySmithery)
+                .Name("Muscle Memory (Smithery)")
+
+                .AddPerkLevel()
+                .Description("Increases success rate of next touch ability to 100%.")
+                .Price(1)
+                .RequirementSkill(SkillType.Smithery, 40);
+
+            _builder.Create(PerkCategoryType.Smithery, PerkType.VenerationSmithery)
+                .Name("Veneration (Smithery)")
+
+                .AddPerkLevel()
+                .Description("Reduces CP cost of Synthesis abilitites by 50% for the next four actions.")
+                .Price(1)
+                .RequirementSkill(SkillType.Smithery, 25);
+
+            _builder.Create(PerkCategoryType.Smithery, PerkType.WasteNotSmithery)
+                .Name("Waste Not (Smithery)")
+
+                .AddPerkLevel()
+                .Description("Reduces loss of durability by 50% for the next four actions.")
+                .Price(1)
+                .RequirementSkill(SkillType.Smithery, 8);
+        }
+        private void OneHandedBlueprints()
+        {
+            _builder.Create(PerkCategoryType.Smithery, PerkType.OneHandedBlueprints)
+                .Name("One-Handed Blueprints")
 
                 .AddPerkLevel()
                 .Description("Grants access to tier 1 One-Handed blueprints.")
@@ -58,9 +152,9 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .GrantsFeat(FeatType.OneHandedBlueprints5);
         }
 
-        private void TwoHandedBlueprints(PerkBuilder builder)
+        private void TwoHandedBlueprints()
         {
-            builder.Create(PerkCategoryType.Smithery, PerkType.TwoHandedBlueprints)
+            _builder.Create(PerkCategoryType.Smithery, PerkType.TwoHandedBlueprints)
                 .Name("Two-Handed Blueprints")
 
                 .AddPerkLevel()
@@ -93,9 +187,9 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .GrantsFeat(FeatType.TwoHandedBlueprints5);
         }
 
-        private void MartialBlueprints(PerkBuilder builder)
+        private void MartialBlueprints()
         {
-            builder.Create(PerkCategoryType.Smithery, PerkType.MartialBlueprints)
+            _builder.Create(PerkCategoryType.Smithery, PerkType.MartialBlueprints)
                 .Name("Martial Blueprints")
 
                 .AddPerkLevel()
@@ -128,9 +222,9 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .GrantsFeat(FeatType.MartialBlueprints5);
         }
 
-        private void RangedBlueprints(PerkBuilder builder)
+        private void RangedBlueprints()
         {
-            builder.Create(PerkCategoryType.Smithery, PerkType.RangedBlueprints)
+            _builder.Create(PerkCategoryType.Smithery, PerkType.RangedBlueprints)
                 .Name("Ranged Blueprints")
 
                 .AddPerkLevel()
@@ -163,9 +257,9 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .GrantsFeat(FeatType.RangedBlueprints5);
         }
 
-        private void ArmorBlueprints(PerkBuilder builder)
+        private void ArmorBlueprints()
         {
-            builder.Create(PerkCategoryType.Smithery, PerkType.ArmorBlueprints)
+            _builder.Create(PerkCategoryType.Smithery, PerkType.ArmorBlueprints)
                 .Name("Armor Blueprints")
 
                 .AddPerkLevel()
@@ -198,9 +292,9 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .GrantsFeat(FeatType.ArmorBlueprints5);
         }
 
-        private void AccessoryBlueprints(PerkBuilder builder)
+        private void AccessoryBlueprints()
         {
-            builder.Create(PerkCategoryType.Smithery, PerkType.AccessoryBlueprints)
+            _builder.Create(PerkCategoryType.Smithery, PerkType.AccessoryBlueprints)
                 .Name("Accessory Blueprints")
 
                 .AddPerkLevel()
@@ -233,6 +327,41 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .GrantsFeat(FeatType.AccessoryBlueprints5);
         }
 
+        private void SmitheryEquipment()
+        {
+            _builder.Create(PerkCategoryType.Smithery, PerkType.SmitheryEquipment)
+                .Name("Smithery Equipment")
+
+                .AddPerkLevel()
+                .Description("Grants the ability to equip tier 1 Smithery equipment.")
+                .Price(2)
+                .RequirementSkill(SkillType.Smithery, 5)
+                .GrantsFeat(FeatType.SmitheryEquipment1)
+
+                .AddPerkLevel()
+                .Description("Grants the ability to equip tier 2 Smithery equipment.")
+                .Price(3)
+                .RequirementSkill(SkillType.Smithery, 15)
+                .GrantsFeat(FeatType.SmitheryEquipment2)
+
+                .AddPerkLevel()
+                .Description("Grants the ability to equip tier 3 Smithery equipment.")
+                .Price(4)
+                .RequirementSkill(SkillType.Smithery, 25)
+                .GrantsFeat(FeatType.SmitheryEquipment3)
+
+                .AddPerkLevel()
+                .Description("Grants the ability to equip tier 4 Smithery equipment.")
+                .Price(4)
+                .RequirementSkill(SkillType.Smithery, 35)
+                .GrantsFeat(FeatType.SmitheryEquipment4)
+
+                .AddPerkLevel()
+                .Description("Grants the ability to equip tier 5 Smithery equipment.")
+                .Price(5)
+                .RequirementSkill(SkillType.Smithery, 45)
+                .GrantsFeat(FeatType.SmitheryEquipment5);
+        }
 
     }
 }

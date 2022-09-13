@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.PerkService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 using Random = WOD.Game.Server.Service.Random;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
@@ -94,7 +92,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         /// <returns>true if within range, false otherwise</returns>
         protected bool IsWithinRange(uint activator, uint target)
         {
-            const float BaseDistance = 2f;
+            const float BaseDistance = 6f;
             var distance = BaseDistance + Perk.GetEffectivePerkLevel(activator, PerkType.RangedHealing);
 
             return !(GetDistanceBetween(activator, target) > distance);

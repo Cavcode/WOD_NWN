@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 using Random = WOD.Game.Server.Service.Random;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
@@ -35,7 +33,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
 
                     ApplyEffectToObject(DurationType.Temporary, EffectKnockdown(), target, 12f);
                     CombatPoint.AddCombatPoint(activator, target, SkillType.MartialArts, 3);
-                    Enmity.ModifyEnmity(activator, target, 18);
+                    Enmity.ModifyEnmity(activator, target, 670);
                 });
         }
     }

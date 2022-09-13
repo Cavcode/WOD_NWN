@@ -1,7 +1,6 @@
 ﻿using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.DialogService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.DialogDefinition
 {
@@ -19,11 +18,13 @@ namespace WOD.Game.Server.Feature.DialogDefinition
 
         private void MainPageInit(DialogPage page)
         {
+            var player = GetPC();
             page.Header = "If you die, you will return to the last medical facility you registered at. Would you like to register to this medical facility?";
 
             page.AddResponse("Register", () =>
             {
-                var player = GetPC();
+                if (!GetIsPC(player) || GetIsDM(player)) return;
+
                 var playerId = GetObjectUUID(player);
                 var dbPlayer = DB.Get<Player>(playerId);
 
@@ -37,7 +38,7 @@ namespace WOD.Game.Server.Feature.DialogDefinition
                 dbPlayer.RespawnLocationY = position.Y;
                 dbPlayer.RespawnLocationZ = position.Z;
 
-                DB.Set(playerId, dbPlayer);
+                DB.Set(dbPlayer);
 
                 FloatingTextStringOnCreature("You will return to this location the next time you die.", player, false);
             });

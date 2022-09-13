@@ -1,10 +1,9 @@
 ﻿using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.KeyItemService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature
 {
@@ -64,22 +63,26 @@ namespace WOD.Game.Server.Feature
         }
 
         /// <summary>
-        /// Applies a permanent VFX on a placeable on heartbeat, then removes the heartbeat script.
+        /// Applies a permanent VFX on a placeable or creature on heartbeat, then removes the heartbeat script.
         /// </summary>
         [NWNEventHandler("permanent_vfx")]
         public static void ApplyPermanentVisualEffect()
         {
-            var placeable = OBJECT_SELF;
+            var target = OBJECT_SELF;
 
-            var vfxId = GetLocalInt(placeable, "PERMANENT_VFX_ID");
+            var vfxId = GetLocalInt(target, "PERMANENT_VFX_ID");
             var vfx = vfxId > 0 ? (VisualEffect) vfxId : VisualEffect.None;
             
             if (vfx != VisualEffect.None)
             {
-                ApplyEffectToObject(DurationType.Permanent, EffectVisualEffect(vfx), placeable);
+                ApplyEffectToObject(DurationType.Permanent, EffectVisualEffect(vfx), target);
             }
 
-            SetEventScript(placeable, EventScript.Placeable_OnHeartbeat, string.Empty);
+            var type = GetObjectType(target);
+            if(type == ObjectType.Placeable)
+                SetEventScript(target, EventScript.Placeable_OnHeartbeat, string.Empty);
+            else if (type == ObjectType.Creature)
+                SetEventScript(target, EventScript.Creature_OnHeartbeat, string.Empty);
         }
 
         /// <summary>
@@ -105,6 +108,58 @@ namespace WOD.Game.Server.Feature
                 AssignCommand(user, () => ActionStartConversation(target, string.Empty, true, false));
             }
         }
-        
+        /// <summary>
+        /// Handle sitting on an object.        
+        /// </summary>
+        [NWNEventHandler("sit")]
+        public static void Sit()
+        {
+            var user = GetLastUsedBy();
+
+            AssignCommand(user, () => ActionSit(OBJECT_SELF));
+            if (GetObjectVisualTransform(user, ObjectVisualTransform.Scale) == 1.0) return;
+
+            // Transformed creatures sit at the height of their transform. Normalise them to the height of the chair.
+            // We want to take the negative/opposite of their differential from "standard" and divide by 2.  So a 
+            // creature at 1.6 scale (0.6 above standard) should be Z-transformed by -0.3.
+            float fScale = GetObjectVisualTransform(user, ObjectVisualTransform.Scale) - 1.0f;
+            SetObjectVisualTransform(user, ObjectVisualTransform.TranslateZ, (-fScale) / 2.0f);           
+        }
+
+        /// <summary>
+        /// Whenever a player purchases a rebuild from the training terminal,
+        /// make them spend a rebuild token and send them to the rebuild area.
+        /// </summary>
+        [NWNEventHandler("buy_rebuild")]
+        public static void PurchaseRebuild()
+        {
+            var player = GetPCSpeaker();
+
+            if (!GetIsPC(player) || GetIsDM(player) || GetIsDMPossessed(player))
+            {
+                SendMessageToPC(player, $"Only players may use this terminal.");
+                return;
+            }
+
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+
+            if (dbPlayer.NumberRebuildsAvailable <= 0)
+            {
+                SendMessageToPC(player, ColorToken.Red($"You do not have any rebuild tokens."));
+                return;
+            }
+
+            dbPlayer.NumberRebuildsAvailable--;
+
+            DB.Set(dbPlayer);
+
+            var waypoint = GetWaypointByTag("REBUILD_LANDING");
+            var location = GetLocation(waypoint);
+            AssignCommand(player, () => ClearAllActions());
+            AssignCommand(player, () => JumpToLocation(location));
+
+            SendMessageToPC(player, $"Remaining rebuild tokens: {dbPlayer.NumberRebuildsAvailable}");
+        }
     }
 }

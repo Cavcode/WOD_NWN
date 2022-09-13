@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.CraftService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
@@ -30,9 +29,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(5)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 1)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("ref_veldite", 6)
-                .Component("fiberp_ruined", 3);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 3)
+                .Component("fiberp_ruined", 2);
 
             // Spiritmaster Boots
             _builder.Create(RecipeType.SpiritmasterBoots, SkillType.Smithery)
@@ -41,9 +40,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(5)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 1)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("lth_ruined", 6)
-                .Component("fiberp_ruined", 3);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("lth_ruined", 3)
+                .Component("fiberp_ruined", 2);
 
             // Combat Boots
             _builder.Create(RecipeType.CombatBoots, SkillType.Smithery)
@@ -52,9 +51,57 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(5)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 1)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("lth_ruined", 4)
-                .Component("fiberp_ruined", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("lth_ruined", 2)
+                .Component("fiberp_ruined", 1);
+
+            // Advent Leggings
+            _builder.Create(RecipeType.AdventLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("advent_leggings")
+                .Level(10)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 1)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 5)
+                .Component("lth_ruined", 5)
+                .Component("jade", 3);
+
+            // Amateur Leggings
+            _builder.Create(RecipeType.AmateurLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("engi_leggings_1")
+                .Level(10)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 1)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 5)
+                .Component("lth_ruined", 5)
+                .Component("jade", 3);
+
+            // Cloth Leggings
+            _builder.Create(RecipeType.ClothLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("fabr_leggings_1")
+                .Level(10)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 1)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 5)
+                .Component("lth_ruined", 5)
+                .Component("jade", 3);
+
+            // Chef Leggings
+            _builder.Create(RecipeType.ChefLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("chef_leggings_1")
+                .Level(10)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 1)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 5)
+                .Component("lth_ruined", 5)
+                .Component("jade", 3);
         }
 
         private void Tier2()
@@ -66,9 +113,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(15)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 2)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("ref_scordspar", 6)
-                .Component("fiberp_flawed", 3);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 3)
+                .Component("fiberp_flawed", 2);
 
             // Vivid Boots
             _builder.Create(RecipeType.VividBoots, SkillType.Smithery)
@@ -77,9 +124,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(15)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 2)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("lth_flawed", 6)
-                .Component("fiberp_flawed", 3);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("lth_flawed", 3)
+                .Component("fiberp_flawed", 2);
 
             // Valor Boots
             _builder.Create(RecipeType.ValorBoots, SkillType.Smithery)
@@ -88,9 +135,57 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(15)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 2)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("lth_flawed", 4)
-                .Component("fiberp_flawed", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("lth_flawed", 2)
+                .Component("fiberp_flawed", 1);
+
+            // Frontier Leggings
+            _builder.Create(RecipeType.FrontierLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("frontier_legging")
+                .Level(20)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 5)
+                .Component("lth_flawed", 5)
+                .Component("agate", 3);
+
+            // Worker Leggings
+            _builder.Create(RecipeType.WorkerLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("engi_leggings_2")
+                .Level(20)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 5)
+                .Component("lth_flawed", 5)
+                .Component("agate", 3);
+
+            // Linen Leggings
+            _builder.Create(RecipeType.LinenLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("fabr_leggings_2")
+                .Level(20)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 5)
+                .Component("lth_flawed", 5)
+                .Component("agate", 3);
+
+            // Velveteen Leggings
+            _builder.Create(RecipeType.VelveteenLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("chef_leggings_2")
+                .Level(20)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 5)
+                .Component("lth_flawed", 5)
+                .Component("agate", 3);
         }
 
         private void Tier3()
@@ -102,9 +197,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(25)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 3)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_plagionite", 6)
-                .Component("fiberp_good", 3);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 3)
+                .Component("fiberp_good", 2);
 
             // Reginal Boots
             _builder.Create(RecipeType.ReginalBoots, SkillType.Smithery)
@@ -113,9 +208,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(25)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 3)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("lth_good", 6)
-                .Component("fiberp_good", 3);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("lth_good", 3)
+                .Component("fiberp_good", 2);
 
             // Forza Boots
             _builder.Create(RecipeType.ForzaBoots, SkillType.Smithery)
@@ -124,9 +219,57 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(25)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 3)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("lth_good", 4)
-                .Component("fiberp_good", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("lth_good", 2)
+                .Component("fiberp_good", 1);
+
+            // Majestic Leggings
+            _builder.Create(RecipeType.MajesticLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("majestic_legging")
+                .Level(30)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 3)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 5)
+                .Component("lth_good", 5)
+                .Component("citrine", 3);
+
+            // Mechanic Leggings
+            _builder.Create(RecipeType.MechanicLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("engi_leggings_3")
+                .Level(30)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 3)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 5)
+                .Component("lth_good", 5)
+                .Component("citrine", 3);
+
+            // Designer Leggings
+            _builder.Create(RecipeType.DesignerLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("fabr_leggings_3")
+                .Level(30)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 3)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 5)
+                .Component("lth_good", 5)
+                .Component("citrine", 3);
+
+            // Silk Leggings
+            _builder.Create(RecipeType.SilkLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("chef_leggings_3")
+                .Level(30)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 3)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 5)
+                .Component("lth_good", 5)
+                .Component("citrine", 3);
         }
 
         private void Tier4()
@@ -138,9 +281,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(35)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 4)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_keromber", 6)
-                .Component("fiberp_imperfect", 3);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 3)
+                .Component("fiberp_imperfect", 2);
 
             // Grenada Boots
             _builder.Create(RecipeType.GrenadaBoots, SkillType.Smithery)
@@ -149,9 +292,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(35)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 4)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("lth_imperfect", 6)
-                .Component("fiberp_imperfect", 3);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("lth_imperfect", 3)
+                .Component("fiberp_imperfect", 2);
 
             // Survival Boots
             _builder.Create(RecipeType.SurvivalBoots, SkillType.Smithery)
@@ -160,9 +303,57 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(35)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 4)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("lth_imperfect", 4)
-                .Component("fiberp_imperfect", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("lth_imperfect", 2)
+                .Component("fiberp_imperfect", 1);
+
+            // Dream Leggings
+            _builder.Create(RecipeType.DreamLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("dream_leggings")
+                .Level(40)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 4)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 5)
+                .Component("lth_imperfect", 5)
+                .Component("ruby", 3);
+
+            // Devotion Leggings
+            _builder.Create(RecipeType.DevotionLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("engi_leggings_4")
+                .Level(40)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 4)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 5)
+                .Component("lth_imperfect", 5)
+                .Component("ruby", 3);
+
+            // Oasis Leggings
+            _builder.Create(RecipeType.OasisLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("fabr_leggings_4")
+                .Level(40)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 4)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 5)
+                .Component("lth_imperfect", 5)
+                .Component("ruby", 3);
+
+            // Vintage Leggings
+            _builder.Create(RecipeType.VintageLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("chef_leggings_4")
+                .Level(40)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 4)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 5)
+                .Component("lth_imperfect", 5)
+                .Component("ruby", 3);
         }
 
         private void Tier5()
@@ -174,9 +365,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(45)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 5)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_jasioclase", 6)
-                .Component("fiberp_high", 3);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 3)
+                .Component("fiberp_high", 2);
 
             // Transcendent Boots
             _builder.Create(RecipeType.TranscendentBoots, SkillType.Smithery)
@@ -185,9 +376,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(45)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 5)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("lth_high", 6)
-                .Component("fiberp_high", 3);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("lth_high", 3)
+                .Component("fiberp_high", 2);
 
             // Supreme Boots
             _builder.Create(RecipeType.SupremeBoots, SkillType.Smithery)
@@ -196,9 +387,57 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(45)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 5)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("lth_high", 4)
-                .Component("fiberp_high", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("lth_high", 2)
+                .Component("fiberp_high", 1);
+
+            // Eternal Leggings
+            _builder.Create(RecipeType.EternalLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("eternal_leggings")
+                .Level(50)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 5)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 5)
+                .Component("lth_high", 5)
+                .Component("emerald", 3);
+
+            // Skysteel Leggings
+            _builder.Create(RecipeType.SkysteelLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("engi_leggings_5")
+                .Level(50)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 5)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 5)
+                .Component("lth_high", 5)
+                .Component("emerald", 3);
+
+            // Rose Leggings
+            _builder.Create(RecipeType.RoseLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("fabr_leggings_5")
+                .Level(50)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 5)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 5)
+                .Component("lth_high", 5)
+                .Component("emerald", 3);
+
+            // Moonflame Leggings
+            _builder.Create(RecipeType.MoonflameLeggings, SkillType.Smithery)
+                .Category(RecipeCategoryType.Boots)
+                .Resref("chef_leggings_5")
+                .Level(50)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 5)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 5)
+                .Component("lth_high", 5)
+                .Component("emerald", 3);
         }
     }
 }

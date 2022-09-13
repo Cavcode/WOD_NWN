@@ -1,0 +1,10 @@
+﻿namespace WOD.Game.Server.Service.AbilityService
+{
+    public enum AbilityToggleType
+    {
+        Invalid = 0,
+        Dash = 1,
+        StrongStyleSaberstaff = 2,
+        StrongStyleLightsaber = 3
+    }
+}

@@ -5,7 +5,6 @@ using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.DBService;
 using WOD.Game.Server.Service.GuiService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 {
@@ -14,7 +13,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
         public const int MaxNumberOfNotes = 25;
         public const int MaxNoteLength = 1000;
 
-        private readonly List<Guid> _noteIds = new();
+        private readonly List<string> _noteIds = new();
 
         private bool _isLoadingNote;
         public bool IsSaveEnabled
@@ -88,6 +87,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             var playerId = GetObjectUUID(Player);
             var query = new DBQuery<PlayerNote>()
                 .AddFieldSearch(nameof(PlayerNote.PlayerId), playerId, false)
+                .AddFieldSearch(nameof(PlayerNote.IsDMNote), false)
                 .OrderBy(nameof(PlayerNote.Name));
             var notes = DB.Search(query)
                 .ToList();
@@ -123,7 +123,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 
             _isLoadingNote = true;
             var noteId = _noteIds[SelectedNoteIndex];
-            var dbNote = DB.Get<PlayerNote>(noteId.ToString());
+            var dbNote = DB.Get<PlayerNote>(noteId);
 
             ActiveNoteName = dbNote.Name;
             ActiveNoteText = dbNote.Text;
@@ -136,12 +136,12 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 return;
 
             var noteId = _noteIds[SelectedNoteIndex];
-            var dbNote = DB.Get<PlayerNote>(noteId.ToString());
+            var dbNote = DB.Get<PlayerNote>(noteId);
 
             dbNote.Name = ActiveNoteName;
             dbNote.Text = ActiveNoteText;
 
-            DB.Set(noteId.ToString(), dbNote);
+            DB.Set(dbNote);
 
             IsSaveEnabled = false;
             NoteNames[SelectedNoteIndex] = ActiveNoteName;
@@ -159,7 +159,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             {
                 PlayerId = playerId,
                 Name = "New Note",
-                Text = string.Empty
+                Text = string.Empty,
             };
 
             _noteIds.Add(note.Id);
@@ -167,11 +167,14 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             NoteToggled.Add(false);
             IsNewEnabled = _noteIds.Count < MaxNumberOfNotes;
 
-            DB.Set(note.Id.ToString(), note);
+            DB.Set(note);
         };
 
         public Action OnClickDeleteNote() => () =>
         {
+            if (SelectedNoteIndex < 0)
+                return;
+
             var noteId = _noteIds[SelectedNoteIndex];
             var noteName = NoteNames[SelectedNoteIndex];
 
@@ -191,7 +194,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 IsSaveEnabled = false;
                 _isLoadingNote = false;
 
-                DB.Delete<PlayerNote>(noteId.ToString());
+                DB.Delete<PlayerNote>(noteId);
             });
         };
 

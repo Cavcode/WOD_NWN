@@ -14,8 +14,6 @@ namespace WOD.Game.Server.Service.SkillService
         Utility = 3,
         [SkillCategory("Languages", true, 8)]
         Languages = 4,
-        [SkillCategory("Disciplines", true, 8)]
-        Disciplines = 5,
     }
 
     public class SkillCategoryAttribute : Attribute

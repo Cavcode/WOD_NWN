@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.SkillService;
@@ -115,7 +116,7 @@ namespace WOD.Game.Server.Service.PerkService
         /// <returns>A perk builder with the configured options</returns>
         public PerkBuilder RequirementSkill(SkillType skill, int requiredRank)
         {
-            var requirement = new PerkSkillRequirement(skill, requiredRank);
+            var requirement = new PerkRequirementSkill(skill, requiredRank);
             _activeLevel.Requirements.Add(requirement);
 
             return this;
@@ -128,7 +129,7 @@ namespace WOD.Game.Server.Service.PerkService
         /// <returns>A perk builder with the configured options.</returns>
         public PerkBuilder RequirementQuest(string questId)
         {
-            var requirement = new PerkQuestRequirement(questId);
+            var requirement = new PerkRequirementQuest(questId);
             _activeLevel.Requirements.Add(requirement);
 
             return this;
@@ -141,7 +142,7 @@ namespace WOD.Game.Server.Service.PerkService
         /// <returns></returns>
         public PerkBuilder RequirementCharacterType(CharacterType characterType)
         {
-            var requirement = new PerkCharacterTypeRequirement(characterType);
+            var requirement = new PerkRequirementCharacterType(characterType);
             _activeLevel.Requirements.Add(requirement);
 
             return this;
@@ -153,7 +154,34 @@ namespace WOD.Game.Server.Service.PerkService
         /// <returns>A perk builder with the configured options.</returns>
         public PerkBuilder RequirementUnlocked()
         {
-            var requirement = new PerkUnlockRequirement(_activePerk.Type);
+            var requirement = new PerkRequirementUnlock(_activePerk.Type);
+            _activeLevel.Requirements.Add(requirement);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a requirement that the player must have leveled a specific other perk.
+        /// </summary>
+        /// <param name="mustHavePerkType">The type of perk the player must have.</param>
+        /// <param name="mustHavePerkLevel">Optionally, the level of the perk required.</param>
+        /// <returns>A perk builder with the configured options.</returns>
+        public PerkBuilder RequirementMustHavePerk(PerkType mustHavePerkType, int mustHavePerkLevel = 0)
+        {
+            var requirement = new PerkRequirementMustHavePerk(mustHavePerkType, mustHavePerkLevel);
+            _activeLevel.Requirements.Add(requirement);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a requirement that the player cannot have a specific other perk.
+        /// </summary>
+        /// <param name="cannotHavePerkType">The type of perk the player cannot have.</param>
+        /// <returns>A perk builder with the configured options.</returns>
+        public PerkBuilder RequirementCannotHavePerk(PerkType cannotHavePerkType)
+        {
+            var requirement = new PerkRequirementCannotHavePerk(cannotHavePerkType);
             _activeLevel.Requirements.Add(requirement);
 
             return this;
@@ -204,11 +232,56 @@ namespace WOD.Game.Server.Service.PerkService
         }
 
         /// <summary>
+        /// Adds a requirement check for purchasing this perk. Check must pass otherwise the
+        /// purchase action will fail.
+        /// </summary>
+        /// <param name="requirementAction">The action to run when a player attempts to purchase this perk.</param>
+        /// <returns>A perk builder with the configured options</returns>
+        public PerkBuilder PurchaseRequirement(PerkPurchaseRequirementAction requirementAction)
+        {
+            _activePerk.PurchaseRequirement = requirementAction;
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a requirement check for refunding this perk. Check must pass otherwise the
+        /// refund action will fail.
+        /// </summary>
+        /// <param name="requirementAction">The action to run when a player attempts to refund this perk.</param>
+        /// <returns>A perk builder with the configured options</returns>
+        public PerkBuilder RefundRequirement(PerkRefundRequirementAction requirementAction)
+        {
+            _activePerk.RefundRequirement = requirementAction;
+            return this;
+        }
+
+        /// <summary>
         /// Returns a built list of perks.
         /// </summary>
         /// <returns>A list of built perks.</returns>
         public Dictionary<PerkType, PerkDetail> Build()
         {
+            // Determine the icon to display within the perk menus.
+            // The first feat's icon will be used if found.
+            // If not found, it will fall back to the 'default_perk' icon instead.
+            foreach (var (_, detail) in _perks)
+            {
+                detail.IconResref = "default_perk";
+                foreach (var (_, perkLevel) in detail.PerkLevels)
+                {
+                    var feat = perkLevel.GrantedFeats.FirstOrDefault();
+                    if (feat == default)
+                        continue;
+
+                    var resref = Get2DAString("feat", "ICON", (int)feat);
+                    if (!string.IsNullOrWhiteSpace(resref))
+                    {
+                        detail.IconResref = resref;
+                        break;
+                    }
+                }
+            }
+
             return _perks;
         }
     }

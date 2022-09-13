@@ -2,12 +2,10 @@
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.PerkService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
-using Random = WOD.Game.Server.Service.Random;
+using WOD.Game.Server.Service.SkillService;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
 {
@@ -61,8 +59,10 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.Resuscitation1, PerkType.Resuscitation)
                 .Name("Resuscitation I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.Resuscitation, 180f)
                 .HasActivationDelay(6f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(10)
                 .UsesAnimation(Animation.LoopingGetLow)
                 .IsCastedAbility()
@@ -71,6 +71,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 .HasImpactAction((activator, target, _, _) =>
                 {
                     Impact(activator, target, 0);
+
+                    Enmity.ModifyEnmityOnAll(activator, 800);
+                    CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
                 });
         }
 
@@ -78,8 +81,10 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.Resuscitation2, PerkType.Resuscitation)
                 .Name("Resuscitation II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.Resuscitation, 180f)
                 .HasActivationDelay(6f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(10)
                 .UsesAnimation(Animation.LoopingGetLow)
                 .IsCastedAbility()
@@ -88,6 +93,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 .HasImpactAction((activator, target, _, _) =>
                 {
                     Impact(activator, target, 25);
+
+                    Enmity.ModifyEnmityOnAll(activator, 1400);
+                    CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
                 });
         }
 
@@ -95,8 +103,10 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.Resuscitation3, PerkType.Resuscitation)
                 .Name("Resuscitation III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.Resuscitation, 180f)
                 .HasActivationDelay(6f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(10)
                 .UsesAnimation(Animation.LoopingGetLow)
                 .IsCastedAbility()
@@ -105,6 +115,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 .HasImpactAction((activator, target, _, _) =>
                 {
                     Impact(activator, target, 50);
+
+                    Enmity.ModifyEnmityOnAll(activator, 2500);
+                    CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
                 });
         }
     }

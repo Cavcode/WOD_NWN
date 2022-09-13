@@ -1,21 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using WOD.Game.Server.Enumeration;
+using System.Linq;
+using WOD.Game.Server.Feature.GuiDefinition.Payload;
+using WOD.Game.Server.Feature.GuiDefinition.RefreshEvent;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.CraftService;
 using WOD.Game.Server.Service.GuiService;
 using WOD.Game.Server.Service.GuiService.Component;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 {
-    public class RecipesViewModel: GuiViewModelBase<RecipesViewModel, GuiPayloadBase>
+    public class RecipesViewModel: GuiViewModelBase<RecipesViewModel, RecipesPayload>,
+        IGuiRefreshable<PerkAcquiredRefreshEvent>,
+        IGuiRefreshable<PerkRefundedRefreshEvent>
     {
-        private int _currentRecipeIndex;
+        private static readonly GuiColor _green = new GuiColor(0, 255, 0);
+        private static readonly GuiColor _red = new GuiColor(255, 0, 0);
 
-        private readonly List<RecipeType> _recipeTypes = new List<RecipeType>();
+        private int _currentRecipeIndex;
+        private readonly List<RecipeType> _recipeTypes = new();
+        private const int RecordsPerPage = 20;
+        private bool _skipPaginationSearch;
+        private SkillType _craftingFilter;
+
+        public string SearchText
+        {
+            get => Get<string>();
+            set => Set(value);
+        }
+
+        public GuiBindingList<GuiComboEntry> Skills
+        {
+            get => Get<GuiBindingList<GuiComboEntry>>();
+            set => Set(value);
+        }
+
+        public int SelectedPageIndex
+        {
+            get => Get<int>();
+            set
+            {
+                Set(value);
+
+                if (!_skipPaginationSearch)
+                    Search();
+            }
+        }
+
+        public GuiBindingList<GuiComboEntry> PageNumbers
+        {
+            get => Get<GuiBindingList<GuiComboEntry>>();
+            set => Set(value);
+        }
 
         public int SelectedSkillId
         {
@@ -23,11 +60,14 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set
             {
                 Set(value);
-                SelectedCategoryId = 0;
                 IsSkillSelected = value != 0;
-                _currentRecipeIndex = -1;
-                IsRecipeSelected = false;
                 LoadCategories();
+
+                if (value == 0)
+                    SelectedCategoryId = 0;
+
+                if(!_skipPaginationSearch)
+                    Search();
             }
         }
 
@@ -38,20 +78,9 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             {
                 Set(value);
                 _currentRecipeIndex = -1;
-                IsRecipeSelected = false;
-                LoadRecipes();
-            }
-        }
 
-        public bool ShowAll
-        {
-            get => Get<bool>();
-            set
-            {
-                Set(value);
-                _currentRecipeIndex = -1;
-                IsRecipeSelected = false;
-                LoadRecipes();
+                if (!_skipPaginationSearch)
+                    Search();
             }
         }
 
@@ -61,25 +90,19 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set => Set(value);
         }
 
-        public bool IsRecipeSelected
-        {
-            get => Get<bool>();
-            set => Set(value);
-        }
-
-        public GuiBindingList<string> Recipes
+        public GuiBindingList<string> RecipeNames
         {
             get => Get<GuiBindingList<string>>();
             set => Set(value);
         }
 
-        public GuiBindingList<GuiColor> Colors
+        public GuiBindingList<GuiColor> RecipeColors
         {
             get => Get<GuiBindingList<GuiColor>>();
             set => Set(value);
         }
 
-        public GuiBindingList<bool> Selections
+        public GuiBindingList<bool> RecipeToggles
         {
             get => Get<GuiBindingList<bool>>();
             set => Set(value);
@@ -103,72 +126,92 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set => Set(value);
         }
 
-        public string RecipeModSlots
+        public string RecipeEnhancementSlots
         {
             get => Get<string>();
             set => Set(value);
         }
 
-        public GuiBindingList<string> RecipeRequirements
+        public bool CanCraftRecipe
+        {
+            get => Get<bool>();
+            set => Set(value);
+        }
+
+        public GuiBindingList<string> RecipeDetails
         {
             get => Get<GuiBindingList<string>>();
             set => Set(value);
         }
 
-        public GuiBindingList<GuiColor> RecipeRequirementColors
+        public GuiBindingList<GuiColor> RecipeDetailColors
         {
             get => Get<GuiBindingList<GuiColor>>();
             set => Set(value);
         }
 
-        public GuiBindingList<string> RecipeComponents
+        public bool IsSkillEnabled
         {
-            get => Get<GuiBindingList<string>>();
+            get => Get<bool>();
             set => Set(value);
         }
 
-        public GuiBindingList<GuiColor> RecipeComponentColors
+        public bool IsInCraftingMode
         {
-            get => Get<GuiBindingList<GuiColor>>();
+            get => Get<bool>();
             set => Set(value);
         }
 
-        public RecipesViewModel()
+        protected override void Initialize(RecipesPayload initialPayload)
         {
-            Recipes = new GuiBindingList<string>();
-            Colors = new GuiBindingList<GuiColor>();
-            Selections = new GuiBindingList<bool>();
-            Categories = new GuiBindingList<GuiComboEntry>();
-            RecipeRequirements = new GuiBindingList<string>();
-            RecipeRequirementColors = new GuiBindingList<GuiColor>();
-            RecipeComponents = new GuiBindingList<string>();
-            RecipeComponentColors = new GuiBindingList<GuiColor>();
-        }
+            _skipPaginationSearch = true;
 
-        protected override void Initialize(GuiPayloadBase initialPayload)
-        {
-            SelectedSkillId = 0;
+            _craftingFilter = initialPayload?.Skill ?? SkillType.Invalid;
+            IsInCraftingMode = _craftingFilter != SkillType.Invalid;
+            IsSkillEnabled = _craftingFilter == SkillType.Invalid;
+
+            RecipeName = string.Empty;
+            RecipeLevel = string.Empty;
+            RecipeEnhancementSlots = string.Empty;
+            SearchText = string.Empty;
+            SelectedPageIndex = 0;
+            SelectedSkillId = (int)_craftingFilter;
             SelectedCategoryId = 0;
             _currentRecipeIndex = -1;
-            ShowAll = false;
-            LoadCategories();
-            LoadRecipes();
 
+            LoadSkills();
+            LoadCategories();
+            Search();
+
+            WatchOnClient(model => model.SearchText);
             WatchOnClient(model => model.SelectedSkillId);
             WatchOnClient(model => model.SelectedCategoryId);
-            WatchOnClient(model => model.ShowAll);
+            WatchOnClient(model => model.SelectedPageIndex);
+            _skipPaginationSearch = false;
+        }
+
+        private void LoadSkills()
+        {
+            var skills = new GuiBindingList<GuiComboEntry>();
+            skills.Add(new GuiComboEntry("<All Skills>", 0));
+            foreach (var (type, detail) in Skill.GetActiveCraftingSkills())
+            {
+                skills.Add(new GuiComboEntry(detail.Name, (int)type));
+            }
+
+            Skills = skills;
         }
 
         private void LoadCategories()
         {
-            if (SelectedSkillId == 0)
+            if (SelectedSkillId == 0 && Categories != null)
             {
                 Categories.Clear();
                 Categories.Add(new GuiComboEntry("Select...", 0));
                 return;
             }
 
-            var selectedSkill = (SkillType) SelectedSkillId;
+            var selectedSkill = (SkillType)SelectedSkillId;
             var categories = new GuiBindingList<GuiComboEntry>();
 
             categories.Add(new GuiComboEntry("Select...", 0));
@@ -180,133 +223,206 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             Categories = categories;
         }
 
-        private void LoadRecipes()
+        private void Search()
         {
-            if (SelectedSkillId == 0 || SelectedCategoryId == 0)
+            Dictionary<RecipeType, RecipeDetail> recipes;
+
+            // Skill and Category selected
+            if (SelectedSkillId > 0 && SelectedCategoryId > 0)
             {
-                _currentRecipeIndex = -1;
-                _recipeTypes.Clear();
-                Recipes.Clear();
-                Colors.Clear();
-                Selections.Clear();
-                IsRecipeSelected = false;
-                return;
+                var skill = (SkillType)SelectedSkillId;
+                var category = (RecipeCategoryType)SelectedCategoryId;
+                recipes = Craft.GetRecipesBySkillAndCategory(skill, category);
+            }
+            // Only skill selected
+            else if (SelectedSkillId > 0)
+            {
+                var skill = (SkillType)SelectedSkillId;
+                recipes = Craft.GetAllRecipesBySkill(skill);
+            }
+            // Neither filters selected
+            else
+            {
+                recipes = Craft.GetAllRecipes();
             }
 
-            var sw = new Stopwatch();
-            sw.Start();
-
-            var recipes = new GuiBindingList<string>();
-            var colors = new GuiBindingList<GuiColor>();
-            var selections = new GuiBindingList<bool>();
-            var skillType = (SkillType) SelectedSkillId;
-            var categoryType = (RecipeCategoryType) SelectedCategoryId;
-
-            foreach (var (type, detail) in Craft.GetRecipesBySkillAndCategory(skillType, categoryType))
+            // Search text filter
+            if (!string.IsNullOrWhiteSpace(SearchText))
             {
-                var canCraft = CanPlayerCraftRecipe(type);
+                recipes = recipes
+                    .AsParallel()
+                    .Where(x =>
+                        Cache.GetItemNameByResref(x.Value.Resref)
+                            .ToLower()
+                            .Contains(SearchText.ToLower()))
+                    .ToDictionary(x => x.Key, y => y.Value);
+            }
+            
+            UpdatePagination(recipes.Count);
 
-                // Show All is unchecked and player can't craft this. Skip it.
-                if (!ShowAll && !canCraft)
-                    continue;
-                
-                var itemName = Cache.GetItemNameByResref(detail.Resref);
-                var name = $"{detail.Quantity}x {itemName}";
-                var color = canCraft 
-                    ? new GuiColor(0, 255, 0)
-                    : new GuiColor(255, 0, 0);
+            recipes = recipes
+                .Skip(SelectedPageIndex * RecordsPerPage)
+                .Take(RecordsPerPage)
+                .ToDictionary(x => x.Key, y => y.Value);
 
-                recipes.Add(name);
-                colors.Add(color);
-                selections.Add(false);
+            var recipeNames = new GuiBindingList<string>();
+            var recipeColors = new GuiBindingList<GuiColor>();
+            var recipeToggles = new GuiBindingList<bool>();
+            _recipeTypes.Clear();
+
+            foreach (var (type, detail) in recipes)
+            {
+                var canCraft = Craft.CanPlayerCraftRecipe(Player, type);
+                var name = $"{Cache.GetItemNameByResref(detail.Resref)} [Lvl. {detail.Level}]";
+
+                recipeNames.Add(name);
+                recipeColors.Add(canCraft ? _green : _red);
+                recipeToggles.Add(false);
                 _recipeTypes.Add(type);
             }
 
-            Recipes = recipes;
-            Colors = colors;
-            Selections = selections;
+            RecipeNames = recipeNames;
+            RecipeColors = recipeColors;
+            RecipeToggles = recipeToggles;
 
-            sw.Stop();
-            Console.WriteLine($"LoadRecipes: {sw.ElapsedMilliseconds}ms");
+            LoadRecipeDetail();
         }
 
-        private bool CanPlayerCraftRecipe(RecipeType recipeType)
+        private void UpdatePagination(int totalRecordCount)
         {
-            var recipe = Craft.GetRecipe(recipeType);
-            if (recipe.Requirements.Count <= 0) return true;
+            _skipPaginationSearch = true;
+            var pageNumbers = new GuiBindingList<GuiComboEntry>();
+            var pages = (int)(totalRecordCount / RecordsPerPage + (totalRecordCount % RecordsPerPage == 0 ? 0 : 1));
 
-            foreach (var requirement in recipe.Requirements)
+            // Always add page 1. In the event no recipes are found,
+            // it still needs to be displayed.
+            pageNumbers.Add(new GuiComboEntry($"Page 1", 0));
+            for (var x = 2; x <= pages; x++)
             {
-                if (!string.IsNullOrWhiteSpace(requirement.CheckRequirements(Player)))
-                {
-                    return false;
-                }
+                pageNumbers.Add(new GuiComboEntry($"Page {x}", x - 1));
             }
 
-            return true;
+            PageNumbers = pageNumbers;
+
+            // In the event no results are found, default the index to zero
+            if (pages <= 0)
+                SelectedPageIndex = 0;
+            // Otherwise, if current page is outside the new page bounds,
+            // set it to the last page in the list.
+            else if (SelectedPageIndex > pages - 1)
+                SelectedPageIndex = pages - 1;
+
+            _skipPaginationSearch = false;
+
+            _currentRecipeIndex = -1;
+            LoadRecipeDetail();
         }
+        public Action OnClickClearSearch() => () =>
+        {
+            SearchText = string.Empty;
+            Search();
+        };
+
+        public Action OnClickSearch() => Search;
+
+
+        public Action OnClickPreviousPage() => () =>
+        {
+            _skipPaginationSearch = true;
+            var newPage = SelectedPageIndex - 1;
+            if (newPage < 0)
+                newPage = 0;
+
+            _currentRecipeIndex = -1;
+            SelectedPageIndex = newPage;
+            Search();
+            _skipPaginationSearch = false;
+        };
+
+        public Action OnClickNextPage() => () =>
+        {
+            _skipPaginationSearch = true;
+            var newPage = SelectedPageIndex + 1;
+            if (newPage > PageNumbers.Count - 1)
+                newPage = PageNumbers.Count - 1;
+
+            _currentRecipeIndex = -1;
+            SelectedPageIndex = newPage;
+            Search();
+            _skipPaginationSearch = false;
+        };
 
         public Action OnSelectRecipe() => () =>
         {
             // Deselect the current recipe.
             if (_currentRecipeIndex > -1)
             {
-                Selections[_currentRecipeIndex] = false;
+                RecipeToggles[_currentRecipeIndex] = false;
             }
 
             _currentRecipeIndex = NuiGetEventArrayIndex();
-            IsRecipeSelected = _currentRecipeIndex > -1;
-            Selections[_currentRecipeIndex] = true;
+            RecipeToggles[_currentRecipeIndex] = true;
             LoadRecipeDetail();
+        };
+
+        public Action OnClickCraftItem() => () =>
+        {
+            if (Gui.IsWindowOpen(Player, GuiWindowType.Craft))
+                return;
+
+            var recipe = _recipeTypes[_currentRecipeIndex];
+            var payload = new CraftPayload(recipe);
+            Gui.TogglePlayerWindow(Player, GuiWindowType.Craft, payload, TetherObject);
         };
 
         private void LoadRecipeDetail()
         {
-            var selectedRecipe = _recipeTypes[_currentRecipeIndex];
-            var detail = Craft.GetRecipe(selectedRecipe);
-            var itemName = Cache.GetItemNameByResref(detail.Resref);
-            var modSlotType = "N/A";
-
-            if (detail.ModType == RecipeModType.Weapon)
-                modSlotType = "Weapon";
-            else if (detail.ModType == RecipeModType.Armor)
-                modSlotType = "Armor";
-            else if (detail.ModType == RecipeModType.Furniture)
-                modSlotType = "Furniture";
-
-            RecipeName = $"Recipe: {detail.Quantity}x {itemName}";
-            RecipeLevel = $"Level: {detail.Level}";
-            RecipeModSlots = $"Mod Slots: {detail.ModSlots}x {modSlotType}";
-
-            var recipeRequirements = new GuiBindingList<string>();
-            var recipeRequirementColors = new GuiBindingList<GuiColor>();
-            var recipeComponents = new GuiBindingList<string>();
-            var recipeComponentColors = new GuiBindingList<GuiColor>();
-
-            recipeRequirements.Add("<---REQUIREMENTS--->");
-            recipeRequirementColors.Add(new GuiColor(0, 255,255));
-            foreach (var req in detail.Requirements)
+            if (_currentRecipeIndex > -1)
             {
-                recipeRequirements.Add(req.RequirementText);
-                recipeRequirementColors.Add(string.IsNullOrWhiteSpace(req.CheckRequirements(Player))
-                    ? new GuiColor(0, 255, 0)
-                    : new GuiColor(255, 0, 0));
-            }
+                var selectedRecipe = _recipeTypes[_currentRecipeIndex];
+                var detail = Craft.GetRecipe(selectedRecipe);
+                var itemName = Cache.GetItemNameByResref(detail.Resref);
+                var enhancementSlotType = "N/A";
 
-            recipeComponents.Add("<---COMPONENTS--->");
-            recipeComponentColors.Add(new GuiColor(0, 255, 255));
-            foreach (var (resref, quantity) in detail.Components)
+                if (detail.EnhancementType == RecipeEnhancementType.Weapon)
+                    enhancementSlotType = "Weapon";
+                else if (detail.EnhancementType == RecipeEnhancementType.Armor)
+                    enhancementSlotType = "Armor";
+                else if (detail.EnhancementType == RecipeEnhancementType.Structure)
+                    enhancementSlotType = "Structure";
+                else if (detail.EnhancementType == RecipeEnhancementType.Food)
+                    enhancementSlotType = "Food";
+
+                RecipeName = $"Recipe: {detail.Quantity}x {itemName}";
+                RecipeLevel = $"Level: {detail.Level}";
+                RecipeEnhancementSlots = $"Enhancement Slots: {detail.EnhancementSlots}x {enhancementSlotType}";
+                var (recipeDetails, recipeDetailColors) = Craft.BuildRecipeDetail(Player, selectedRecipe);
+
+                RecipeDetails = recipeDetails;
+                RecipeDetailColors = recipeDetailColors;
+                CanCraftRecipe = Craft.CanPlayerCraftRecipe(Player, selectedRecipe);
+            }
+            else
             {
-                var componentName = Cache.GetItemNameByResref(resref);
-                recipeComponents.Add($"{quantity}x {componentName}");
-                recipeComponentColors.Add(new GuiColor(255, 255, 255));
+                RecipeName = string.Empty;
+                RecipeLevel = string.Empty;
+                RecipeEnhancementSlots = string.Empty;
+                SearchText = string.Empty;
+                RecipeDetails = new GuiBindingList<string>();
+                RecipeDetailColors = new GuiBindingList<GuiColor>();
+                _currentRecipeIndex = -1;
+                CanCraftRecipe = false;
             }
-
-            RecipeRequirements = recipeRequirements;
-            RecipeRequirementColors = recipeRequirementColors;
-            RecipeComponents = recipeComponents;
-            RecipeComponentColors = recipeComponentColors;
         }
 
+        public void Refresh(PerkAcquiredRefreshEvent payload)
+        {
+            Search();
+        }
+
+        public void Refresh(PerkRefundedRefreshEvent payload)
+        {
+            Search();
+        }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using WOD.Game.Server.Entity;
-using WOD.Game.Server.Enumeration;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service.CraftService
 {

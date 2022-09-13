@@ -2,7 +2,6 @@
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.StatusEffectService;
 
@@ -29,6 +28,11 @@ namespace WOD.Game.Server.Service.AbilityService
         public StatusEffectType ConcentrationStatusEffectType { get; set; }
         public bool CanBeUsedInSpace { get; set; }
         public bool IgnoreHeavyArmorPenalty { get; set; }
+        public float MaxRange { get; set; }
+        public bool IsHostileAbility { get; set; }
+        public bool DisplaysActivationMessage { get; set; }
+
+        public int AbilityLevel { get; set; }
 
         public AbilityDetail()
         {
@@ -36,6 +40,10 @@ namespace WOD.Game.Server.Service.AbilityService
             AnimationType = Animation.Invalid;
             Requirements = new List<IAbilityActivationRequirement>();
             ConcentrationStatusEffectType = StatusEffectType.Invalid;
+            MaxRange = 5.0f;
+            IsHostileAbility = false;
+            DisplaysActivationMessage = true;
+            AbilityLevel = 1;
         }
     }
 }

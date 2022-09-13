@@ -1,10 +1,8 @@
 ﻿using System;
 using WOD.Game.Server.Entity;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.DialogService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 using static WOD.Game.Server.Service.Random;
 
 namespace WOD.Game.Server.Feature.DialogDefinition

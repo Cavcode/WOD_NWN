@@ -3,13 +3,11 @@
 using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
 using WOD.Game.Server.Service.StatusEffectService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
 {
@@ -43,30 +41,34 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
             if (GetActionMode(activator, ActionMode.Stealth) == true)
                 SetActionMode(activator, ActionMode.Stealth, false);
 
+            var enmity = level * 300;
             switch (level)
             {
                 case 1:
-                    Enmity.ModifyEnmity(activator, target, 30);
+                    Enmity.ModifyEnmity(activator, target, enmity);
                     StatusEffect.Apply(activator, target, StatusEffectType.Tranquilize, 12f);
                     CombatPoint.AddCombatPoint(activator, target, SkillType.Ranged, 3);
                     break;
                 case 2:
-                    Enmity.ModifyEnmity(activator, target, 60);
+                    Enmity.ModifyEnmity(activator, target, enmity);
                     StatusEffect.Apply(activator, target, StatusEffectType.Tranquilize, 24f);
                     CombatPoint.AddCombatPoint(activator, target, SkillType.Ranged, 3);
                     break;
                 case 3:
                     var count = 0;
-                    var creature = GetFirstObjectInShape(Shape.Cone, RadiusSize.Colossal, GetLocation(target), true, ObjectType.Creature);
+                    var creature = GetFirstObjectInShape(Shape.SpellCone, RadiusSize.Colossal, GetLocation(target), true, ObjectType.Creature);
                     while (GetIsObjectValid(creature) && count < 3)
                     {
-
-                        Enmity.ModifyEnmity(activator, creature, 30);
+                        if(creature == activator) {
+                            creature = GetNextObjectInShape(Shape.SpellCone, RadiusSize.Colossal, GetLocation(target), true, ObjectType.Creature);
+                            continue;
+                        }
+                        Enmity.ModifyEnmity(activator, creature, enmity);
                         StatusEffect.Apply(activator, creature, StatusEffectType.Tranquilize, 12f);
                         CombatPoint.AddCombatPoint(activator, creature, SkillType.Ranged, 3);
                         count++;
 
-                        creature = GetNextObjectInShape(Shape.Cone, RadiusSize.Colossal, GetLocation(target), true, ObjectType.Creature);
+                        creature = GetNextObjectInShape(Shape.SpellCone, RadiusSize.Colossal, GetLocation(target), true, ObjectType.Creature);
                     }
                     break;
                 default:
@@ -79,8 +81,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
         {
             builder.Create(FeatType.TranquilizerShot1, PerkType.TranquilizerShot)
                 .Name("Tranquilizer Shot I")
-                .HasRecastDelay(RecastGroup.TranquilizerShot, 30f)
-                .HasActivationDelay(2.0f)
+                .Level(1)
+                .HasRecastDelay(RecastGroup.TranquilizerShot, 60f)
                 .RequirementStamina(3)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
@@ -90,8 +92,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
         {
             builder.Create(FeatType.TranquilizerShot2, PerkType.TranquilizerShot)
                 .Name("Tranquilizer Shot II")
-                .HasRecastDelay(RecastGroup.TranquilizerShot, 30f)
-                .HasActivationDelay(2.0f)
+                .Level(2)
+                .HasRecastDelay(RecastGroup.TranquilizerShot, 60f)
                 .RequirementStamina(4)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
@@ -101,8 +103,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
         {
             builder.Create(FeatType.TranquilizerShot3, PerkType.TranquilizerShot)
                 .Name("Tranquilizer Shot III")
-                .HasRecastDelay(RecastGroup.TranquilizerShot, 30f)
-                .HasActivationDelay(2.0f)
+                .Level(3)
+                .HasRecastDelay(RecastGroup.TranquilizerShot, 300f)
                 .RequirementStamina(5)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)

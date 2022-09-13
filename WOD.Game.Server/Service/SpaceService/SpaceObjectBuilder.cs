@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using WOD.Game.Server.Service.LogService;
 
 namespace WOD.Game.Server.Service.SpaceService
 {

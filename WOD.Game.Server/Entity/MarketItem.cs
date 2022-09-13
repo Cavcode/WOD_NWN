@@ -1,4 +1,5 @@
-﻿using WOD.Game.Server.Service.PlayerMarketService;
+﻿using System;
+using WOD.Game.Server.Service.PlayerMarketService;
 
 namespace WOD.Game.Server.Entity
 {
@@ -6,7 +7,6 @@ namespace WOD.Game.Server.Entity
     {
         [Indexed]
         public string MarketId { get; set; }
-        public string ItemId { get; set; }
         public string MarketName { get; set; }
         [Indexed]
         public string PlayerId { get; set; }
@@ -25,5 +25,6 @@ namespace WOD.Game.Server.Entity
         public string IconResref { get; set; }
         [Indexed]
         public MarketCategoryType Category { get; set; }
+        public DateTime? DateListed { get; set; }
     }
 }

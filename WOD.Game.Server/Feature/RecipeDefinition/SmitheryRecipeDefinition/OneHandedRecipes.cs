@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.CraftService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
@@ -14,6 +13,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
         {
             Knifes();
             Longswords();
+            Lightsabers();
 
             return _builder.Build();
         }
@@ -27,8 +27,8 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(1)
                 .Quantity(1)
                 .RequirementPerk(PerkType.OneHandedBlueprints, 1)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_veldite", 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_veldite", 1)
                 .Component("wood", 1);
 
             // Titan Knife
@@ -38,9 +38,20 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(11)
                 .Quantity(1)
                 .RequirementPerk(PerkType.OneHandedBlueprints, 2)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_scordspar", 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_scordspar", 1)
                 .Component("fine_wood", 1);
+
+            // Sith Knife
+            _builder.Create(RecipeType.SithKnife, SkillType.Smithery)
+                .Category(RecipeCategoryType.Knife)
+                .Resref("sith_knife")
+                .Level(17)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_scordspar", 4)
+                .Component("fine_wood", 2);
 
             // Delta Knife
             _builder.Create(RecipeType.DeltaKnife, SkillType.Smithery)
@@ -49,8 +60,8 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(21)
                 .Quantity(1)
                 .RequirementPerk(PerkType.OneHandedBlueprints, 3)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_plagionite", 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_plagionite", 1)
                 .Component("ancient_wood", 1);
 
             // Proto Knife
@@ -60,8 +71,8 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(31)
                 .Quantity(1)
                 .RequirementPerk(PerkType.OneHandedBlueprints, 4)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_keromber", 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_keromber", 1)
                 .Component("aracia_wood", 1);
 
             // Ophidian Knife
@@ -71,8 +82,8 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(41)
                 .Quantity(1)
                 .RequirementPerk(PerkType.OneHandedBlueprints, 5)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_jasioclase", 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_jasioclase", 1)
                 .Component("hyphae_wood", 1);
         }
 
@@ -85,9 +96,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(4)
                 .Quantity(1)
                 .RequirementPerk(PerkType.OneHandedBlueprints, 1)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_veldite", 5)
-                .Component("wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_veldite", 3)
+                .Component("wood", 2);
 
             // Titan Longsword
             _builder.Create(RecipeType.TitanLongsword, SkillType.Smithery)
@@ -96,7 +107,18 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(14)
                 .Quantity(1)
                 .RequirementPerk(PerkType.OneHandedBlueprints, 2)
-                .ModSlots(RecipeModType.Weapon, 1)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_scordspar", 3)
+                .Component("fine_wood", 2);
+
+            // Sith Longsword
+            _builder.Create(RecipeType.SithLongsword, SkillType.Smithery)
+                .Category(RecipeCategoryType.Longsword)
+                .Resref("sith_longsword")
+                .Level(18)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
                 .Component("ref_scordspar", 5)
                 .Component("fine_wood", 3);
 
@@ -107,9 +129,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(24)
                 .Quantity(1)
                 .RequirementPerk(PerkType.OneHandedBlueprints, 3)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_plagionite", 5)
-                .Component("ancient_wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_plagionite", 3)
+                .Component("ancient_wood", 2);
 
             // Proto Longsword
             _builder.Create(RecipeType.ProtoLongsword, SkillType.Smithery)
@@ -118,9 +140,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(34)
                 .Quantity(1)
                 .RequirementPerk(PerkType.OneHandedBlueprints, 4)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_keromber", 5)
-                .Component("aracia_wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_keromber", 3)
+                .Component("aracia_wood", 2);
 
             // Ophidian Longsword
             _builder.Create(RecipeType.OphidianLongsword, SkillType.Smithery)
@@ -129,9 +151,145 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(44)
                 .Quantity(1)
                 .RequirementPerk(PerkType.OneHandedBlueprints, 5)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_jasioclase", 5)
-                .Component("hyphae_wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_jasioclase", 3)
+                .Component("hyphae_wood", 2);
+        }
+
+        private void Lightsabers()
+        {
+            // Electroblade I
+            _builder.Create(RecipeType.Electroblade1, SkillType.Smithery)
+                .Category(RecipeCategoryType.Lightsaber)
+                .Resref("electroblade_1")
+                .Level(6)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 1)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("elec_ruined", 4)
+                .Component("ref_veldite", 2);
+
+            // Electroblade II
+            _builder.Create(RecipeType.Electroblade2, SkillType.Smithery)
+                .Category(RecipeCategoryType.Lightsaber)
+                .Resref("electroblade_2")
+                .Level(16)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("elec_flawed", 4)
+                .Component("ref_scordspar", 2);
+
+            // Sith Electroblade
+            _builder.Create(RecipeType.SithElectroblade, SkillType.Smithery)
+                .Category(RecipeCategoryType.Lightsaber)
+                .Resref("sith_electro")
+                .Level(19)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("elec_flawed", 5)
+                .Component("ref_scordspar", 3);
+
+            // Electroblade III
+            _builder.Create(RecipeType.Electroblade3, SkillType.Smithery)
+                .Category(RecipeCategoryType.Lightsaber)
+                .Resref("electroblade_3")
+                .Level(26)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 3)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("elec_good", 4)
+                .Component("ref_plagionite", 2);
+
+            // Electroblade IV
+            _builder.Create(RecipeType.Electroblade4, SkillType.Smithery)
+                .Category(RecipeCategoryType.Lightsaber)
+                .Resref("electroblade_4")
+                .Level(36)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 4)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("elec_imperfect", 4)
+                .Component("ref_keromber", 2);
+
+            // Electroblade V
+            _builder.Create(RecipeType.Electroblade5, SkillType.Smithery)
+                .Category(RecipeCategoryType.Lightsaber)
+                .Resref("electroblade_5")
+                .Level(46)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 5)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("elec_high", 4)
+                .Component("ref_jasioclase", 2);
+
+
+
+            // Training Saber I
+            _builder.Create(RecipeType.TrainingSaber1, SkillType.Smithery)
+                .Category(RecipeCategoryType.Lightsaber)
+                .Resref("saber_train_1")
+                .Level(8)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 1)
+                .RequirementUnlocked()
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("jade", 4)
+                .Component("ref_veldite", 2)
+                .Component("elec_ruined", 3);
+
+            // Training Saber II
+            _builder.Create(RecipeType.TrainingSaber2, SkillType.Smithery)
+                .Category(RecipeCategoryType.Lightsaber)
+                .Resref("saber_train_2")
+                .Level(18)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 2)
+                .RequirementUnlocked()
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("agate", 4)
+                .Component("ref_scordspar", 2)
+                .Component("elec_flawed", 3);
+
+            // Training Saber III
+            _builder.Create(RecipeType.TrainingSaber3, SkillType.Smithery)
+                .Category(RecipeCategoryType.Lightsaber)
+                .Resref("saber_train_3")
+                .Level(28)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 3)
+                .RequirementUnlocked()
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("citrine", 4)
+                .Component("ref_plagionite", 2)
+                .Component("elec_good", 3);
+
+            // Training Saber IV
+            _builder.Create(RecipeType.TrainingSaber4, SkillType.Smithery)
+                .Category(RecipeCategoryType.Lightsaber)
+                .Resref("saber_train_4")
+                .Level(38)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 4)
+                .RequirementUnlocked()
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ruby", 4)
+                .Component("ref_keromber", 2)
+                .Component("elec_imperfect", 3);
+
+            // Training Saber V
+            _builder.Create(RecipeType.TrainingSaber5, SkillType.Smithery)
+                .Category(RecipeCategoryType.Lightsaber)
+                .Resref("saber_train_5")
+                .Level(48)
+                .Quantity(1)
+                .RequirementPerk(PerkType.OneHandedBlueprints, 5)
+                .RequirementUnlocked()
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("emerald", 4)
+                .Component("ref_jasioclase", 2)
+                .Component("elec_high", 3);
         }
 
     }

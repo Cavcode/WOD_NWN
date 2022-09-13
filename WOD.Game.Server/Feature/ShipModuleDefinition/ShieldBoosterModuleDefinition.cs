@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SpaceService;
 
@@ -29,13 +28,16 @@ namespace WOD.Game.Server.Feature.ShipModuleDefinition
                 .Description($"Improves a ship's maximum shields by {shieldBoostAmount}.")
                 .PowerType(ShipModulePowerType.Low)
                 .RequirePerk(PerkType.DefensiveModules, requiredLevel)
-                .EquippedAction((creature, shipStatus) =>
+                .EquippedAction((creature, shipStatus, moduleBonus) =>
                 {
-                    shipStatus.MaxShield += shieldBoostAmount;
+                    shipStatus.MaxShield += shieldBoostAmount + moduleBonus * 2;
                 })
-                .UnequippedAction((creature, shipStatus) =>
+                .UnequippedAction((creature, shipStatus, moduleBonus) =>
                 {
-                    shipStatus.MaxShield -= shieldBoostAmount;
+                    shipStatus.MaxShield -= shieldBoostAmount + moduleBonus * 2;
+
+                    if (shipStatus.Shield > shipStatus.MaxShield)
+                        shipStatus.Shield = shipStatus.MaxShield;
                 });
         }
     }

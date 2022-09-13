@@ -12,6 +12,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition
         {
             _builder.CreateWindow(GuiWindowType.ChangePortrait)
                 .SetIsResizable(true)
+                .SetIsCollapsible(true)
                 .SetInitialGeometry(0, 0, 340f, 360f)
                 .SetTitle("Change Portrait")
 
@@ -33,15 +34,28 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                     col.AddRow(row =>
                     {
                         row.AddSpacer();
+                        row.AddColumn(col2 =>
+                        {
+                            col2.AddRow(row2 =>
+                            {
+                                row2.AddTextEdit()
+                                    .BindValue(model => model.ActivePortraitInternalId);
+                            });
+                        });
 
-                        row.AddSliderInt()
-                            .BindMaximum(model => model.MaximumPortraits)
-                            .SetMinimum(1)
-                            .BindValue(model => model.ActivePortraitInternalId)
-                            .SetStepSize(1);
+                        row.AddColumn(col2 =>
+                        {
+                            col2.AddRow(row2 =>
+                            {
+                                row2.AddLabel()
+                                    .BindText(model => model.MaxPortraitsText)
+                                    .SetHeight(35f)
+                                    .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                                    .SetVerticalAlign(NuiVerticalAlign.Middle);
+                            });
+                        });
 
                         row.AddSpacer();
-
                     });
 
                     col.AddRow(row =>

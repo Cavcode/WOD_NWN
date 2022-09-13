@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Service.StatusEffectService;
 
 namespace WOD.Game.Server.Feature.StatusEffectDefinition
@@ -19,7 +19,7 @@ namespace WOD.Game.Server.Feature.StatusEffectDefinition
         {
             _builder.Create(StatusEffectType.IronShell)
                 .Name("Iron Shell")
-                .EffectIcon(49);
+                .EffectIcon(EffectIconType.ElementalShield);
         }
     }
 }

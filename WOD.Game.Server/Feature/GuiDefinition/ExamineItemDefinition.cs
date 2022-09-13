@@ -10,8 +10,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
         public GuiConstructedWindow BuildWindow()
         {
             _builder.CreateWindow(GuiWindowType.ExamineItem)
-                .BindOnClosed(model => model.OnCloseWindow())
                 .SetIsResizable(true)
+                .SetIsCollapsible(true)
                 .SetInitialGeometry(0, 0, 385f, 379f)
                 .BindTitle(model => model.WindowTitle)
 

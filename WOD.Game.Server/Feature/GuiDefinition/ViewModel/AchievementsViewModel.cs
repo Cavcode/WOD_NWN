@@ -1,23 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using WOD.Game.Server.Entity;
+using WOD.Game.Server.Feature.GuiDefinition.RefreshEvent;
 using WOD.Game.Server.Service;
+using WOD.Game.Server.Service.AchievementService;
 using WOD.Game.Server.Service.GuiService;
 using WOD.Game.Server.Service.GuiService.Component;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 {
-    public class AchievementsViewModel: GuiViewModelBase<AchievementsViewModel, GuiPayloadBase>
+    public class AchievementsViewModel: GuiViewModelBase<AchievementsViewModel, GuiPayloadBase>,
+        IGuiRefreshable<AchievementUnlockedRefreshEvent>
     {
-        public bool ShowAll
-        {
-            get => Get<bool>();
-            set
-            {
-                Set(value);
-                LoadAchievements();
-            }
-        }
+        private const int EntriesPerPage = 25;
+        private int SelectedIndex { get; set; }
+        private readonly List<AchievementType> _types = new();
 
         public GuiBindingList<string> Names
         {
@@ -25,9 +23,9 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set => Set(value);
         }
 
-        public GuiBindingList<string> Descriptions
+        public GuiBindingList<bool> Toggles
         {
-            get => Get<GuiBindingList<string>>();
+            get => Get<GuiBindingList<bool>>();
             set => Set(value);
         }
 
@@ -37,73 +35,172 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set => Set(value);
         }
 
-        public GuiBindingList<string> AcquiredDates
+        public string Name
         {
-            get => Get<GuiBindingList<string>>();
+            get => Get<string>();
             set => Set(value);
         }
 
-        public AchievementsViewModel()
+        public string Description
         {
-            Names = new GuiBindingList<string>();
-            Descriptions = new GuiBindingList<string>();
-            Colors = new GuiBindingList<GuiColor>();
+            get => Get<string>();
+            set => Set(value);
         }
+
+        public string AcquiredDate
+        {
+            get => Get<string>();
+            set => Set(value);
+        }
+
+        public int SelectedPageIndex
+        {
+            get => Get<int>();
+            set
+            {
+                Set(value);
+                UpdatePagination();
+                Search();
+            }
+        }
+
+        public GuiBindingList<GuiComboEntry> PageNumbers
+        {
+            get => Get<GuiBindingList<GuiComboEntry>>();
+            set => Set(value);
+        }
+        
 
         protected override void Initialize(GuiPayloadBase initialPayload)
         {
-            ShowAll = true;
-            LoadAchievements();
-            WatchOnClient(model => model.ShowAll);
+            SelectedPageIndex = -1;
+            UpdatePagination();
+            Search();
+
+            WatchOnClient(model => model.SelectedPageIndex);
         }
 
-        private void LoadAchievements()
+        private void Search()
         {
             var cdKey = GetPCPublicCDKey(Player);
-            var dbAccount = DB.Get<Account>(cdKey);
+            var dbAccount = DB.Get<Account>(cdKey) ?? new Account(cdKey);
+            var achievements = Achievement.GetActiveAchievements()
+                .Skip(SelectedPageIndex * EntriesPerPage)
+                .Take(EntriesPerPage);
 
             var names = new GuiBindingList<string>();
-            var descriptions = new GuiBindingList<string>();
             var colors = new GuiBindingList<GuiColor>();
-            var acquiredDates = new GuiBindingList<string>();
+            var toggles = new GuiBindingList<bool>();
+            _types.Clear();
 
-            if (ShowAll)
+            foreach (var (type, detail) in achievements)
             {
-                foreach (var (type, detail) in Achievement.GetActiveAchievements())
-                {
-                    names.Add(detail.Name);
-                    descriptions.Add(detail.Description);
-
-                    if (dbAccount.Achievements.ContainsKey(type))
-                    {
-                        var date = dbAccount.Achievements[type];
-                        colors.Add(new GuiColor(0, 255, 0));
-                        acquiredDates.Add(date.ToString("g"));
-                    }
-                    else
-                    {
-                        colors.Add(new GuiColor(255, 0, 0));
-                        acquiredDates.Add("LOCKED");
-                    }
-                }
-            }
-            else
-            {
-                foreach (var (type, date) in dbAccount.Achievements)
-                {
-                    var detail = Achievement.GetAchievement(type);
-
-                    names.Add(detail.Name);
-                    descriptions.Add(detail.Description);
-                    colors.Add(new GuiColor(0, 255, 0));
-                    acquiredDates.Add(date.ToString("g"));
-                }
+                _types.Add(type);
+                names.Add(detail.Name);
+                colors.Add(dbAccount.Achievements.ContainsKey(type)
+                    ? new GuiColor(0, 255, 0)
+                    : new GuiColor(255, 0, 0));
+                toggles.Add(false);
             }
 
+            SelectedIndex = -1;
             Names = names;
-            Descriptions = descriptions;
             Colors = colors;
-            AcquiredDates = acquiredDates;
+            Toggles = toggles;
+
+            LoadAchievement();
+        }
+
+        private void LoadAchievement()
+        {
+            if (SelectedIndex <= -1)
+            {
+                Name = string.Empty;
+                Description = string.Empty;
+                AcquiredDate = string.Empty;
+                return;
+            }
+
+            var type = _types[SelectedIndex];
+            var achievement = Achievement.GetAchievement(type);
+            var cdKey = GetPCPublicCDKey(Player);
+            var dbAccount = DB.Get<Account>(cdKey) ?? new Account(cdKey);
+
+            Name = achievement.Name;
+            Description = achievement.Description;
+            AcquiredDate = dbAccount.Achievements.ContainsKey(type)
+                ? $"Acquired: {dbAccount.Achievements[type].ToString("g")}"
+                : string.Empty;
+        }
+
+        private void UpdatePagination()
+        {
+            var totalRecordCount = Achievement.GetActiveAchievements().Count;
+            var pageNumbers = new GuiBindingList<GuiComboEntry>();
+            var pages = (int)(totalRecordCount / EntriesPerPage + (totalRecordCount % EntriesPerPage == 0 ? 0 : 1));
+
+            // Always add page 1.
+            pageNumbers.Add(new GuiComboEntry($"Page 1", 0));
+            for (var x = 2; x <= pages; x++)
+            {
+                pageNumbers.Add(new GuiComboEntry($"Page {x}", x - 1));
+            }
+
+            PageNumbers = pageNumbers;
+
+            // In the event no results are found, default the index to zero
+            if (pages <= 0)
+                SelectedPageIndex = 0;
+
+            // Otherwise, if current page is outside the new page bounds,
+            // set it to the last page in the list.
+            else if (SelectedPageIndex > pages - 1)
+                SelectedPageIndex = pages - 1;
+        }
+
+        public Action OnClickAchievement() => () =>
+        {
+            if (SelectedIndex > -1)
+                Toggles[SelectedIndex] = false;
+
+            var index = NuiGetEventArrayIndex();
+            SelectedIndex = index;
+            Toggles[SelectedIndex] = true;
+
+            LoadAchievement();
+        };
+
+        public Action OnClickPreviousPage() => () =>
+        {
+            var newPage = SelectedPageIndex - 1;
+            if (newPage < 0)
+                newPage = 0;
+
+            SelectedPageIndex = newPage;
+        };
+
+        public Action OnClickNextPage() => () =>
+        {
+            var newPage = SelectedPageIndex + 1;
+            if (newPage > PageNumbers.Count - 1)
+                newPage = PageNumbers.Count - 1;
+
+            SelectedPageIndex = newPage;
+        };
+
+        public void Refresh(AchievementUnlockedRefreshEvent payload)
+        {
+            var achievement = payload.Type;
+            if (!_types.Contains(achievement))
+                return;
+
+            var index = _types.IndexOf(achievement);
+            if (SelectedIndex == index)
+            {
+                LoadAchievement();
+            }
+
+            Colors[index] = new GuiColor(0, 255, 0);
         }
     }
 }

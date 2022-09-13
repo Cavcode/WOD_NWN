@@ -3,13 +3,11 @@
 using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
 {
@@ -39,7 +37,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
 
         private static void ImpactAction(uint activator, uint target, int level, Location targetLocation)
         {
-            var dmg = 0.0f;
+            var dmg = 0;
             var inflict = false;
             // If activator is in stealth mode, force them out of stealth mode.
             if (GetActionMode(activator, ActionMode.Stealth) == true)
@@ -48,42 +46,53 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
             switch (level)
             {
                 case 1:
-                    dmg = 7.0f;
+                    dmg = 12;
                     if (Random(100) < 45) inflict = true;
                     break;
                 case 2:
-                    dmg = 8.5f;
+                    dmg = 21;
                     if (d4() > 1) inflict = true;
                     break;
                 case 3:
-                    dmg = 12.0f;
+                    dmg = 34;
                     inflict = true;
                     break;
                 default:
                     break;
             }
 
-            var perception = GetAbilityModifier(AbilityType.Might, activator);
-            var defense = Stat.GetDefense(target, CombatDamageType.Physical);
-            var vitality = GetAbilityModifier(AbilityType.Vitality, target);
-            var damage = Combat.CalculateDamage(dmg, perception, defense, vitality, false);
+            dmg += Combat.GetAbilityDamageBonus(activator, SkillType.TwoHanded);
+            
+            var attackerStat = GetAbilityModifier(AbilityType.Might, activator);
+            var attack = Stat.GetAttack(activator, AbilityType.Might, SkillType.TwoHanded);
+            var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
+            var defenderStat = GetAbilityModifier(AbilityType.Vitality, target);
+            var damage = Combat.CalculateDamage(
+                attack, 
+                dmg, 
+                attackerStat, 
+                defense, 
+                defenderStat, 
+                0);
             ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Piercing), target);
             if (inflict)
             {
+                UsePerkFeat.DequeueWeaponAbility(target);
                 Ability.EndConcentrationAbility(target);
                 SendMessageToPC(activator, ColorToken.Gray(GetName(target)) + "'s  concentration has been broken.");
                 SendMessageToPC(target, ColorToken.Gray(GetName(activator)) + " broke your concentration.");
             }
 
             CombatPoint.AddCombatPoint(activator, target, SkillType.TwoHanded, 3);
+            Enmity.ModifyEnmity(activator, target, 250 * level + damage);
         }
 
         private static void Skewer1(AbilityBuilder builder)
         {
             builder.Create(FeatType.Skewer1, PerkType.Skewer)
                 .Name("Skewer I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.Skewer, 30f)
-                .HasActivationDelay(2.0f)
                 .RequirementStamina(3)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
@@ -93,8 +102,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
         {
             builder.Create(FeatType.Skewer2, PerkType.Skewer)
                 .Name("Skewer II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.Skewer, 30f)
-                .HasActivationDelay(2.0f)
                 .RequirementStamina(4)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
@@ -104,8 +113,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
         {
             builder.Create(FeatType.Skewer3, PerkType.Skewer)
                 .Name("Skewer III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.Skewer, 30f)
-                .HasActivationDelay(2.0f)
                 .RequirementStamina(5)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)

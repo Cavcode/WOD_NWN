@@ -1,20 +1,10 @@
-﻿using System.Collections.Generic;
-
-namespace WOD.Game.Server.Entity
+﻿namespace WOD.Game.Server.Entity
 {
     public class PlayerOutfit: EntityBase
     {
-
-        public List<PlayerOutfitDetail> Outfits { get; set; }
-
-        public PlayerOutfit()
-        {
-            Outfits = new List<PlayerOutfitDetail>();
-        }
-    }
-
-    public class PlayerOutfitDetail
-    {
+        [Indexed]
+        public string PlayerId { get; set; }
+        [Indexed]
         public string Name { get; set; }
         public string Data { get; set; }
 

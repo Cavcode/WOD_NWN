@@ -3,33 +3,28 @@ using System.Collections.Generic;
 
 namespace WOD.Game.Server.Core
 {
-    public class ScheduledItem : IDisposable
+    internal class ScheduledItem : IDisposable
     {
-        private readonly Action task;
+        private readonly Action _task;
 
         public double ExecutionTime { get; private set; }
-        public bool Disposed { get;  set; }
 
         public readonly bool Repeating;
         public readonly double Schedule;
-        public readonly string Identifier;
 
-        public ScheduledItem(Action task, double executionTime, string identifier)
+        public ScheduledItem(Action task, double executionTime)
         {
-            this.task = task;
+            _task = task;
             ExecutionTime = executionTime;
             Repeating = false;
-            Identifier = identifier;
-
         }
 
-        public ScheduledItem(Action task, double executionTime, double schedule, string identifier)
+        public ScheduledItem(Action task, double executionTime, double schedule)
         {
-            this.task = task;
+            _task = task;
             ExecutionTime = executionTime;
             Schedule = schedule;
             Repeating = true;
-            Identifier = identifier;
         }
 
         public void Reschedule(double newTime)
@@ -39,7 +34,7 @@ namespace WOD.Game.Server.Core
 
         public void Execute()
         {
-            task();
+            _task();
         }
 
         public void Dispose()

@@ -2,7 +2,6 @@
 using System.Linq.Expressions;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.Beamdog;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service.GuiService.Component
 {
@@ -13,6 +12,15 @@ namespace WOD.Game.Server.Service.GuiService.Component
         private string TextBindName { get; set; }
         private bool IsTextBound => !string.IsNullOrWhiteSpace(TextBindName);
 
+        private bool ShowBorder { get; set; }
+        private NuiScrollbars Scrollbars { get; set; }
+
+        public GuiText()
+        {
+            ShowBorder = true;
+            Scrollbars = NuiScrollbars.Auto;
+        }
+
         /// <summary>
         /// Sets a static value for the Text property.
         /// </summary>
@@ -20,6 +28,26 @@ namespace WOD.Game.Server.Service.GuiService.Component
         public GuiText<T> SetText(string text)
         {
             Text = text;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a static value for whether the borders will be displayed.
+        /// </summary>
+        /// <param name="showBorder">The value to set.</param>
+        public GuiText<T> SetShowBorder(bool showBorder)
+        {
+            ShowBorder = showBorder;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a static value for the scroll bars property.
+        /// </summary>
+        /// <param name="scrollbars">The scroll bar setting to use.</param>
+        public GuiText<T> SetScrollbars(NuiScrollbars scrollbars)
+        {
+            Scrollbars = scrollbars;
             return this;
         }
 
@@ -39,7 +67,7 @@ namespace WOD.Game.Server.Service.GuiService.Component
         {
             var text = IsTextBound ? Nui.Bind(TextBindName) : JsonString(Text);
 
-            return Nui.Text(text);
+            return Nui.Text(text, ShowBorder, Scrollbars);
         }
     }
 }

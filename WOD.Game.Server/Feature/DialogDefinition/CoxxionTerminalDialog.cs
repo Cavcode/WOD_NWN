@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.DialogService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.DialogDefinition
 {
@@ -22,7 +17,7 @@ namespace WOD.Game.Server.Feature.DialogDefinition
         [NWNEventHandler("mod_load")]
         public static void LoadDoors()
         {
-            var area = Cache.GetAreaByResref("v_cox_base");
+            var area = Area.GetAreaByResref("v_cox_base");
             if (!GetIsObjectValid(area)) return;
 
             for (var obj = GetFirstObjectInArea(area); GetIsObjectValid(obj); obj = GetNextObjectInArea(area))
@@ -71,6 +66,8 @@ namespace WOD.Game.Server.Feature.DialogDefinition
 
             page.AddResponse($"Open {terminalColor} doors", () =>
             {
+                SetLocalInt(area, "DOOR_STATUS", terminalColorId);
+
                 foreach (var door in _areaDoors)
                 {
                     if (GetLocalInt(door, "DOOR_COLOR") == terminalColorId)
@@ -84,6 +81,13 @@ namespace WOD.Game.Server.Feature.DialogDefinition
                         SetLocked(door, true);
                     }
                 }
+
+                foreach (var areaPlayer in Area.GetPlayersInArea(area))
+                {
+                    FloatingTextStringOnCreature($"{terminalColor} doors are now unlocked.", areaPlayer, false);
+                }
+
+                EndConversation();
             });
         }
 

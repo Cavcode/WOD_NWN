@@ -1,6 +1,5 @@
 ﻿using WOD.Game.Server.Core.NWNX.Enum;
 using WOD.Game.Server.Core.NWScript.Enum;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Core.NWNX
 {

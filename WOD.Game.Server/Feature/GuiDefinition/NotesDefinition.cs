@@ -12,7 +12,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
             _builder.CreateWindow(GuiWindowType.Notes)
                 .SetInitialGeometry(0, 0, 638f, 336f)
                 .SetTitle("Notes")
-                .SetIsResizable(false)
+                .SetIsResizable(true)
+                .SetIsCollapsible(true)
                 .BindOnClosed(model => model.OnCloseWindow())
 
                 .AddColumn(col =>
@@ -38,12 +39,14 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                         row.AddButton()
                             .SetText("New Note")
                             .BindOnClicked(model => model.OnClickNewNote())
-                            .BindIsEnabled(model => model.IsNewEnabled);
+                            .BindIsEnabled(model => model.IsNewEnabled)
+                            .SetHeight(35f);
 
                         row.AddButton()
                             .SetText("Delete Note")
                             .BindOnClicked(model => model.OnClickDeleteNote())
-                            .BindIsEnabled(model => model.IsDeleteEnabled);
+                            .BindIsEnabled(model => model.IsDeleteEnabled)
+                            .SetHeight(35f);
                     });
                 })
 
@@ -72,14 +75,21 @@ namespace WOD.Game.Server.Feature.GuiDefinition
 
                     col.AddRow(row =>
                     {
+                        row.AddSpacer();
+                    });
+                    
+                    col.AddRow(row =>
+                    {
                         row.AddButton()
                             .BindOnClicked(model => model.OnClickSave())
                             .SetText("Save")
+                            .SetHeight(35f)
                             .BindIsEnabled(model => model.IsSaveEnabled);
 
                         row.AddButton()
                             .BindOnClicked(model => model.OnClickDiscardChanges())
                             .SetText("Discard Changes")
+                            .SetHeight(35f)
                             .BindIsEnabled(model => model.IsSaveEnabled);
                     });
                 });

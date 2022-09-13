@@ -1,17 +1,14 @@
-﻿using System;
-
-namespace WOD.Game.Server.Entity
+﻿namespace WOD.Game.Server.Entity
 {
     public class ServerConfiguration: EntityBase
     {
         public ServerConfiguration()
         {
+            Id = "WOD_CONFIG";
             MigrationVersion = 0;
-            LastRestart = DateTime.MinValue;
         }
 
         [Indexed]
         public int MigrationVersion { get; set; }
-        public DateTime LastRestart { get; set; }
     }
 }

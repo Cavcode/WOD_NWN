@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.CraftService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
@@ -15,6 +14,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
             GreatSwords();
             Spears();
             TwinBlades();
+            Saberstaffs();
 
             return _builder.Build();
         }
@@ -28,9 +28,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(8)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 1)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_veldite", 9)
-                .Component("wood", 5);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_veldite", 5)
+                .Component("wood", 3);
 
             // Titan Great Sword
             _builder.Create(RecipeType.TitanGreatSword, SkillType.Smithery)
@@ -39,9 +39,20 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(18)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 2)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_scordspar", 9)
-                .Component("fine_wood", 5);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_scordspar", 5)
+                .Component("fine_wood", 3);
+
+            // Sith Great Sword
+            _builder.Create(RecipeType.SithGreatSword, SkillType.Smithery)
+                .Category(RecipeCategoryType.GreatSword)
+                .Resref("sith_gswd")
+                .Level(14)
+                .Quantity(1)
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_scordspar", 3)
+                .Component("fine_wood", 2);
 
             // Delta Great Sword
             _builder.Create(RecipeType.DeltaGreatSword, SkillType.Smithery)
@@ -50,9 +61,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(28)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 3)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_plagionite", 9)
-                .Component("ancient_wood", 5);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_plagionite", 5)
+                .Component("ancient_wood", 3);
 
             // Proto Great Sword
             _builder.Create(RecipeType.ProtoGreatSword, SkillType.Smithery)
@@ -61,9 +72,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(38)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 4)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_keromber", 9)
-                .Component("aracia_wood", 5);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_keromber", 5)
+                .Component("aracia_wood", 3);
 
             // Ophidian Great Sword
             _builder.Create(RecipeType.OphidianGreatSword, SkillType.Smithery)
@@ -72,9 +83,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(48)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 5)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_jasioclase", 9)
-                .Component("hyphae_wood", 5);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_jasioclase", 5)
+                .Component("hyphae_wood", 3);
         }
 
         private void Spears()
@@ -86,9 +97,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(7)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 1)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_veldite", 8)
-                .Component("wood", 4);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_veldite", 4)
+                .Component("wood", 2);
 
             // Titan Spear
             _builder.Create(RecipeType.TitanSpear, SkillType.Smithery)
@@ -97,9 +108,20 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(17)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 2)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_scordspar", 8)
-                .Component("fine_wood", 4);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_scordspar", 4)
+                .Component("fine_wood", 2);
+
+            // Sith Spear
+            _builder.Create(RecipeType.SithSpear, SkillType.Smithery)
+                .Category(RecipeCategoryType.Spear)
+                .Resref("sith_spear")
+                .Level(13)
+                .Quantity(1)
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_scordspar", 3)
+                .Component("fine_wood", 2);
 
             // Delta Spear
             _builder.Create(RecipeType.DeltaSpear, SkillType.Smithery)
@@ -108,9 +130,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(27)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 3)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_plagionite", 8)
-                .Component("ancient_wood", 4);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_plagionite", 4)
+                .Component("ancient_wood", 2);
 
             // Proto Spear
             _builder.Create(RecipeType.ProtoSpear, SkillType.Smithery)
@@ -119,9 +141,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(37)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 4)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_keromber", 8)
-                .Component("aracia_wood", 4);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_keromber", 4)
+                .Component("aracia_wood", 2);
 
             // Ophidian Spear
             _builder.Create(RecipeType.OphidianSpear, SkillType.Smithery)
@@ -130,9 +152,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(47)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 5)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("aracia_wood", 8)
-                .Component("hyphae_wood", 4);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("aracia_wood", 4)
+                .Component("hyphae_wood", 2);
         }
 
         private void TwinBlades()
@@ -144,9 +166,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(8)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 1)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_veldite", 5)
-                .Component("wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_veldite", 3)
+                .Component("wood", 2);
 
             // Titan Twin Blade
             _builder.Create(RecipeType.TitanTwinBlade, SkillType.Smithery)
@@ -155,9 +177,20 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(18)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 2)
-                .ModSlots(RecipeModType.Weapon, 1)
-                .Component("ref_scordspar", 5)
-                .Component("fine_wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_scordspar", 3)
+                .Component("fine_wood", 2);
+
+            // Sith Twin Blade
+            _builder.Create(RecipeType.SithTwinBlade, SkillType.Smithery)
+                .Category(RecipeCategoryType.TwinBlade)
+                .Resref("sith_twinblade")
+                .Level(16)
+                .Quantity(1)
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("ref_scordspar", 4)
+                .Component("fine_wood", 2);
 
             // Delta Twin Blade
             _builder.Create(RecipeType.DeltaTwinBlade, SkillType.Smithery)
@@ -166,9 +199,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(28)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 3)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_plagionite", 5)
-                .Component("ancient_wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_plagionite", 3)
+                .Component("ancient_wood", 2);
 
             // Proto Twin Blade
             _builder.Create(RecipeType.ProtoTwinBlade, SkillType.Smithery)
@@ -177,9 +210,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(38)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 4)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_keromber", 5)
-                .Component("aracia_wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_keromber", 3)
+                .Component("aracia_wood", 2);
 
             // Ophidian Twin Blade
             _builder.Create(RecipeType.OphidianTwinBlade, SkillType.Smithery)
@@ -188,10 +221,135 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(48)
                 .Quantity(1)
                 .RequirementPerk(PerkType.TwoHandedBlueprints, 5)
-                .ModSlots(RecipeModType.Weapon, 2)
-                .Component("ref_jasioclase", 5)
-                .Component("hyphae_wood", 3);
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ref_jasioclase", 3)
+                .Component("hyphae_wood", 2);
         }
+
+        private void Saberstaffs()
+        {
+            // Twin Electroblade I
+            _builder.Create(RecipeType.TwinElectroblade1, SkillType.Smithery)
+                .Category(RecipeCategoryType.Saberstaff)
+                .Resref("twin_elec_1")
+                .Level(7)
+                .Quantity(1)
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 1)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("elec_ruined", 5)
+                .Component("ref_veldite", 3);
+
+            // Twin Electroblade II
+            _builder.Create(RecipeType.TwinElectroblade2, SkillType.Smithery)
+                .Category(RecipeCategoryType.Saberstaff)
+                .Resref("twin_elec_2")
+                .Level(17)
+                .Quantity(1)
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("elec_flawed", 5)
+                .Component("ref_scordspar", 3);
+
+            // Twin Electroblade III
+            _builder.Create(RecipeType.TwinElectroblade3, SkillType.Smithery)
+                .Category(RecipeCategoryType.Saberstaff)
+                .Resref("twin_elec_3")
+                .Level(27)
+                .Quantity(1)
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 3)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("elec_good", 5)
+                .Component("ref_plagionite", 3);
+
+            // Twin Electroblade IV
+            _builder.Create(RecipeType.TwinElectroblade4, SkillType.Smithery)
+                .Category(RecipeCategoryType.Saberstaff)
+                .Resref("twin_elec_4")
+                .Level(37)
+                .Quantity(1)
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 4)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("elec_imperfect", 5)
+                .Component("ref_keromber", 3);
+
+            // Twin Electroblade V
+            _builder.Create(RecipeType.TwinElectroblade5, SkillType.Smithery)
+                .Category(RecipeCategoryType.Saberstaff)
+                .Resref("twin_elec_5")
+                .Level(47)
+                .Quantity(1)
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 5)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("elec_high", 5)
+                .Component("ref_jasioclase", 3);
+
+            // Training Saberstaff I
+            _builder.Create(RecipeType.TrainingSaberstaff1, SkillType.Smithery)
+                .Category(RecipeCategoryType.Saberstaff)
+                .Resref("trn_saberstaff_1")
+                .Level(9)
+                .Quantity(1)
+                .RequirementUnlocked()
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 1)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("jade", 5)
+                .Component("ref_veldite", 3)
+                .Component("elec_ruined", 4);
+
+            // Training Saberstaff II
+            _builder.Create(RecipeType.TrainingSaberstaff2, SkillType.Smithery)
+                .Category(RecipeCategoryType.Saberstaff)
+                .Resref("trn_saberstaff_2")
+                .Level(19)
+                .Quantity(1)
+                .RequirementUnlocked()
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 1)
+                .Component("agate", 5)
+                .Component("ref_scordspar", 3)
+                .Component("elec_flawed", 4);
+
+            // Training Saberstaff III
+            _builder.Create(RecipeType.TrainingSaberstaff3, SkillType.Smithery)
+                .Category(RecipeCategoryType.Saberstaff)
+                .Resref("trn_saberstaff_3")
+                .Level(29)
+                .Quantity(1)
+                .RequirementUnlocked()
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 3)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("citrine", 5)
+                .Component("ref_plagionite", 3)
+                .Component("elec_good", 4);
+
+            // Training Saberstaff IV
+            _builder.Create(RecipeType.TrainingSaberstaff4, SkillType.Smithery)
+                .Category(RecipeCategoryType.Saberstaff)
+                .Resref("trn_saberstaff_4")
+                .Level(39)
+                .Quantity(1)
+                .RequirementUnlocked()
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 4)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("ruby", 5)
+                .Component("ref_keromber", 3)
+                .Component("elec_imperfect", 4);
+
+            // Training Saberstaff V
+            _builder.Create(RecipeType.TrainingSaberstaff5, SkillType.Smithery)
+                .Category(RecipeCategoryType.Saberstaff)
+                .Resref("trn_saberstaff_5")
+                .Level(49)
+                .Quantity(1)
+                .RequirementUnlocked()
+                .RequirementPerk(PerkType.TwoHandedBlueprints, 5)
+                .EnhancementSlots(RecipeEnhancementType.Weapon, 2)
+                .Component("emerald", 5)
+                .Component("ref_jasioclase", 3)
+                .Component("elec_high", 4);
+
+        }
+
 
     }
 }

@@ -97,7 +97,7 @@ namespace WOD.Game.Server.Service.QuestService
         /// <returns>A QuestBuilder with the configured options.</returns>
         public QuestBuilder AddGoldReward(int amount, bool isSelectable = true)
         {
-            var reward = new GoldReward(amount, isSelectable);
+            var reward = new GoldReward(amount, isSelectable, _activeQuest.GuildType != GuildType.Invalid);
             _activeQuest.Rewards.Add(reward);
 
             return this;
@@ -211,6 +211,18 @@ namespace WOD.Game.Server.Service.QuestService
         public QuestBuilder OnAcceptAction(AcceptQuestDelegate action)
         {
             _activeQuest.OnAcceptActions.Add(action);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds an action to run when a player abandons a quest.
+        /// </summary>
+        /// <param name="action">The action to run when a player abandons a quest.</param>
+        /// <returns>A QuestBuilder with the configured options.</returns>
+        public QuestBuilder OnAbandonAction(AbandonQuestDelegate action)
+        {
+            _activeQuest.OnAbandonActions.Add(action);
 
             return this;
         }

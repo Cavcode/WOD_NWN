@@ -3,7 +3,7 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Extension;
 using WOD.Game.Server.Service;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.LogService;
 
 namespace WOD.Game.Server.Feature
 {

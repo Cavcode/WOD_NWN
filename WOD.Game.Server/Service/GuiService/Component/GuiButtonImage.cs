@@ -2,7 +2,6 @@
 using System.Linq.Expressions;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.Beamdog;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service.GuiService.Component
 {
@@ -28,7 +27,7 @@ namespace WOD.Game.Server.Service.GuiService.Component
         /// </summary>
         /// <typeparam name="TProperty">The property of the view model.</typeparam>
         /// <param name="expression">Expression to target the property.</param>
-        public GuiButtonImage<TDataModel> BindResref<TProperty>(Expression<Func<TDataModel, TProperty>> expression)
+        public GuiButtonImage<TDataModel> BindImageResref<TProperty>(Expression<Func<TDataModel, TProperty>> expression)
         {
             ResrefBindName = GuiHelper<TDataModel>.GetPropertyName(expression);
             return this;

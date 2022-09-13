@@ -3,13 +3,11 @@
 using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
 {
@@ -39,7 +37,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
 
         private static void ImpactAction(uint activator, uint target, int level, Location targetLocation)
         {
-            var dmg = 0.0f;
+            var dmg = 0;
             // If activator is in stealth mode, force them out of stealth mode.
             if (GetActionMode(activator, ActionMode.Stealth) == true)
                 SetActionMode(activator, ActionMode.Stealth, false);
@@ -47,31 +45,47 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
             switch (level)
             {
                 case 1:
-                    dmg = 5.5f;
+                    dmg = 8;
                     break;
                 case 2:
-                    dmg = 7.5f;
+                    dmg = 16;
                     break;
                 case 3:
-                    dmg = 11.0f;
+                    dmg = 26;
                     break;
                 default:
                     break;
             }
 
+            dmg += Combat.GetAbilityDamageBonus(activator, SkillType.Ranged);
+
+            var attack = Stat.GetAttack(activator, AbilityType.Might, SkillType.Ranged);
+            var attackerStat = GetAbilityScore(activator, AbilityType.Might);
             var count = 0;
             var creature = GetFirstObjectInShape(Shape.Sphere, RadiusSize.Medium, GetLocation(target), true, ObjectType.Creature);
             while (GetIsObjectValid(creature) && count < 3)
             {
                 if (GetDistanceBetween(target, creature) <= 3f)
                 {
-                    var might = GetAbilityModifier(AbilityType.Might, activator);
-                    var defense = Stat.GetDefense(target, CombatDamageType.Physical);
-                    var vitality = GetAbilityModifier(AbilityType.Vitality, target);
-                    var damage = Combat.CalculateDamage(dmg, might, defense, vitality, false);
-                    ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Slashing), creature);
+
+                    var defense = Stat.GetDefense(creature, CombatDamageType.Physical, AbilityType.Vitality);
+                    var defenderStat = GetAbilityScore(creature, AbilityType.Vitality);
+                    var damage = Combat.CalculateDamage(
+                        attack,
+                        dmg, 
+                        attackerStat, 
+                        defense, 
+                        defenderStat, 
+                        0);
+
+                    var dTarget = creature;
+                    DelayCommand(0.1f, () =>
+                    {
+                        ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Slashing), dTarget);
+                    });
 
                     CombatPoint.AddCombatPoint(activator, creature, SkillType.Ranged, 3);
+                    Enmity.ModifyEnmity(activator, creature, 250 * level + damage);
 
                     count++;
                 }
@@ -83,11 +97,15 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
         {
             builder.Create(FeatType.ExplosiveToss1, PerkType.ExplosiveToss)
                 .Name("Explosive Toss I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.ExplosiveToss, 30f)
-                .HasActivationDelay(2.0f)
+                .HasActivationDelay(0.5f)
+                .HasMaxRange(15.0f)
                 .RequirementStamina(3)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
+                .UsesAnimation(Animation.ThrowGrenade)
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
         }
@@ -95,11 +113,15 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
         {
             builder.Create(FeatType.ExplosiveToss2, PerkType.ExplosiveToss)
                 .Name("Explosive Toss II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.ExplosiveToss, 30f)
-                .HasActivationDelay(2.0f)
+                .HasActivationDelay(0.5f)
+                .HasMaxRange(15.0f)
                 .RequirementStamina(4)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
+                .UsesAnimation(Animation.ThrowGrenade)
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
         }
@@ -107,11 +129,15 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
         {
             builder.Create(FeatType.ExplosiveToss3, PerkType.ExplosiveToss)
                 .Name("Explosive Toss III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.ExplosiveToss, 30f)
-                .HasActivationDelay(2.0f)
+                .HasActivationDelay(0.5f)
+                .HasMaxRange(15.0f)
                 .RequirementStamina(5)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
+                .UsesAnimation(Animation.ThrowGrenade)
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
         }

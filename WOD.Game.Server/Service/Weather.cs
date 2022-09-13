@@ -8,7 +8,6 @@ using WOD.Game.Server.Core.NWScript.Enum.Area;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
 using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.WeatherService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 using WOD.Game.Server.Extension;
 
 namespace WOD.Game.Server.Service
@@ -22,7 +21,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When the module loads, cache planet climates and other pertinent data.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void LoadData()
         {
             _planetClimates = WeatherPlanetDefinitions.GetPlanetClimates();
@@ -559,12 +558,12 @@ namespace WOD.Game.Server.Service
         private static void _DoWindKnockdown(uint oCreature)
         {
             var nDC = (GetHitDice(oCreature) / 2) + 10;
-            var nDiscipline = GetSkillRank(Core.NWScript.Enum.Skill.Discipline, oCreature);
+            var nDiscipline = GetSkillRank(Core.NWScript.Enum.NWNSkillType.Discipline, oCreature);
             var nReflexSave = GetReflexSavingThrow(oCreature);
             int nSuccess;
 
             if (nDiscipline > nReflexSave)
-                nSuccess = GetIsSkillSuccessful(oCreature, Core.NWScript.Enum.Skill.Discipline, nDC) ? 1 : 0;
+                nSuccess = GetIsSkillSuccessful(oCreature, Core.NWScript.Enum.NWNSkillType.Discipline, nDC) ? 1 : 0;
             else
                 nSuccess = ReflexSave(oCreature, nDC) == SaveReturn.Success ? 1 : 0;
 

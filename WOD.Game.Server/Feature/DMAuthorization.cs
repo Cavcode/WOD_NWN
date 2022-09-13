@@ -1,7 +1,7 @@
 ﻿using WOD.Game.Server.Core;
 using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.LogService;
 
 namespace WOD.Game.Server.Feature
 {
@@ -28,6 +28,7 @@ namespace WOD.Game.Server.Feature
             }
 
             LogDMAuthorization(true);
+            ExecuteScriptNWScript("dmfi_onclienter", OBJECT_SELF);
         }
 
         /// <summary>

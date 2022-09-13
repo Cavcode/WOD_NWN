@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.PerkService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.SkillService;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.NPC
 {
@@ -31,11 +30,18 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.NPC
                 .RequirementStamina(3)
                 .HasImpactAction((activator, target, level, location) =>
                 {
-                    var might = GetAbilityModifier(AbilityType.Might, activator);
-                    var dmg = 1.0f;
-                    var defense = Stat.GetDefense(target, CombatDamageType.Physical);
-                    var vitality = GetAbilityModifier(AbilityType.Vitality, target);
-                    var damage = Combat.CalculateDamage(dmg, might, defense, vitality, false);
+                    const int DMG = 1;
+                    var attackerStat = GetAbilityScore(activator, AbilityType.Might);
+                    var attack = Stat.GetAttack(activator, AbilityType.Might, SkillType.Invalid);
+                    var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
+                    var defenderStat = GetAbilityScore(target, AbilityType.Vitality);
+                    var damage = Combat.CalculateDamage(
+                        attack,
+                        DMG, 
+                        attackerStat, 
+                        defense, 
+                        defenderStat, 
+                        0);
 
                     ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Piercing), target);
                     ApplyEffectToObject(DurationType.Instant, EffectVisualEffect(VisualEffect.Vfx_Com_Blood_Spark_Medium), target);

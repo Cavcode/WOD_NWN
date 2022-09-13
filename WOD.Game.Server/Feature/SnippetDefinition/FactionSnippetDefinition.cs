@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.FactionService;
+using WOD.Game.Server.Service.LogService;
 using WOD.Game.Server.Service.SnippetService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.SnippetDefinition
 {

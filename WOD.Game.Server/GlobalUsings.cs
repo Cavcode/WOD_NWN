@@ -1,0 +1,1 @@
+﻿global using static WOD.Game.Server.Core.NWScript.NWScript;

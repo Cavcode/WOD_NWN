@@ -12,8 +12,10 @@ namespace WOD.Game.Server.Feature.GuiDefinition
         public GuiConstructedWindow BuildWindow()
         {
             _builder.CreateWindow(GuiWindowType.CharacterSheet)
-                .SetInitialGeometry(0, 0, 565f, 320f)
+                .SetInitialGeometry(0, 0, 800f, 400f)
                 .SetTitle("Character Sheet")
+                .SetIsResizable(true)
+                .SetIsCollapsible(true)
                 .AddColumn(col =>
                 {
                     col.AddRow(row =>
@@ -63,7 +65,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetText("HP")
                             .SetColor(139, 0, 0)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Hit Points - When these hit zero, you die.");
 
                         row.AddLabel()
                             .BindText(model => model.HP)
@@ -84,7 +87,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetText("FP")
                             .SetColor(0, 138, 250)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Force Points - Resource used to activate force abilities. Force sensitive characters only.");
 
                         row.AddLabel()
                             .BindText(model => model.FP)
@@ -105,7 +109,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetText("STM")
                             .SetColor(0, 139, 0)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Stamina - Resource used to activate non-force abilities.");
 
                         row.AddLabel()
                             .BindText(model => model.STM)
@@ -123,9 +128,50 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                     col.AddRow(row =>
                     {
                         row.AddLabel()
-                            .SetText("Might")
+                            .SetText("SP")
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Skill Points - Used to purchase Perks.");
+
+                        row.AddLabel()
+                            .BindText(model => model.SP)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left);
+
+                        row.AddButton()
+                            .SetWidth(IncreaseButtonSize)
+                            .SetHeight(IncreaseButtonSize)
+                            .SetText("+")
+                            .SetIsVisible(false);
+                    });
+
+                    col.AddRow(row =>
+                    {
+                        row.AddLabel()
+                            .SetText("AP")
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Ability Points - Used to increase your attributes.");
+
+                        row.AddLabel()
+                            .BindText(model => model.AP)
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+
+                        row.AddButton()
+                            .SetWidth(IncreaseButtonSize)
+                            .SetHeight(IncreaseButtonSize)
+                            .SetText("+")
+                            .SetIsVisible(false);
+                    });
+
+                    col.AddRow(row =>
+                    {
+                        row.AddLabel()
+                            .SetText("Might")
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Might - Improves damage dealt by melee weapons and increases carrying capacity.");
 
                         row.AddLabel()
                             .BindText(model => model.Might)
@@ -145,7 +191,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                         row.AddLabel()
                             .SetText("Perception")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Perception - Improves damage dealt by ranged and finesse weapons and increases physical accuracy.");
 
                         row.AddLabel()
                             .BindText(model => model.Perception)
@@ -165,7 +212,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                         row.AddLabel()
                             .SetText("Vitality")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Vitality - Improves your max hit points and reduces damage received.");
 
                         row.AddLabel()
                             .BindText(model => model.Vitality)
@@ -185,7 +233,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                         row.AddLabel()
                             .SetText("Willpower")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Willpower - Improves your force attack, force defense, and max force points.");
 
                         row.AddLabel()
                             .BindText(model => model.Willpower)
@@ -200,12 +249,35 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .BindOnClicked(model => model.OnClickUpgradeWillpower());
                     });
 
+
+                    col.AddRow(row =>
+                    {
+                        row.AddLabel()
+                            .SetText("Agility")
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Agility - Improves ranged accuracy, evasion, and max stamina.");
+
+                        row.AddLabel()
+                            .BindText(model => model.Agility)
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+
+                        row.AddButton()
+                            .SetWidth(IncreaseButtonSize)
+                            .SetHeight(IncreaseButtonSize)
+                            .SetText("+")
+                            .BindIsVisible(model => model.IsAgilityUpgradeAvailable)
+                            .BindOnClicked(model => model.OnClickUpgradeAgility());
+                    });
+
                     col.AddRow(row =>
                     {
                         row.AddLabel()
                             .SetText("Social")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Social - Improves your XP gain and leadership capabilities.");
 
                         row.AddLabel()
                             .BindText(model => model.Social)
@@ -231,27 +303,71 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetHeight(20f);
                     });
 
+                    col.AddRow(row =>
+                    {
+                        row.AddLabel()
+                            .SetText("Main Hand")
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Main Hand DMG - Baseline damage ratio before stats and target defenses are taken into account.");
+
+                        row.AddLabel()
+                            .BindText(model => model.MainHandDMG)
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .BindTooltip(model => model.MainHandTooltip);
+                    });
 
                     col.AddRow(row =>
                     {
                         row.AddLabel()
-                            .SetText("Defense")
+                            .SetText("Off Hand")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Off Hand DMG - Baseline damage ratio before stats and target defenses are taken into account.");
 
                         row.AddLabel()
-                            .BindText(model => model.Defense)
+                            .BindText(model => model.OffHandDMG)
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .BindTooltip(model => model.OffHandTooltip);
+                    });
+
+                    col.AddRow(row =>
+                    {
+                        row.AddLabel()
+                            .SetText("Attack")
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Attack - Improves damage dealt by physical attacks.");
+
+                        row.AddLabel()
+                            .BindText(model => model.Attack)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left);
                     });
 
+                    col.AddRow(row =>
+                    {
+                        row.AddLabel()
+                            .SetText("Accuracy")
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Accuracy - Improves your chance to hit.");
+
+                        row.AddLabel()
+                            .BindText(model => model.Accuracy)
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+                    });
 
                     col.AddRow(row =>
                     {
                         row.AddLabel()
                             .SetText("Evasion")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Evasion - Improves your ability to dodge attacks.");
 
                         row.AddLabel()
                             .BindText(model => model.Evasion)
@@ -262,12 +378,13 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                     col.AddRow(row =>
                     {
                         row.AddLabel()
-                            .SetText("SP")
+                            .SetText("Phys. DEF")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Physical Defense - Reduces the amount of damage taken by physical attacks.");
 
                         row.AddLabel()
-                            .BindText(model => model.SP)
+                            .BindText(model => model.DefensePhysical)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left);
                     });
@@ -275,34 +392,71 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                     col.AddRow(row =>
                     {
                         row.AddLabel()
-                            .SetText("AP")
+                            .SetText("Force DEF")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Force Defense - Reduces the amount of damage taken by force attacks.");
 
                         row.AddLabel()
-                            .BindText(model => model.AP)
+                            .BindText(model => model.DefenseForce)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left);
                     });
 
                     col.AddRow(row =>
                     {
-                        row.AddSpacer();
+                        row.AddLabel()
+                            .SetText("Elem. DEF")
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Elemental Defenses - Reduces the amount of damage taken by elemental damage. (Order: Fire/Poison/Electrical/Ice)");
+
+                        row.AddLabel()
+                            .BindText(model => model.DefenseElemental)
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
                     });
 
                     col.AddRow(row =>
                     {
-                        row.AddSpacer();
+                        row.AddLabel()
+                            .SetText("Control")
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Control - Improves quality of crafted items. Also improves chance to auto-craft items. (Order: Smithery/Engineering/Fabrication/Agriculture)");
+
+                        row.AddLabel()
+                            .BindText(model => model.Control)
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
                     });
 
                     col.AddRow(row =>
                     {
-                        row.AddSpacer();
+                        row.AddLabel()
+                            .SetText("Craftsmanship")
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Craftsmanship - Improves progress of crafted items. Also improves chance to auto-craft items. (Order: Smithery/Engineering/Fabrication/Agriculture)");
+
+                        row.AddLabel()
+                            .BindText(model => model.Craftsmanship)
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
                     });
 
                     col.AddRow(row =>
                     {
-                        row.AddSpacer();
+                        row.AddLabel()
+                            .SetText("Rebuild Tokens")
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetTooltip("Rebuild Tokens - Can be used to send you to the rebuild area.");
+
+                        row.AddLabel()
+                            .BindText(model => model.RebuildTokens)
+                            .SetVerticalAlign(NuiVerticalAlign.Top)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
                     });
 
                 })
@@ -358,6 +512,15 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                                 col2.AddRow(row2 =>
                                 {
                                     row2.AddButton()
+                                        .SetText("HoloCom")
+                                        .SetHeight(32f)
+                                        .SetWidth(100f)
+                                        .BindOnClicked(model => model.OnClickHoloCom())
+                                        .BindIsEnabled(model => model.IsHolocomEnabled);
+                                });
+                                col2.AddRow(row2 =>
+                                {
+                                    row2.AddButton()
                                         .SetText("Key Items")
                                         .SetHeight(32f)
                                         .SetWidth(100f)
@@ -378,6 +541,14 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                                         .SetHeight(32f)
                                         .SetWidth(100f)
                                         .BindOnClicked(model => model.OnClickNotes());
+                                });
+                                col2.AddRow(row2 =>
+                                {
+                                    row2.AddButton()
+                                        .SetText("Open Trash")
+                                        .SetHeight(32f)
+                                        .SetWidth(100f)
+                                        .BindOnClicked(model => model.OnClickOpenTrash());
                                 });
                                 col2.AddRow(row2 =>
                                 {

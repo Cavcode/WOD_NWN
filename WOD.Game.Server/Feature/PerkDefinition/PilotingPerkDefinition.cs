@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
 
@@ -27,30 +26,30 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Name("Starships")
 
                 .AddPerkLevel()
-                .Description("Enables you to pilot basic starships.")
+                .Description("Enables you to pilot tier 1 starships.")
                 .Price(1)
                 .GrantsFeat(FeatType.Starships1)
 
                 .AddPerkLevel()
-                .Description("Enables you to pilot tier 1 starships.")
+                .Description("Enables you to pilot tier 2 starships.")
                 .Price(1)
                 .RequirementSkill(SkillType.Piloting, 10)
                 .GrantsFeat(FeatType.Starships2)
 
                 .AddPerkLevel()
-                .Description("Enables you to pilot tier 2 starships.")
+                .Description("Enables you to pilot tier 3 starships.")
                 .Price(2)
                 .RequirementSkill(SkillType.Piloting, 20)
                 .GrantsFeat(FeatType.Starships3)
 
                 .AddPerkLevel()
-                .Description("Enables you to pilot tier 3 starships.")
+                .Description("Enables you to pilot tier 4 starships.")
                 .Price(3)
                 .RequirementSkill(SkillType.Piloting, 30)
                 .GrantsFeat(FeatType.Starships4)
 
                 .AddPerkLevel()
-                .Description("Enables you to pilot tier 4 starships.")
+                .Description("Enables you to pilot tier 5 starships.")
                 .Price(4)
                 .RequirementSkill(SkillType.Piloting, 40)
                 .GrantsFeat(FeatType.Starships5);
@@ -86,7 +85,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
 
                 .AddPerkLevel()
                 .Description("Enables you to attach tier 5 defensive modules on starships.")
-                .Price(4)
+                .Price(3)
                 .RequirementSkill(SkillType.Piloting, 40)
                 .GrantsFeat(FeatType.DefensiveModules5);
         }
@@ -121,7 +120,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
 
                 .AddPerkLevel()
                 .Description("Enables you to attach tier 5 offensive modules on starships.")
-                .Price(4)
+                .Price(3)
                 .RequirementSkill(SkillType.Piloting, 40)
                 .GrantsFeat(FeatType.OffensiveModules5);
         }
@@ -174,7 +173,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
 
                 .AddPerkLevel()
                 .Description("Enables you to attach tier 5 mining modules on starships.")
-                .Price(4)
+                .Price(3)
                 .RequirementSkill(SkillType.Piloting, 40)
                 .GrantsFeat(FeatType.MiningModules5);
         }

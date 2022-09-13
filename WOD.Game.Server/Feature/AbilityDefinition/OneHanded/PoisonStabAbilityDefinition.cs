@@ -1,17 +1,12 @@
-﻿//using Random = WOD.Game.Server.Service.Random;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Core.NWScript.Enum.Item;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
 using WOD.Game.Server.Service.StatusEffectService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
 {
@@ -30,22 +25,19 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
         private static string Validation(uint activator, uint target, int level, Location targetLocation)
         {
             var weapon = GetItemInSlot(InventorySlot.RightHand, activator);
+            var rightHandType = GetBaseItemType(weapon);
 
-            if (Item.FinesseVibrobladeBaseItemTypes.Contains(GetBaseItemType(weapon))
-                && (GetBaseItemType((GetItemInSlot(InventorySlot.LeftHand))) == BaseItem.SmallShield ||
-                    GetBaseItemType((GetItemInSlot(InventorySlot.LeftHand))) == BaseItem.LargeShield ||
-                    GetBaseItemType((GetItemInSlot(InventorySlot.LeftHand))) == BaseItem.TowerShield ||
-                    GetBaseItemType((GetItemInSlot(InventorySlot.LeftHand))) == BaseItem.Invalid))
+            if (Item.FinesseVibrobladeBaseItemTypes.Contains(rightHandType))
             {
-                return "This is a one-handed ability.";
+                return string.Empty;
             }
             else
-                return string.Empty;
+                return "A finesse vibroblade must be equipped in your right hand to use this ability.";
         }
 
         private static void ImpactAction(uint activator, uint target, int level, Location targetLocation)
         {
-            var dmg = 0.0f;
+            var dmg = 0;
             var inflictPoison = false;
             // If activator is in stealth mode, force them out of stealth mode.
             if (GetActionMode(activator, ActionMode.Stealth) == true)
@@ -54,37 +46,50 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
             switch (level)
             {
                 case 1:
-                    dmg = 6.0f;
+                    dmg = 8;
                     if (d2() == 1) inflictPoison = true;
                     break;
                 case 2:
-                    dmg = 7.5f;
+                    dmg = 18;
                     if (d4() > 1) inflictPoison = true;
                     break;
                 case 3:
-                    dmg = 11.0f;
+                    dmg = 28;
                     inflictPoison = true;
                     break;
                 default:
                     break;
             }
 
-            var perception = GetAbilityModifier(AbilityType.Perception, activator);
-            var defense = Stat.GetDefense(target, CombatDamageType.Physical);
-            var vitality = GetAbilityModifier(AbilityType.Vitality, target);
-            var damage = Combat.CalculateDamage(dmg, perception, defense, vitality, false);
-            ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Slashing), target);
-            if (inflictPoison) StatusEffect.Apply(activator, target, StatusEffectType.Poison, 60f);
+            dmg += Combat.GetAbilityDamageBonus(activator, SkillType.OneHanded);
 
             CombatPoint.AddCombatPoint(activator, target, SkillType.OneHanded, 3);
+
+            var attackerStat = GetAbilityScore(activator, AbilityType.Perception);
+            var attack = Stat.GetAttack(activator, AbilityType.Perception, SkillType.OneHanded);
+            var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
+            var defenderStat = GetAbilityScore(target, AbilityType.Vitality);
+
+            var damage = Combat.CalculateDamage(
+                attack,
+                dmg, 
+                attackerStat, 
+                defense, 
+                defenderStat, 
+                0);
+            ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Slashing), target);
+            if (inflictPoison) 
+                StatusEffect.Apply(activator, target, StatusEffectType.Poison, 60f);
+
+            Enmity.ModifyEnmity(activator, target, 250 * level + damage);
         }
 
         private static void PoisonStab1(AbilityBuilder builder)
         {
             builder.Create(FeatType.PoisonStab1, PerkType.PoisonStab)
                 .Name("Poison Stab I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.PoisonStab, 30f)
-                .HasActivationDelay(2.0f)
                 .RequirementStamina(3)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
@@ -94,8 +99,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
         {
             builder.Create(FeatType.PoisonStab2, PerkType.PoisonStab)
                 .Name("Poison Stab II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.PoisonStab, 30f)
-                .HasActivationDelay(2.0f)
                 .RequirementStamina(4)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
@@ -105,8 +110,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
         {
             builder.Create(FeatType.PoisonStab3, PerkType.PoisonStab)
                 .Name("Poison Stab III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.PoisonStab, 30f)
-                .HasActivationDelay(2.0f)
                 .RequirementStamina(5)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)

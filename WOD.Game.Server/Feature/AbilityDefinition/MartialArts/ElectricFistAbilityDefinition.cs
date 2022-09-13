@@ -3,14 +3,12 @@
 using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
 using WOD.Game.Server.Service.StatusEffectService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
 {
@@ -40,7 +38,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
 
         private static void ImpactAction(uint activator, uint target, int level, Location targetLocation)
         {
-            var dmg = 0.0f;
+            var dmg = 0;
             var duration = 0f;
             var inflict = false;
             // If activator is in stealth mode, force them out of stealth mode.
@@ -50,40 +48,50 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
             switch (level)
             {
                 case 1:
-                    dmg = 4.0f;
-                    inflict = true;
+                    dmg = 8;
+                    if (d2() == 1) inflict = true;
                     duration = 30f;
                     break;
                 case 2:
-                    dmg = 6.0f;
-                    inflict = true;
+                    dmg = 17;
+                    if (d4() > 1) inflict = true;
                     duration = 60f;
                     break;
                 case 3:
-                    dmg = 9.5f;
+                    dmg = 24;
+                    inflict = true;
                     duration = 60f;
                     break;
                 default:
                     break;
             }
 
-            var perception = GetAbilityModifier(AbilityType.Perception, activator);
-            var defense = Stat.GetDefense(target, CombatDamageType.Physical) +
-                          Stat.GetDefense(target, CombatDamageType.Electrical);
-            var vitality = GetAbilityModifier(AbilityType.Vitality, target);
-            var damage = Combat.CalculateDamage(dmg, perception, defense, vitality, false);
-            ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Electrical), target);
-            if (inflict) StatusEffect.Apply(activator, target, StatusEffectType.Shock, duration);
+            dmg += Combat.GetAbilityDamageBonus(activator, SkillType.MartialArts);
 
             CombatPoint.AddCombatPoint(activator, target, SkillType.MartialArts, 3);
+            Enmity.ModifyEnmity(activator, target, 250 * level);
+
+            var attackerStat = GetAbilityScore(activator, AbilityType.Perception);
+            var attack = Stat.GetAttack(activator, AbilityType.Might, SkillType.MartialArts);
+            var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
+            var defenderStat = GetAbilityScore(target, AbilityType.Vitality);
+            var damage = Combat.CalculateDamage(
+                attack,
+                dmg, 
+                attackerStat, 
+                defense, 
+                defenderStat, 
+                0);
+            ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Electrical), target);
+            if (inflict) StatusEffect.Apply(activator, target, StatusEffectType.Shock, duration);
         }
 
         private static void ElectricFist1(AbilityBuilder builder)
         {
             builder.Create(FeatType.ElectricFist1, PerkType.ElectricFist)
                 .Name("Electric Fist I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.ElectricFist, 30f)
-                .HasActivationDelay(2.0f)
                 .RequirementStamina(3)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
@@ -93,8 +101,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
         {
             builder.Create(FeatType.ElectricFist2, PerkType.ElectricFist)
                 .Name("Electric Fist II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.ElectricFist, 30f)
-                .HasActivationDelay(2.0f)
                 .RequirementStamina(4)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
@@ -104,8 +112,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
         {
             builder.Create(FeatType.ElectricFist3, PerkType.ElectricFist)
                 .Name("Electric Fist III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.ElectricFist, 30f)
-                .HasActivationDelay(2.0f)
                 .RequirementStamina(5)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)

@@ -4,43 +4,47 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Item;
-using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Feature.StatusEffectDefinition.StatusEffectData;
+using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
+using WOD.Game.Server.Service.LogService;
+using WOD.Game.Server.Service.PerkService;
+using WOD.Game.Server.Service.SkillService;
+using WOD.Game.Server.Service.StatService;
 using WOD.Game.Server.Service.StatusEffectService;
 using Player = WOD.Game.Server.Entity.Player;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using BaseItem = WOD.Game.Server.Core.NWScript.Enum.Item.BaseItem;
+using EquipmentSlot = NWN.Native.API.EquipmentSlot;
 using InventorySlot = WOD.Game.Server.Core.NWScript.Enum.InventorySlot;
 
 namespace WOD.Game.Server.Service
 {
     public class Stat
     {
-        private static readonly Dictionary<uint, Dictionary<CombatDamageType, int>> _npcDefenses = new Dictionary<uint, Dictionary<CombatDamageType, int>>();
+        private static readonly Dictionary<uint, Dictionary<CombatDamageType, int>> _npcDefenses = new();
+
+        public const int BaseHP = 70;
+        public const int BaseFP = 10;
+        public const int BaseSTM = 10;
+
+        /// <summary>
+        /// When a player enters the server, reapply HP and temporary stats.
+        /// </summary>
+        [NWNEventHandler("mod_enter")]
+        public static void ApplyPlayerStats()
+        {
+            ApplyTemporaryPlayerStats();
+        }
 
         /// <summary>
         /// When a player enters the server, apply any temporary stats which do not persist.
         /// </summary>
-        [NWNEventHandler("mod_enter")]
-        public static void ApplyTemporaryPlayerStats()
+        private static void ApplyTemporaryPlayerStats()
         {
             var player = GetEnteringObject();
             if (!GetIsPC(player) || GetIsDM(player)) return;
 
-            var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Player>(playerId) ?? new Player();
-
-            CreaturePlugin.SetMovementRateFactor(player, dbPlayer.MovementRate);
-        }
-
-        /// <summary>
-        /// Retrieves the maximum hit points on a creature.
-        /// This will include any base NWN calculations used when determining max HP.
-        /// </summary>
-        /// <param name="creature">The creature object</param>
-        /// <returns>The max amount of HP</returns>
-        public static int GetMaxHP(uint creature)
-        {
-            return GetMaxHitPoints(creature);
+            ApplyPlayerMovementRate(player);
         }
 
         /// <summary>
@@ -64,9 +68,16 @@ namespace WOD.Game.Server.Service
                     dbPlayer = DB.Get<Player>(playerId);
                 }
                 var baseFP = dbPlayer.MaxFP;
-                var modifier = GetAbilityModifier(AbilityType.Vitality, creature);
+                var modifier = GetAbilityModifier(AbilityType.Willpower, creature);
+                var foodEffect = StatusEffect.GetEffectData<FoodEffectData>(creature, StatusEffectType.Food);
+                var foodBonus = 0;
 
-                return baseFP + (modifier * 10);
+                if (foodEffect != null)
+                {
+                    foodBonus = foodEffect.FP;
+                }
+
+                return baseFP + modifier * 10 + foodBonus;
             }
             // NPCs
             else
@@ -131,9 +142,16 @@ namespace WOD.Game.Server.Service
                 }
 
                 var baseStamina = dbPlayer.MaxStamina;
-                var conModifier = GetAbilityModifier(AbilityType.Vitality, creature);
+                var modifier = GetAbilityModifier(AbilityType.Agility, creature);
+                var foodEffect = StatusEffect.GetEffectData<FoodEffectData>(creature, StatusEffectType.Food);
+                var foodBonus = 0;
 
-                return baseStamina + (conModifier * 2);
+                if (foodEffect != null)
+                {
+                    foodBonus = foodEffect.STM;
+                }
+
+                return baseStamina + modifier * 5 + foodBonus;
             }
             // NPCs
             else
@@ -205,7 +223,7 @@ namespace WOD.Game.Server.Service
                 if (dbPlayer.FP > maxFP)
                     dbPlayer.FP = maxFP;
                 
-                DB.Set(playerId, dbPlayer);
+                DB.Set(dbPlayer);
             }
             // NPCs
             else
@@ -219,6 +237,7 @@ namespace WOD.Game.Server.Service
                 SetLocalInt(creature, "FP", fp);
             }
             
+            ExecuteScript("pc_fp_adjusted", creature);
         }
 
         /// <summary>
@@ -245,7 +264,7 @@ namespace WOD.Game.Server.Service
                 if (dbPlayer.FP < 0)
                     dbPlayer.FP = 0;
                 
-                DB.Set(playerId, dbPlayer);
+                DB.Set(dbPlayer);
             }
             else
             {
@@ -256,6 +275,8 @@ namespace WOD.Game.Server.Service
                 
                 SetLocalInt(creature, "FP", fp);
             }
+
+            ExecuteScript("pc_fp_adjusted", creature);
         }
 
         /// <summary>
@@ -284,7 +305,7 @@ namespace WOD.Game.Server.Service
                 if (dbPlayer.Stamina > maxSTM)
                     dbPlayer.Stamina = maxSTM;
 
-                DB.Set(playerId, dbPlayer);
+                DB.Set(dbPlayer);
             }
             // NPCs
             else
@@ -297,6 +318,8 @@ namespace WOD.Game.Server.Service
 
                 SetLocalInt(creature, "STAMINA", fp);
             }
+
+            ExecuteScript("pc_stm_adjusted", creature);
         }
 
         /// <summary>
@@ -323,7 +346,7 @@ namespace WOD.Game.Server.Service
                 if (dbPlayer.Stamina < 0)
                     dbPlayer.Stamina = 0;
 
-                DB.Set(playerId, dbPlayer);
+                DB.Set(dbPlayer);
             }
             else
             {
@@ -334,12 +357,38 @@ namespace WOD.Game.Server.Service
 
                 SetLocalInt(creature, "STAMINA", stamina);
             }
+
+            ExecuteScript("pc_stm_adjusted", creature);
+        }
+
+        /// <summary>
+        /// After a player's status effects are reassociated,
+        /// adjust any food HP if necessary.
+        /// </summary>
+        [NWNEventHandler("assoc_stateffect")]
+        public static void ReapplyFoodHP()
+        {
+            var player = OBJECT_SELF;
+            if (!GetIsPC(player) || GetIsDM(player))
+                return;
+
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+
+            // Player returned after the server restarted. They no longer have the food status effect.
+            // Reduce their HP by the amount tracked in the DB.
+            if (dbPlayer.TemporaryFoodHP > 0 && !StatusEffect.HasStatusEffect(player, StatusEffectType.Food))
+            {
+                Stat.AdjustPlayerMaxHP(dbPlayer, player, -dbPlayer.TemporaryFoodHP);
+                dbPlayer.TemporaryFoodHP = 0;
+                DB.Set(dbPlayer);
+            }
         }
 
         /// <summary>
         /// Increases or decreases a player's HP by a specified amount.
-        /// There is a cap of 255 HP per NWN level. Players are auto-leveled to 5 by default, so this
-        /// gives 255 * 5 = 1275 HP maximum. If the player's HP would go over this amount, it will be set to 1275.
+        /// There is a cap of 255 HP per NWN level. Players are auto-leveled to 40 by default, so this
+        /// gives 255 * 40 = 10,200 HP maximum. If the player's HP would go over this amount, it will be set to 10,200.
         /// This method will not persist the changes so be sure you call DB.Set after calling this.
         /// </summary>
         /// <param name="entity">The entity to modify</param>
@@ -347,7 +396,7 @@ namespace WOD.Game.Server.Service
         /// <param name="adjustBy">The amount to adjust by.</param>
         public static void AdjustPlayerMaxHP(Player entity, uint player, int adjustBy)
         {
-            const int MaxHPPerLevel = 255;
+            const int MaxHPPerLevel = 254;
             entity.MaxHP += adjustBy;
             var nwnLevelCount = GetLevelByPosition(1, player) +
                                 GetLevelByPosition(2, player) +
@@ -388,8 +437,7 @@ namespace WOD.Game.Server.Service
             var maxHP = GetMaxHitPoints(player);
             if (currentHP > maxHP)
             {
-                var damage = EffectDamage(currentHP - maxHP);
-                ApplyEffectToObject(DurationType.Instant, damage, player);
+                SetCurrentHitPoints(player, maxHP);
             }
         }
 
@@ -399,14 +447,15 @@ namespace WOD.Game.Server.Service
         /// </summary>
         /// <param name="entity">The entity to modify</param>
         /// <param name="adjustBy">The amount to adjust by</param>
-        public static void AdjustPlayerMaxFP(Player entity, int adjustBy)
+        public static void AdjustPlayerMaxFP(Player entity, int adjustBy, uint player)
         {
             // Note: It's possible for Max FP to drop to a negative number. This is expected to ensure calculations stay in sync.
             // If there are any visual indicators (GUI elements for example) be sure to account for this scenario.
             entity.MaxFP += adjustBy;
 
-            if (entity.FP > entity.MaxFP)
-                entity.FP = entity.MaxFP;
+            // Note - must call GetMaxFP here to account for ability-based increase to FP cap. 
+            if (entity.FP > GetMaxFP(player))
+                entity.FP = GetMaxFP(player);
 
             // Current FP, however, should never drop below zero.
             if (entity.FP < 0)
@@ -419,33 +468,57 @@ namespace WOD.Game.Server.Service
         /// </summary>
         /// <param name="entity">The entity to modify</param>
         /// <param name="adjustBy">The amount to adjust by</param>
-        public static void AdjustPlayerMaxSTM(Player entity, int adjustBy)
+        public static void AdjustPlayerMaxSTM(Player entity, int adjustBy, uint player)
         {
             // Note: It's possible for Max STM to drop to a negative number. This is expected to ensure calculations stay in sync.
             // If there are any visual indicators (GUI elements for example) be sure to account for this scenario.
             entity.MaxStamina += adjustBy;
 
-            if (entity.Stamina > entity.MaxStamina)
-                entity.Stamina = entity.MaxStamina;
+            // Note - must call GetMaxFP here to account for ability-based increase to STM cap. 
+            if (entity.Stamina > GetMaxStamina(player))
+                entity.Stamina = GetMaxStamina(player);
 
             // Current STM, however, should never drop below zero.
             if (entity.Stamina < 0)
                 entity.Stamina = 0;
         }
-
-        /// <summary>
-        /// Modifies the movement rate of a player by a certain amount.
-        /// This method will not persist the changes so be sure you call DB.Set after calling this.
-        /// </summary>
-        /// <param name="entity">The player entity</param>
-        /// <param name="player">The player object</param>
-        /// <param name="adjustBy">The amount to adjust by</param>
-        public static void AdjustPlayerMovementRate(Player entity, uint player, float adjustBy)
-        {
-            entity.MovementRate += adjustBy;
-            CreaturePlugin.SetMovementRateFactor(player, entity.MovementRate);
-        }
         
+        public static void ApplyPlayerMovementRate(uint player)
+        {
+            var movementRate = 1.0f;
+            if (Ability.IsAbilityToggled(player, AbilityToggleType.Dash))
+            {
+                var level = Perk.GetEffectivePerkLevel(player, PerkType.Dash);
+                switch (level)
+                {
+                    case 1:
+                        movementRate += 0.1f; // 10%
+                        break;
+                    case 2:
+                        movementRate += 0.25f; // 25%
+                        break;
+                }
+            }
+
+            for (var effect = GetFirstEffect(player); GetIsEffectValid(effect); effect = GetNextEffect(player))
+            {
+                var type = GetEffectType(effect);
+                float amount;
+                if (type == EffectTypeScript.MovementSpeedIncrease)
+                {
+                    amount = GetEffectInteger(effect, 0) - 100;
+                    movementRate += amount * 0.01f;
+                }
+                else if (type == EffectTypeScript.MovementSpeedDecrease)
+                {
+                    amount = GetEffectInteger(effect, 0);
+                    movementRate -= amount * 0.01f;
+                }
+            }
+
+            CreaturePlugin.SetMovementRateFactor(player, movementRate);
+        }
+
         /// <summary>
         /// Calculates a player's stat based on their skill bonuses, upgrades, etc. and applies the changes to one ability score.
         /// </summary>
@@ -524,21 +597,96 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
+        /// Modifies a player's evasion by a certain amount.
+        /// This method will not persist the changes so be sure you call DB.Set after calling this.
+        /// </summary>
+        /// <param name="entity">The entity to modify</param>
+        /// <param name="adjustBy">The amount to adjust by</param>
+        public static void AdjustEvasion(Player entity, int adjustBy)
+        {
+            entity.Evasion += adjustBy;
+        }
+
+        /// <summary>
+        /// Modifies a player's attack by a certain amount. Attack affects damage output.
+        /// This method will not persist the changes so be sure you call DB.Set after calling this.
+        /// </summary>
+        /// <param name="entity">The entity to modify</param>
+        /// <param name="adjustBy">The amount to adjust by</param>
+        public static void AdjustAttack(Player entity, int adjustBy)
+        {
+            entity.Attack += adjustBy;
+        }
+
+        /// <summary>
+        /// Modifies a player's force attack by a certain amount. Force Attack affects damage output.
+        /// This method will not persist the changes so be sure you call DB.Set after calling this.
+        /// </summary>
+        /// <param name="entity">The entity to modify</param>
+        /// <param name="adjustBy">The amount to adjust by</param>
+        public static void AdjustForceAttack(Player entity, int adjustBy)
+        {
+            entity.ForceAttack += adjustBy;
+        }
+
+        /// <summary>
+        /// Modifies a player's control by a certain amount.
+        /// This method will not persist the changes so be sure you call DB.Set after calling this.
+        /// </summary>
+        /// <param name="entity">The entity to modify</param>
+        /// <param name="skillType">The skill type to modify</param>
+        /// <param name="adjustBy">The amount to adjust by</param>
+        public static void AdjustControl(Player entity, SkillType skillType, int adjustBy)
+        {
+            if (!entity.Control.ContainsKey(skillType))
+                entity.Control[skillType] = 0;
+
+            entity.Control[skillType] += adjustBy;
+        }
+
+        /// <summary>
+        /// Modifies a player's craftsmanship by a certain amount.
+        /// This method will not persist the changes so be sure you call DB.Set after calling this.
+        /// </summary>
+        /// <param name="entity">The entity to modify</param>
+        /// <param name="skillType">The skill type to modify</param>
+        /// <param name="adjustBy">The amount to adjust by</param>
+        public static void AdjustCraftsmanship(Player entity, SkillType skillType, int adjustBy)
+        {
+            if (!entity.Craftsmanship.ContainsKey(skillType))
+                entity.Craftsmanship[skillType] = 0;
+
+            entity.Craftsmanship[skillType] += adjustBy;
+        }
+
+        /// <summary>
+        /// Modifies a player's CP bonus by a certain amount.
+        /// This method will not persist the changes so be sure you call DB.Set after calling this.
+        /// </summary>
+        /// <param name="entity">The entity to modify</param>
+        /// <param name="skillType">The skill type to modify</param>
+        /// <param name="adjustBy">The amount to adjust by</param>
+        public static void AdjustCPBonus(Player entity, SkillType skillType, int adjustBy)
+        {
+            if (!entity.CPBonus.ContainsKey(skillType))
+                entity.CPBonus[skillType] = 0;
+
+            entity.CPBonus[skillType] += adjustBy;
+        }
+
+        /// <summary>
         /// When a creature spawns, load its relevant defense information based on their equipment.
         /// </summary>
-        [NWNEventHandler("crea_spawn")]
+        [NWNEventHandler("crea_spawn_bef")]
         public static void LoadNPCDefense()
         {
             var creature = OBJECT_SELF;
-            _npcDefenses[creature] = new Dictionary<CombatDamageType, int>
+            _npcDefenses[creature] = new Dictionary<CombatDamageType, int>();
+
+            foreach (var type in Combat.GetAllDamageTypes())
             {
-                {CombatDamageType.Physical, 0},
-                {CombatDamageType.Force, 0},
-                {CombatDamageType.Fire, 0},
-                {CombatDamageType.Poison, 0},
-                {CombatDamageType.Electrical, 0},
-                {CombatDamageType.Ice, 0},
-            };
+                _npcDefenses[creature][type] = 0;
+            }
 
             // Pull defense values off skin.
             var skin = GetItemInSlot(InventorySlot.CreatureArmor, creature);
@@ -555,57 +703,245 @@ namespace WOD.Game.Server.Service
             }
         }
 
-        [NWNEventHandler("crea_death")]
+        [NWNEventHandler("crea_death_aft")]
         public static void ClearNPCDefense()
         {
             if (_npcDefenses.ContainsKey(OBJECT_SELF))
                 _npcDefenses.Remove(OBJECT_SELF);
         }
+
+        /// <summary>
+        /// Modifies defense value based on effects found on creature.
+        /// </summary>
+        /// <param name="creature">The creature to check.</param>
+        /// <param name="defense">The current defense value which will be modified.</param>
+        /// <returns>A modified defense value.</returns>
+        private static int CalculateEffectDefense(uint creature, int defense)
+        {
+            if (StatusEffect.HasStatusEffect(creature, StatusEffectType.IronShell))
+                defense += 20;
+
+            if (StatusEffect.HasStatusEffect(creature, StatusEffectType.Shielding1))
+                defense += 5;
+
+            if (StatusEffect.HasStatusEffect(creature, StatusEffectType.Shielding2))
+                defense += 10;
+
+            if (StatusEffect.HasStatusEffect(creature, StatusEffectType.Shielding3))
+                defense += 15;
+
+            if (StatusEffect.HasStatusEffect(creature, StatusEffectType.Shielding4))
+                defense += 20;
+
+            if (StatusEffect.HasStatusEffect(creature, StatusEffectType.ForceValor1))
+                defense += 10;
+
+            if (StatusEffect.HasStatusEffect(creature, StatusEffectType.ForceValor2))
+                defense += 20;
+
+            return defense;
+        }
+
+        private static int CalculateEffectAttack(uint creature, int attack)
+        {
+            if (StatusEffect.HasStatusEffect(creature, StatusEffectType.ForceRage1))
+                attack += 10;
+            if (StatusEffect.HasStatusEffect(creature, StatusEffectType.ForceRage2))
+                attack += 20;
+
+            return attack;
+        }
         
         /// <summary>
-        /// Retrieves the total defense toward a specific type of damage.
+        /// Calculates the attack for a given creature.
         /// </summary>
-        /// <param name="creature">The creature to retrieve from.</param>
-        /// <param name="type">The type of damage to retrieve.</param>
-        /// <returns>The defense value toward a given damage type.</returns>
-        public static int GetDefense(uint creature, CombatDamageType type)
+        /// <param name="creature">The creature to calculate.</param>
+        /// <param name="abilityType">The type of ability to use.</param>
+        /// <param name="skillType">The type of skill to use.</param>
+        /// <param name="attackBonusOverride">Overrides the attack bonus granted by equipment. Usually only used by Space combat.</param>
+        /// <returns>The total Attack value of a creature.</returns>
+        public static int GetAttack(uint creature, AbilityType abilityType, SkillType skillType, int attackBonusOverride = 0)
         {
-            int defense;
+            if (attackBonusOverride < 0)
+                attackBonusOverride = 0;
 
-            if (GetIsPC(creature))
+            var attackBonus = 0 + attackBonusOverride;
+            var skillLevel = 0;
+            var stat = GetAbilityScore(creature, abilityType);
+            
+            if (GetIsPC(creature) && !GetIsDM(creature))
             {
                 var playerId = GetObjectUUID(creature);
                 var dbPlayer = DB.Get<Player>(playerId);
 
-                defense = dbPlayer.Defenses[type];
+                if (skillType != SkillType.Invalid)
+                    skillLevel = dbPlayer.Skills[skillType].Rank;
+
+                if (attackBonusOverride <= 0)
+                {
+                    if (skillType == SkillType.Force)
+                        attackBonus += dbPlayer.ForceAttack;
+                    else
+                        attackBonus += dbPlayer.Attack;
+                }
             }
             else
             {
-                if (!_npcDefenses.ContainsKey(creature))
-                    return 0;
+                var npcStats = GetNPCStats(creature);
+                skillLevel = npcStats.Level;
+            }
 
-                defense = _npcDefenses[creature][type];
+            attackBonus = CalculateEffectAttack(creature, attackBonus);
+
+            return 8 + (2 * skillLevel) + stat + attackBonus;
+        }
+
+        public static int GetAttackNative(CNWSCreature creature, BaseItem itemType)
+        {
+            var attackBonus = 0;
+            var skillLevel = 0;
+            var statType = Item.GetWeaponDamageAbilityType(itemType);
+            var stat = GetStatValueNative(creature, statType);
+
+            if (creature.m_bPlayerCharacter == 1)
+            {
+                var playerId = creature.m_pUUID.GetOrAssignRandom().ToString();
+                var dbPlayer = DB.Get<Player>(playerId);
+                var skillType = Skill.GetSkillTypeByBaseItem(itemType);
+
+                if (dbPlayer != null)
+                {
+                    if(skillType != SkillType.Invalid)
+                        skillLevel = dbPlayer.Skills[skillType].Rank;
+
+                    if (skillType == SkillType.Force)
+                        attackBonus += dbPlayer.ForceAttack;
+                    else
+                        attackBonus += dbPlayer.Attack;
+                }
+            }
+            else
+            {
+                var npcStats = GetNPCStatsNative(creature);
+                skillLevel = npcStats.Level;
+            }
+
+            attackBonus = CalculateEffectAttack(creature.m_idSelf, attackBonus);
+
+            return 8 + (2 * skillLevel) + stat + attackBonus;
+        }
+
+        /// <summary>
+        /// Retrieves the total defense toward a specific type of damage.
+        /// Physical and Force types include effect bonuses, stats, etc.
+        /// Fire/Poison/Electrical/Ice include effect bonuses, stats, etc. at 70% of physical.
+        /// </summary>
+        /// <param name="creature">The creature to retrieve from.</param>
+        /// <param name="type">The type of damage to retrieve.</param>
+        /// <param name="abilityType"></param>
+        /// <param name="defenseBonusOverride">Overrides the defense bonus granted by equipment. Usually only used for Space combat.</param>
+        /// <returns>The defense value toward a given damage type.</returns>
+        public static int GetDefense(uint creature, CombatDamageType type, AbilityType abilityType, int defenseBonusOverride = 0)
+        {
+            if (defenseBonusOverride < 0)
+                defenseBonusOverride = 0;
+
+            var defenseBonus = 0;
+            var defenderStat = GetAbilityScore(creature, abilityType);
+            int skillLevel;
+            var equipmentDefense = 0 + defenseBonusOverride;
+            var rate = 1.0f;
+
+            if (GetIsPC(creature) && !GetIsDM(creature))
+            {
+                var playerId = GetObjectUUID(creature);
+                var dbPlayer = DB.Get<Player>(playerId);
+
+                if (type == CombatDamageType.Fire ||
+                    type == CombatDamageType.Poison ||
+                    type == CombatDamageType.Electrical ||
+                    type == CombatDamageType.Ice)
+                {
+                    rate = 0.7f;
+                }
+
+                skillLevel = dbPlayer.Skills[SkillType.Armor].Rank;
+
+                if(defenseBonusOverride <= 0)
+                    equipmentDefense += dbPlayer.Defenses[type];
+            }
+            else
+            {
+                var npcStats = GetNPCStats(creature);
+
+                if (type == CombatDamageType.Fire ||
+                    type == CombatDamageType.Poison ||
+                    type == CombatDamageType.Electrical ||
+                    type == CombatDamageType.Ice)
+                {
+                    rate = 0.7f;
+                }
+
+                if (_npcDefenses.ContainsKey(creature) && defenseBonusOverride <= 0)
+                {
+                    equipmentDefense += _npcDefenses[creature][type];
+                }
+
+                skillLevel = npcStats.Level;
             }
 
             if (type == CombatDamageType.Physical)
             {
-                if (StatusEffect.HasStatusEffect(creature, StatusEffectType.IronShell))
-                    defense += 20;
-
-                if (StatusEffect.HasStatusEffect(creature, StatusEffectType.Shielding1))
-                    defense += 5;
-
-                if (StatusEffect.HasStatusEffect(creature, StatusEffectType.Shielding2))
-                    defense += 10;
-
-                if (StatusEffect.HasStatusEffect(creature, StatusEffectType.Shielding3))
-                    defense += 15;
-
-                if (StatusEffect.HasStatusEffect(creature, StatusEffectType.Shielding4))
-                    defense += 20;
+                defenseBonus = CalculateEffectDefense(creature, defenseBonus);
             }
 
-            return defense;
+            defenseBonus = (int)(defenseBonus * rate) + equipmentDefense;
+            return CalculateDefense(defenderStat, skillLevel, defenseBonus);
+        }
+
+        public static int CalculateDefense(int defenderStat, int skillLevel, int defenseBonus)
+        {
+            return (int)(8 + (defenderStat * 1.5f) + skillLevel + defenseBonus);
+        }
+
+        /// <summary>
+        /// Retrieves the native stat value of a given type on a particular creature.
+        /// </summary>
+        /// <param name="creature">The creature to check</param>
+        /// <param name="statType">The type of stat to check</param>
+        /// <returns>The stat value of a creature based on the ability type</returns>
+        public static int GetStatValueNative(CNWSCreature creature, AbilityType statType)
+        {
+            var stat = 0;
+            switch (statType)
+            {
+                case AbilityType.Might:
+                    stat = creature.m_pStats.GetSTRStat();
+                    break;
+                case AbilityType.Perception:
+                    stat = creature.m_pStats.GetDEXStat();
+                    break;
+                case AbilityType.Vitality:
+                    stat = creature.m_pStats.GetCONStat();
+                    break;
+                case AbilityType.Willpower:
+                    stat = creature.m_pStats.GetWISStat();
+                    break;
+                case AbilityType.Agility:
+                    stat = creature.m_pStats.GetINTStat();
+                    break;
+                case AbilityType.Social:
+                    stat = creature.m_pStats.GetCHAStat();
+                    break;
+                default:
+                    stat = 0;
+                    break;
+            }
+
+            // Check for negative modifiers.  A modifier of -2 is represented as 254.
+            if (stat > 128) stat -= 256;
+
+            return stat;
         }
 
         /// <summary>
@@ -614,45 +950,503 @@ namespace WOD.Game.Server.Service
         /// </summary>
         /// <param name="creature">The creature to retrieve from.</param>
         /// <param name="type">The type of damage to retrieve.</param>
+        /// <param name="abilityType"></param>
         /// <returns>The defense value toward a given damage type.</returns>
-        public static int GetDefenseNative(CNWSCreature creature, CombatDamageType type)
+        public static int GetDefenseNative(CNWSCreature creature, CombatDamageType type, AbilityType abilityType)
         {
-            int defense;
+            var defenseBonus = 0;
+            var defenderStat = GetStatValueNative(creature, abilityType);
+            var skillLevel = 0;
+            var equipmentDefense = 0;
+            var rate = 1.0f;
 
             if (creature.m_bPlayerCharacter == 1)
             {
-                var playerId = creature.m_pUUID.m_uuid.ToString();
+                var playerId = creature.m_pUUID.GetOrAssignRandom().ToString();
                 var dbPlayer = DB.Get<Player>(playerId);
 
-                defense = dbPlayer.Defenses[type];
+                if (dbPlayer != null)
+                {
+                    if (type == CombatDamageType.Fire ||
+                        type == CombatDamageType.Poison ||
+                        type == CombatDamageType.Electrical ||
+                        type == CombatDamageType.Ice)
+                    {
+                        rate = 0.7f;
+                    }
+
+                    skillLevel = dbPlayer.Skills[SkillType.Armor].Rank;
+                    equipmentDefense += dbPlayer.Defenses[type];
+                }
             }
             else
             {
-                if (!_npcDefenses.ContainsKey(creature.m_idSelf))
-                    return 0;
+                var npcStats = GetNPCStatsNative(creature);
+                if (type == CombatDamageType.Fire ||
+                    type == CombatDamageType.Poison ||
+                    type == CombatDamageType.Electrical ||
+                    type == CombatDamageType.Ice)
+                {
+                    rate = 0.7f;
+                }
 
-                defense = _npcDefenses[creature.m_idSelf][type];
+                if (_npcDefenses.ContainsKey(creature.m_idSelf))
+                {
+                    equipmentDefense += _npcDefenses[creature.m_idSelf][type];
+                }
+
+                skillLevel = npcStats.Level;
             }
 
             if (type == CombatDamageType.Physical)
             {
-                if (StatusEffect.HasStatusEffect(creature.m_idSelf, StatusEffectType.IronShell))
-                    defense += 20;
-
-                if (StatusEffect.HasStatusEffect(creature.m_idSelf, StatusEffectType.Shielding1))
-                    defense += 5;
-
-                if (StatusEffect.HasStatusEffect(creature.m_idSelf, StatusEffectType.Shielding2))
-                    defense += 10;
-
-                if (StatusEffect.HasStatusEffect(creature.m_idSelf, StatusEffectType.Shielding3))
-                    defense += 15;
-
-                if (StatusEffect.HasStatusEffect(creature.m_idSelf, StatusEffectType.Shielding4))
-                    defense += 20;
+                defenseBonus = CalculateEffectDefense(creature.m_idSelf, defenseBonus);
             }
 
-            return defense;
+            defenseBonus = (int)(defenseBonus * rate) + equipmentDefense;
+            return (int)(8 + (defenderStat * 1.5f) + skillLevel + defenseBonus);
         }
+
+        /// <summary>
+        /// Retrieves the accuracy rating of a creature.
+        /// </summary>
+        /// <param name="creature">The creature to retrieve from.</param>
+        /// <param name="weapon">The weapon being used.</param>
+        /// <param name="statOverride">The stat override used to calculate accuracy. This stat will be used instead of whatever stat is defined for the weapon type.</param>
+        /// <param name="skillOverride">The skill override used to calculate accuracy. This skill will be used instead of whatever skill is defined for the weapon type.</param>
+        /// <returns>The accuracy rating for a creature using a specific weapon.</returns>
+        public static int GetAccuracy(uint creature, uint weapon, AbilityType statOverride, SkillType skillOverride)
+        {
+            var baseItemType = GetBaseItemType(weapon);
+            var statType = statOverride == AbilityType.Invalid ? 
+                Item.GetWeaponAccuracyAbilityType(baseItemType) :
+                statOverride;
+            var stat = statType == AbilityType.Invalid ? 0 : GetAbilityScore(creature, statType);
+            var skillType = skillOverride == SkillType.Invalid ? Skill.GetSkillTypeByBaseItem(baseItemType) : skillOverride;
+            var skillLevel = 0;
+            var accuracyBonus = 0;
+
+            // Attack Bonus / Enhancement Bonus found on the weapon.
+            for (var ip = GetFirstItemProperty(weapon); GetIsItemPropertyValid(ip); ip = GetNextItemProperty(weapon))
+            {
+                var type = GetItemPropertyType(ip);
+                if (type == ItemPropertyType.AttackBonus ||
+                    type == ItemPropertyType.EnhancementBonus)
+                {
+                    accuracyBonus += GetItemPropertyCostTableValue(ip) * 2;
+                }
+            }
+
+            // Creature skill level / NPC level
+            if (GetIsPC(creature) && !GetIsDM(creature))
+            {
+                var playerId = GetObjectUUID(creature);
+                var dbPlayer = DB.Get<Player>(playerId);
+
+                if (skillType != SkillType.Invalid)
+                    skillLevel = dbPlayer.Skills[skillType].Rank;
+            }
+            else
+            {
+                var npcStats = GetNPCStats(creature);
+                skillLevel = npcStats.Level;
+            }
+
+            // Accuracy increases granted by effects
+            accuracyBonus = CalculateEffectAccuracy(creature, accuracyBonus);
+
+            // Power Attack to-hit penalty
+            if (GetActionMode(creature, ActionMode.PowerAttack))
+                accuracyBonus -= 5;
+            else if (GetActionMode(creature, ActionMode.ImprovedPowerAttack))
+                accuracyBonus -= 10;
+
+            return stat * 3 + skillLevel + accuracyBonus;
+        }
+
+        /// <summary>
+        /// Retrieves the accuracy rating of a creature from a native context.
+        /// </summary>
+        /// <param name="creature">The creature to retrieve from.</param>
+        /// <param name="weapon">The weapon being used.</param>
+        /// <param name="statOverride">The stat override used to calculate accuracy. This stat will be used instead of whatever stat is defined for the weapon type.</param>
+        /// <returns>The accuracy rating for a creature using a specific weapon.</returns>
+        public static int GetAccuracyNative(CNWSCreature creature, CNWSItem weapon, AbilityType statOverride)
+        {
+            var baseItemType = weapon == null ? BaseItem.Invalid : (BaseItem)weapon.m_nBaseItem;
+            var statType = statOverride == AbilityType.Invalid ? 
+                Item.GetWeaponAccuracyAbilityType(baseItemType) :
+                statOverride;
+            var skillType = Skill.GetSkillTypeByBaseItem(baseItemType);
+            var stat = GetStatValueNative(creature, statType);
+            var skillLevel = 0;
+            var accuracyBonus = 0;
+
+            // Attack Bonus / Enhancement Bonus found on the weapon.
+            if (weapon != null)
+            {
+                foreach (var ip in weapon.m_lstPassiveProperties)
+                {
+                    if (ip.m_nPropertyName == (ushort)ItemPropertyType.AttackBonus ||
+                        ip.m_nPropertyName == (ushort)ItemPropertyType.EnhancementBonus)
+                    {
+                        accuracyBonus += ip.m_nCostTableValue * 2;
+                    }
+                }
+            }
+
+            // Creature skill level / NPC level
+            if (creature.m_bPlayerCharacter == 1)
+            {
+                var playerId = creature.m_pUUID.GetOrAssignRandom().ToString();
+                var dbPlayer = DB.Get<Player>(playerId);
+
+                if (dbPlayer != null && skillType != SkillType.Invalid)
+                {
+                    skillLevel = dbPlayer.Skills[skillType].Rank;
+                }
+            }
+            else
+            {
+                var npcStats = GetNPCStatsNative(creature);
+                skillLevel = npcStats.Level;
+            }
+
+            accuracyBonus = CalculateEffectAccuracyNative(creature, accuracyBonus);
+
+            return stat * 3 + skillLevel + accuracyBonus;
+        }
+
+        private static int CalculateEffectAccuracy(uint creature, int accuracy)
+        {
+            for (var effect = GetFirstEffect(creature); GetIsEffectValid(effect); effect = GetNextEffect(creature))
+            {
+                var type = GetEffectType(effect);
+                if (type == EffectTypeScript.AttackIncrease)
+                {
+                    accuracy += 5 * GetEffectInteger(effect, 0);
+                }
+                else if (type == EffectTypeScript.AttackDecrease)
+                {
+                    accuracy -= 5 * GetEffectInteger(effect, 0);
+                }
+            }
+
+            Log.Write(LogGroup.Attack, $"Effect Accuracy: {accuracy}");
+
+            return accuracy;
+        }
+
+        private static int CalculateEffectAccuracyNative(CNWSCreature creature, int accuracy)
+        {
+            foreach (var effect in creature.m_appliedEffects)
+            {
+                if (effect.m_nType == (ushort)EffectTrueType.AttackIncrease)
+                {
+                    accuracy += 5 * effect.GetInteger(0);
+                }
+                else if (effect.m_nType == (ushort)EffectTrueType.AttackDecrease)
+                {
+                    accuracy -= 5 * effect.GetInteger(0);
+                }
+            }
+
+            Log.Write(LogGroup.Attack, $"Native Effect Accuracy: {accuracy}");
+
+            return accuracy;
+        }
+
+        /// <summary>
+        /// Retrieves a creature's evasion.
+        /// </summary>
+        /// <param name="creature">The creature to retrieve from.</param>
+        /// <param name="skillOverride">The skill override to use instead of Armor for the purposes of calculating evasion.</param>
+        /// <returns>The evasion rating of a creature.</returns>
+        public static int GetEvasion(uint creature, SkillType skillOverride)
+        {
+            var stat = GetAbilityScore(creature, AbilityType.Agility);
+            int skillLevel;
+            var evasionBonus = 0;
+
+            // Base NWN applies an AC bonus based on the DEX stat. The Perception stat is based upon this.
+            // Perception should not increase AC in WOD, so this is subtracted from the AC.
+            var dexOffset = GetAbilityModifier(AbilityType.Perception, creature);
+            var ac = GetAC(creature) - dexOffset - 10; // Offset by natural 10 AC granted to all characters.
+            var skillType = skillOverride == SkillType.Invalid ? SkillType.Armor : skillOverride;
+
+            Log.Write(LogGroup.Attack, $"Evasion regular AC = {ac}");
+
+            if (GetIsPC(creature) && !GetIsDM(creature))
+            {
+                var playerId = GetObjectUUID(creature);
+                var dbPlayer = DB.Get<Player>(playerId);
+
+                skillLevel = dbPlayer.Skills[skillType].Rank;
+                evasionBonus = dbPlayer.Evasion;
+            }
+            else
+            {
+                var npcStats = GetNPCStats(creature);
+                skillLevel = npcStats.Level;
+            }
+
+            Log.Write(LogGroup.Attack, $"Effect Evasion: {evasionBonus}");
+
+            return stat * 3 + skillLevel + ac * 5 + evasionBonus;
+        }
+
+        /// <summary>
+        /// Retrieves a creature's evasion rating from a native context.
+        /// </summary>
+        /// <param name="creature">The creature to retrieve from.</param>
+        /// <returns>The evasion rating of a creature.</returns>
+        public static int GetEvasionNative(CNWSCreature creature)
+        {
+            var stat = GetStatValueNative(creature, AbilityType.Agility);
+            var skillLevel = 0;
+            var evasionBonus = 0;
+
+            // Note: The DEX offset is unnecessary for the native call.
+            var ac = creature.m_pStats.m_nACArmorBase +
+                     creature.m_pStats.m_nACNaturalBase +
+                     creature.m_pStats.m_nACArmorMod -
+                     creature.m_pStats.m_nACArmorNeg +
+                     creature.m_pStats.m_nACDeflectionMod -
+                     creature.m_pStats.m_nACDeflectionNeg +
+                     creature.m_pStats.m_nACDodgeMod -
+                     creature.m_pStats.m_nACDodgeNeg +
+                     creature.m_pStats.m_nACNaturalMod -
+                     creature.m_pStats.m_nACNaturalNeg +
+                     creature.m_pStats.m_nACShieldMod -
+                     creature.m_pStats.m_nACShieldNeg;
+
+            Log.Write(LogGroup.Attack, $"Native Evasion AC = {ac}");
+
+            if (creature.m_bPlayerCharacter == 1)
+            {
+                var playerId = creature.m_pUUID.GetOrAssignRandom().ToString();
+                var dbPlayer = DB.Get<Player>(playerId);
+
+                if (dbPlayer != null)
+                {
+                    skillLevel = dbPlayer.Skills[SkillType.Armor].Rank;
+                    evasionBonus = dbPlayer.Evasion;
+                }
+            }
+            else
+            {
+                var npcStats = GetNPCStatsNative(creature);
+                skillLevel = npcStats.Level;
+            }
+
+            return stat * 3 + skillLevel + ac * 5 + evasionBonus;
+        }
+        
+        /// <summary>
+        /// Retrieves the stats of an NPC. This is determined by several item properties located on the NPC's skin.
+        /// If no skin is equipped or the item properties do not exist, an empty NPCStats object will be returned.
+        /// </summary>
+        /// <returns>An NPCStats object.</returns>
+        public static NPCStats GetNPCStats(uint npc)
+        {
+            var npcStats = new NPCStats();
+
+            var skin = GetItemInSlot(InventorySlot.CreatureArmor, npc);
+            if (!GetIsObjectValid(skin))
+                return npcStats;
+
+            for (var ip = GetFirstItemProperty(skin); GetIsItemPropertyValid(ip); ip = GetNextItemProperty(skin))
+            {
+                var type = GetItemPropertyType(ip);
+                if (type == ItemPropertyType.NPCLevel)
+                {
+                    npcStats.Level = GetItemPropertyCostTableValue(ip);
+                }
+                else if (type == ItemPropertyType.Defense)
+                {
+                    var damageType = (CombatDamageType)GetItemPropertySubType(ip);
+                    npcStats.Defenses[damageType] = GetItemPropertyCostTableValue(ip);
+                }
+
+            }
+
+            return npcStats;
+        }
+
+        private static NPCStats GetNPCStatsNative(CNWSCreature npc)
+        {
+            var npcStats = new NPCStats();
+            var skin = npc.m_pInventory.GetItemInSlot((uint)EquipmentSlot.CreatureArmour);
+            if (skin != null)
+            {
+                foreach (var prop in skin.m_lstPassiveProperties)
+                {
+                    if (prop.m_nPropertyName == (ushort)ItemPropertyType.NPCLevel)
+                    {
+                        npcStats.Level = prop.m_nCostTableValue;
+                    }
+                    else if (prop.m_nPropertyName == (ushort)ItemPropertyType.Defense)
+                    {
+                        var damageType = (CombatDamageType)prop.m_nSubType;
+
+                        if (!npcStats.Defenses.ContainsKey(damageType))
+                            npcStats.Defenses[damageType] = 0;
+
+                        npcStats.Defenses[damageType] += prop.m_nCostTableValue;
+                    }
+                }
+            }
+
+            return npcStats;
+        }
+
+        /// <summary>
+        /// Applies the total number of attacks per round to a player.
+        /// If a valid weapon is passed in the associated mastery perk will also be checked.
+        /// </summary>
+        /// <param name="player">The player to apply attacks to</param>
+        /// <param name="rightHandWeapon">The weapon equipped to the right hand.</param>
+        public static void ApplyAttacksPerRound(uint player, uint rightHandWeapon, uint offhand = OBJECT_INVALID)
+        {
+            static int GetBABForAttacks(int attacks)
+            {
+                switch (attacks)
+                {
+                    case 1:
+                        return 1;
+                    case 2:
+                        return 6;
+                    case 3:
+                        return 11;
+                    case 4:
+                        return 16;
+                    case 5:
+                        return 21;
+                    case 6:
+                        return 26;
+                    case 7:
+                        return 31;
+                    case 8:
+                        return 36;
+                    case 9:
+                        return 41;
+                }
+
+                return 1;
+            }
+
+            static int GetRapidShotBonus(uint pc)
+            {
+                return Perk.GetEffectivePerkLevel(pc, PerkType.RapidShot);
+            }
+
+            static int GetFlurryBonus(uint pc)
+            {
+                return Perk.GetEffectivePerkLevel(pc, PerkType.FlurryStyle);
+            }
+
+            static int GetShieldBonus(uint pc)
+            {
+                return Perk.GetEffectivePerkLevel(pc, PerkType.ShieldMaster);
+            }
+
+            if (!GetIsPC(player) || GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
+            var itemType = GetBaseItemType(rightHandWeapon);
+            var offhandType = GetBaseItemType(offhand);
+            var numberOfAttacks = 1;
+            var perkType = PerkType.Invalid;
+
+            // Martial Arts
+            if (Item.KatarBaseItemTypes.Contains(itemType))
+            {
+                perkType = PerkType.KatarMastery;
+            }
+            else if (Item.StaffBaseItemTypes.Contains(itemType))
+            {
+                perkType = PerkType.StaffMastery;
+                numberOfAttacks += GetFlurryBonus(player);
+            }
+            // Ranged (Pistol & Rifle only. Throwing is intentionally excluded from Rapid Shot because they get Doublehand)
+            else if (Item.PistolBaseItemTypes.Contains(itemType))
+            {
+                perkType = PerkType.PistolMastery;
+                numberOfAttacks += GetRapidShotBonus(player);
+            }
+            else if (Item.ThrowingWeaponBaseItemTypes.Contains(itemType))
+            {
+                perkType = PerkType.ThrowingWeaponMastery;
+            }
+            else if (Item.RifleBaseItemTypes.Contains(itemType))
+            {
+                perkType = PerkType.RifleMastery;
+            }
+            // One-Handed
+            else if (Item.VibrobladeBaseItemTypes.Contains(itemType))
+            {
+                perkType = PerkType.VibrobladeMastery;
+            }
+            else if (Item.FinesseVibrobladeBaseItemTypes.Contains(itemType))
+            {
+                perkType = PerkType.FinesseVibrobladeMastery;
+            }
+            else if (Item.LightsaberBaseItemTypes.Contains(itemType))
+            {
+                perkType = PerkType.LightsaberMastery;
+            }
+            // Two-Handed
+            else if (Item.HeavyVibrobladeBaseItemTypes.Contains(itemType))
+            {
+                perkType = PerkType.HeavyVibrobladeMastery;
+            }
+            else if (Item.PolearmBaseItemTypes.Contains(itemType))
+            {
+                perkType = PerkType.PolearmMastery;
+            }
+            else if (Item.TwinBladeBaseItemTypes.Contains(itemType))
+            {
+                perkType = PerkType.TwinBladeMastery;
+            }
+            else if (Item.SaberstaffBaseItemTypes.Contains(itemType))
+            {
+                perkType = PerkType.SaberstaffMastery;
+            }
+
+            if (Item.ShieldBaseItemTypes.Contains(offhandType)) numberOfAttacks += GetShieldBonus(player);
+
+            var effectiveMasteryLevel = Perk.GetEffectivePerkLevel(player, perkType);
+            numberOfAttacks += effectiveMasteryLevel;
+
+            var bab = GetBABForAttacks(numberOfAttacks);
+            CreaturePlugin.SetBaseAttackBonus(player, bab);
+        }
+
+        public static void ApplyCritModifier(uint player, uint rightHandWeapon)
+        {
+            if (!GetIsPC(player) || GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
+            var critMod = 0;
+            var itemType = GetBaseItemType(rightHandWeapon);
+            var offhandType = GetBaseItemType(GetItemInSlot(InventorySlot.LeftHand, player));
+            if (Item.OneHandedMeleeItemTypes.Contains(itemType) || Item.ThrowingWeaponBaseItemTypes.Contains(itemType))
+            {
+                if (Item.OneHandedMeleeItemTypes.Contains(offhandType))
+                    critMod += Perk.GetEffectivePerkLevel(player, PerkType.WailingBlows) * 3; // 15% for WB
+                else if(offhandType == BaseItem.Invalid || Item.ShieldBaseItemTypes.Contains(offhandType))
+                    critMod += Perk.GetEffectivePerkLevel(player, PerkType.Duelist);
+            }
+
+            if(Item.ThrowingWeaponBaseItemTypes.Contains(itemType) || Item.PistolBaseItemTypes.Contains(itemType))
+            {
+                critMod += Perk.GetEffectivePerkLevel(player, PerkType.DirtyBlow) * 2; // 10% for DB
+            }
+
+            critMod += Perk.GetEffectivePerkLevel(player, PerkType.InnerStrength);
+
+            CreaturePlugin.SetCriticalRangeModifier(player, -critMod, 0, true);
+        }
+
     }
 }

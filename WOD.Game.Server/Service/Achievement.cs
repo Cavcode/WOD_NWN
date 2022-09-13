@@ -4,10 +4,8 @@ using System.Linq;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Entity;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Extension;
 using WOD.Game.Server.Service.AchievementService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
 {
@@ -23,9 +21,9 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// When the module loads, read all achievement types and store them into the cache.
+        /// When the module caches, read all achievement types and store them into the cache.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void LoadAchievements()
         {
             var achievementTypes = Enum.GetValues(typeof(AchievementType)).Cast<AchievementType>();
@@ -51,14 +49,14 @@ namespace WOD.Game.Server.Service
             if (!GetIsPC(player) || GetIsDM(player)) return;
 
             var cdKey = GetPCPublicCDKey(player);
-            var account = DB.Get<Account>(cdKey) ?? new Account();
+            var account = DB.Get<Account>(cdKey) ?? new Account(cdKey);
             if (account.Achievements.ContainsKey(achievementType)) return;
 
             var playerId = GetObjectUUID(player);
             var dbPlayer = DB.Get<Player>(playerId);
             var now = DateTime.UtcNow;
             account.Achievements[achievementType] = now;
-            DB.Set(cdKey, account);
+            DB.Set(account);
 
             // Player turned off achievement notifications. Nothing left to do here.
             if (!dbPlayer.Settings.DisplayAchievementNotification) return;
@@ -78,8 +76,8 @@ namespace WOD.Game.Server.Service
             const int WindowWidth = 26;
 
             var centerWindowX = Gui.CenterStringInWindow(name, WindowX, WindowWidth);
-            PostString(player, "Achievement Unlocked", centerWindowX + 2, WindowY + 1, ScreenAnchor.TopRight, 10.0f, Gui.ColorWhite, Gui.ColorYellow, _idReservation.StartId, Gui.TextName);
-            PostString(player, " " + name, centerWindowX + 4, WindowY + 3, ScreenAnchor.TopRight, 10.0f, Gui.ColorWhite, Gui.ColorYellow, _idReservation.StartId + 1, Gui.TextName);
+            PostString(player, "Achievement Unlocked", centerWindowX + 2, WindowY+1, ScreenAnchor.TopRight, 10.0f, Gui.ColorWhite, Gui.ColorYellow, _idReservation.StartId,Gui.TextName);
+            PostString(player, " " + name, centerWindowX + 4, WindowY+3, ScreenAnchor.TopRight, 10.0f, Gui.ColorWhite, Gui.ColorYellow, _idReservation.StartId + 1, Gui.TextName);
             Gui.DrawWindow(player, _idReservation.StartId + 2, ScreenAnchor.TopRight, WindowX, WindowY, WindowWidth, 4);
         }
 

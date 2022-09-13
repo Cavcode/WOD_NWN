@@ -285,6 +285,7 @@ namespace WOD.Game.Server.Core.NWScript.Enum.VisualEffect
         Vfx_Dur_Freeze_Animation = 352,
         Vfx_Com_Chunk_Stone_Small = 353,
         Vfx_Com_Chunk_Stone_Medium = 354,
+        Vfx_Normal_Arrow = 357,
         Vfx_Beam_Silent_Lightning = 307,
         Vfx_Beam_Silent_Fire = 308,
         Vfx_Beam_Silent_Cold = 309,
@@ -535,8 +536,29 @@ namespace WOD.Game.Server.Core.NWScript.Enum.VisualEffect
         Vfx_Imp_Starburst_Red = 645,
         Vfx_Imp_Nightmare_Head_Hit = 670,
 
+        Vfx_Target_Marker = 813,
 
         Vfx_Placement_Grid = 821,
-        Vfx_Target_Marker = 822
+        Vfx_Imp_Mirv_Rock = 822,
+        Vfx_Imp_Mirv_Fireball = 823,
+        VFX_IMP_KIN_L = 824,
+        Vfx_Beam_Drain = 825,
+        Vfx_Flamethrower = 826,
+
+        Vfx_Ship_Blast = 827,
+        Mirv_StarWars_Bolt2 = 828, // Red
+        Mirv_StarWars_Bolt3 = 829, // Green
+        Mirv_Torpedo = 830,
+        Vfx_Ship_Blast2 = 831,
+        Vfx_Ship_Blast3 = 832,
+        Vfx_Ion_Shot = 833,
+        Vfx_Ship_Trp = 834,
+        Vfx_UI_Select = 835,
+        Vfx_UI_Cancel = 836,
+        Vfx_Ship_Deflect = 837,
+        Vfx_Ship_Explosion = 838,
+        Vfx_Imp_Mirv_Rock2 = 839,
+        Vfx_Imp_Mirv_Rock3 = 840,
+        Vfx_Dur_Chat_Bubble = 841,
     }
 }

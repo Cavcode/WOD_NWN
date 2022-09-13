@@ -7,7 +7,7 @@ namespace WOD.Game.Server.Service
 {
     public static partial class Skill
     {
-        private static readonly Dictionary<int, int> _skillXPRequirements = new Dictionary<int, int>
+        private static readonly Dictionary<int, int> _skillXPRequirements = new()
         {
             { 0, 550 },
             { 1, 825 },
@@ -111,20 +111,20 @@ namespace WOD.Game.Server.Service
             { 99, 280000 },
             { 100, 400000 }
         };
-        private static readonly Dictionary<int, int> _skillTotalXP = new Dictionary<int, int>();
-        private static readonly Dictionary<int, int> _skillDeltaXP = new Dictionary<int, int>
+        private static readonly Dictionary<int, int> _skillTotalXP = new();
+        private static readonly Dictionary<int, int> _skillDeltaXP = new()
         {
-            { 6, 600 },
-            { 5, 525 },
-            { 4, 488 },
-            { 3, 450 },
-            { 2, 375 },
-            { 1, 338 },
-            { 0, 300 },
-            { -1, 225 },
-            { -2, 150 },
-            { -3, 75 },
-            { -4, 38 }
+            { 6, 1200 },
+            { 5, 1050 },
+            { 4, 976 },
+            { 3, 900 },
+            { 2, 750 },
+            { 1, 676 },
+            { 0, 600 },
+            { -1, 450 },
+            { -2, 300 },
+            { -3, 150 },
+            { -4, 76 }
         };
 
         private static int _highestDelta;
@@ -132,7 +132,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When the module loads, cache all XP chart data used for quick access.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void CacheXPChartData()
         {
             CalculateTotalXP();
@@ -170,12 +170,28 @@ namespace WOD.Game.Server.Service
         /// </summary>
         /// <param name="level">The level to retrieve.</param>
         /// <returns>The total amount of XP attained at this level</returns>
-        public static int GetTotalXP(int level)
+        public static int GetTotalRequiredXP(int level)
         {
             if (!_skillTotalXP.ContainsKey(level))
                 throw new Exception($"Level {level} not registered in the SkillTotalXP dictionary.");
 
             return _skillTotalXP[level];
+        }
+
+        /// <summary>
+        /// Gets the highest level by a total XP amount, returning the remainder XP as the second item.
+        /// </summary>
+        /// <param name="totalXP">The total XP gained</param>
+        /// <returns>A tuple containing the level and a remainder amount of XP</returns>
+        public static (int, int) GetLevelByTotalXP(int totalXP)
+        {
+            var (level, requiredXP) = _skillTotalXP
+                .OrderBy(o => o.Value)
+                .First(x => x.Value >= totalXP);
+
+            var remainderXP = requiredXP - totalXP;
+            remainderXP = _skillXPRequirements[level] - remainderXP;
+            return (level, remainderXP);
         }
 
         /// <summary>

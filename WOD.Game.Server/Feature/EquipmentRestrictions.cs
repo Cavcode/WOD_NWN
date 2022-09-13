@@ -4,11 +4,9 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Item;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.PerkService;
 using Player = WOD.Game.Server.Entity.Player;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature
 {
@@ -21,11 +19,13 @@ namespace WOD.Game.Server.Feature
         [NWNEventHandler("item_valid_bef")]
         public static void ValidateItemUse()
         {
-            var creature = OBJECT_SELF;
-            var item = StringToObject(EventsPlugin.GetEventData("ITEM_OBJECT_ID"));
+            // todo: removed due to performance issues. Revisit later.
 
-            EventsPlugin.SetEventResult(string.IsNullOrWhiteSpace(CanItemBeUsed(creature, item)) ? "1" : "0");
-            EventsPlugin.SkipEvent();
+            //var creature = OBJECT_SELF;
+            //var item = StringToObject(EventsPlugin.GetEventData("ITEM_OBJECT_ID"));
+
+            //EventsPlugin.SetEventResult(string.IsNullOrWhiteSpace(CanItemBeUsed(creature, item)) ? "1" : "0");
+            //EventsPlugin.SkipEvent();
         }
 
         /// <summary>
@@ -39,11 +39,13 @@ namespace WOD.Game.Server.Feature
             var item = StringToObject(EventsPlugin.GetEventData("ITEM"));
             var slot = (InventorySlot)Convert.ToInt32(EventsPlugin.GetEventData("SLOT"));
 
+            var isSwapping = IsItemSwapping(creature, item, slot);
             var canUseItem = CanItemBeUsed(creature, item);
             var canDualWield = ValidateDualWield(item, slot);
 
             if (string.IsNullOrWhiteSpace(canUseItem) &&
-                canDualWield)
+                canDualWield && 
+                !isSwapping)
             {
                 EventsPlugin.PushEventData("ITEM", ObjectToString(item));
                 EventsPlugin.PushEventData("SLOT", Convert.ToString((int)slot));
@@ -51,15 +53,55 @@ namespace WOD.Game.Server.Feature
                 return;
             }
 
-            SendMessageToPC(creature, ColorToken.Red(canUseItem));
+            if(!string.IsNullOrWhiteSpace(canUseItem))
+                SendMessageToPC(creature, ColorToken.Red(canUseItem));
+
             EventsPlugin.SkipEvent();
+        }
+
+        private static bool IsItemSwapping(uint creature, uint item, InventorySlot slot)
+        {
+            var itemInSlot = GetItemInSlot(slot, creature);
+            var itemType = GetBaseItemType(item);
+            var rightHand = GetItemInSlot(InventorySlot.RightHand, creature);
+            var rightHandType = GetBaseItemType(rightHand);
+            var leftHand = GetItemInSlot(InventorySlot.LeftHand, creature);
+            var leftHandType = GetBaseItemType(leftHand);
+
+            // Two-handed weapons
+            if (Item.TwoHandedMeleeItemTypes.Contains(itemType) || 
+                Item.TwinBladeBaseItemTypes.Contains(itemType) || 
+                Item.SaberstaffBaseItemTypes.Contains(itemType) ||
+                Item.RifleBaseItemTypes.Contains(itemType) ||
+                Item.PistolBaseItemTypes.Contains(itemType))
+            {
+                if (GetIsObjectValid(rightHand) ||
+                    GetIsObjectValid(leftHand))
+                    return true;
+            }
+            // Shields & One-Handed Weapons
+            else if (Item.ShieldBaseItemTypes.Contains(itemType) || 
+                     Item.OneHandedMeleeItemTypes.Contains(itemType) || 
+                     Item.ThrowingWeaponBaseItemTypes.Contains(itemType))
+            {
+                if (Item.TwoHandedMeleeItemTypes.Contains(rightHandType) || 
+                    Item.TwinBladeBaseItemTypes.Contains(rightHandType) || 
+                    Item.SaberstaffBaseItemTypes.Contains(rightHandType) ||
+                    Item.RifleBaseItemTypes.Contains(rightHandType) ||
+                    Item.PistolBaseItemTypes.Contains(rightHandType))
+                {
+                    return true;
+                }
+            }
+
+            return GetIsObjectValid(itemInSlot);
         }
 
         /// <summary>
         /// When an item is equipped, check if the item is going to be dual wielded. If it is, ensure player has
         /// at least level 1 of the Dual Wield perk. If they don't, skip the equip event with an error message.
         /// </summary>
-        public static bool ValidateDualWield(uint item, InventorySlot slot)
+        private static bool ValidateDualWield(uint item, InventorySlot slot)
         {
             var creature = OBJECT_SELF;
 
@@ -84,7 +126,9 @@ namespace WOD.Game.Server.Feature
                 BaseItem.Kukri,
                 BaseItem.Rapier,
                 BaseItem.Scimitar,
-                BaseItem.Sickle
+                BaseItem.Sickle,
+                BaseItem.Lightsaber,
+                BaseItem.Electroblade
             };
             if (!dualWieldWeapons.Contains(baseItem)) return true;
 
@@ -109,7 +153,17 @@ namespace WOD.Game.Server.Feature
         /// <returns>An empty string if successful or an error message if failed</returns>
         private static string CanItemBeUsed(uint creature, uint item)
         {
-            if (!GetIsPC(creature) || GetIsDM(creature)) return string.Empty;
+            if (!GetIsPC(creature) || GetIsDM(creature) || GetIsDMPossessed(creature)) 
+                return string.Empty;
+
+            var itemType = GetBaseItemType(item);
+
+            // Droids may only equip items in specific slots if the item has the Use Limitation Race: Droid item property.
+            // They are unable to equip any items in these slots if this item property is missing.
+            // Non-Droids may not equip any items which have this item property.
+            var race = GetRacialType(creature);
+            var needsDroidLimitation = race == RacialType.Droid && Item.DroidBaseItemTypes.Contains(itemType);
+            var itemHasDroidIP = false;
 
             var playerId = GetObjectUUID(creature);
             var dbPlayer = DB.Get<Player>(playerId);
@@ -118,20 +172,43 @@ namespace WOD.Game.Server.Feature
             for (var ip = GetFirstItemProperty(item); GetIsItemPropertyValid(ip); ip = GetNextItemProperty(item))
             {
                 var type = GetItemPropertyType(ip);
-                if (type != ItemPropertyType.UseLimitationPerk) continue;
 
-                var perkType = (PerkType)GetItemPropertySubType(ip);
-                if (perkType == PerkType.Invalid) continue;
-
-                var requiredLevel = GetItemPropertyCostTableValue(ip);
-                var perkLevel = dbPlayer.Perks.ContainsKey(perkType) ? dbPlayer.Perks[perkType] : 0;
-
-                if (perkLevel < requiredLevel)
+                // Check perk requirements
+                if (type == ItemPropertyType.UseLimitationPerk)
                 {
-                    var perkName = Perk.GetPerkDetails(perkType).Name;
-                    return $"This item requires '{perkName}' level {requiredLevel} to use.";
+                    var perkType = (PerkType)GetItemPropertySubType(ip);
+                    if (perkType == PerkType.Invalid) continue;
+
+                    var requiredLevel = GetItemPropertyCostTableValue(ip);
+                    var perkLevel = dbPlayer.Perks.ContainsKey(perkType) ? dbPlayer.Perks[perkType] : 0;
+
+                    if (perkLevel < requiredLevel)
+                    {
+                        var perkName = Perk.GetPerkDetails(perkType).Name;
+                        return $"This item requires '{perkName}' level {requiredLevel} to use.";
+                    }
+                }
+                else if (type == ItemPropertyType.UseLimitationRacialType)
+                {
+                    var limitationRace = (RacialType)GetItemPropertySubType(ip);
+
+                    if (limitationRace == RacialType.Droid)
+                    {
+                        // Has the use limitation but is not a droid, return error.
+                        if (race != RacialType.Droid)
+                            return $"This item may only be equipped by Droids.";
+
+                        // Has the use limitation but item does not have droid limitation
+                        if (!needsDroidLimitation)
+                            continue;
+
+                        itemHasDroidIP = true;
+                    }
                 }
             }
+
+            if (needsDroidLimitation && !itemHasDroidIP)
+                return "Droids may not equip that item.";
 
             return string.Empty;
         }

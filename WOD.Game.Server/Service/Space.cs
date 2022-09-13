@@ -8,9 +8,17 @@ using WOD.Game.Server.Core.NWNX.Enum;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Item;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
+using WOD.Game.Server.Entity;
+using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Service.CombatService;
+using WOD.Game.Server.Service.DBService;
+using WOD.Game.Server.Service.GuiService;
+using WOD.Game.Server.Service.LogService;
 using WOD.Game.Server.Service.PerkService;
+using WOD.Game.Server.Service.PropertyService;
+using WOD.Game.Server.Service.SkillService;
 using WOD.Game.Server.Service.SpaceService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using Vector3 = System.Numerics.Vector3;
 
 namespace WOD.Game.Server.Service
 {
@@ -18,7 +26,7 @@ namespace WOD.Game.Server.Service
     {
         public const int MaxRegisteredShips = 10;
 
-        private static readonly Dictionary<string, ShipDetail> _ships = new();
+        private static readonly Dictionary<string, ShipDetail> _shipTypes = new();
         private static readonly Dictionary<string, ShipModuleDetail> _shipModules = new();
         private static readonly Dictionary<string, SpaceObjectDetail> _spaceObjects = new();
         
@@ -30,6 +38,12 @@ namespace WOD.Game.Server.Service
         private static readonly HashSet<string> _shipItemResrefs = new();
         private static readonly HashSet<string> _shipModuleItemTags = new();
 
+        private static readonly Dictionary<string, uint> _shipClones = new();
+
+        private static readonly Dictionary<PlanetType, Dictionary<string, ShipDockPoint>> _dockPoints = new();
+
+        private static readonly HashSet<uint> _playersInSpace = new();
+
         /// <summary>
         /// When the module loads, cache all space data into memory.
         /// </summary>
@@ -40,11 +54,126 @@ namespace WOD.Game.Server.Service
             LoadShipModules();
             LoadShipEnemies();
 
-            Console.WriteLine($"Loaded {_ships.Count} ships.");
+            Console.WriteLine($"Loaded {_shipTypes.Count} ships.");
             Console.WriteLine($"Loaded {_shipModules.Count} ship modules.");
             Console.WriteLine($"Loaded {_spaceObjects.Count} space objects.");
 
-            //Scheduler.ScheduleRepeating(ProcessSpaceNPCAI, TimeSpan.FromSeconds(1));
+            Scheduler.ScheduleRepeating(ProcessSpaceNPCAI, TimeSpan.FromSeconds(1));
+            Scheduler.ScheduleRepeating(PlayerShipRecovery, TimeSpan.FromSeconds(1));
+        }
+
+        [NWNEventHandler("mod_enter")]
+        public static void EnterServer()
+        {
+            var player = GetEnteringObject();
+            ReloadPlayerTlkStrings();
+            WarpPlayerInsideShip(player);
+        }
+
+        [NWNEventHandler("mod_exit")]
+        public static void ExitServer()
+        {
+            var player = GetExitingObject();
+            if (!IsPlayerInSpaceMode(player))
+                return;
+
+            CloneShip(player);
+
+            if (_playersInSpace.Contains(player))
+                _playersInSpace.Remove(player);
+        }
+
+        /// <summary>
+        /// When the module loads, 
+        /// </summary>
+        [NWNEventHandler("mod_load")]
+        public static void LoadLandingPoints()
+        {
+            var count = 0;
+            var waypoint = GetObjectByTag("STARSHIP_DOCKPOINT", count);
+
+            while (GetIsObjectValid(waypoint))
+            {
+                var area = GetArea(waypoint);
+                RegisterLandingPoint(waypoint, area, true, string.Empty);
+
+                count++;
+                waypoint = GetObjectByTag("STARSHIP_DOCKPOINT", count);
+            }
+        }
+
+        /// <summary>
+        /// Registers a waypoint as a landing point.
+        /// Once added, this location will become available for players to land at.
+        /// </summary>
+        /// <param name="waypoint">The waypoint to register.</param>
+        /// <param name="area">The area to use for registration.</param>
+        /// <param name="isNPC">If true, will be marked as an NPC dock. Otherwise will be marked as a PC dock.</param>
+        /// <param name="propertyId">If specified, references the world property Id of this landing point.</param>
+        public static void RegisterLandingPoint(uint waypoint, uint area, bool isNPC, string propertyId)
+        {
+            var dockPointId = GetLocalString(waypoint, "STARSHIP_DOCKPOINT_ID");
+            if (!string.IsNullOrWhiteSpace(dockPointId))
+            {
+                return;
+            }
+
+            var planet = Planet.GetPlanetType(area);
+
+            // Only waypoints in recognized planets are tracked.
+            if (planet == PlanetType.Invalid)
+                return;
+
+            if (!_dockPoints.ContainsKey(planet))
+                _dockPoints[planet] = new Dictionary<string, ShipDockPoint>();
+
+            dockPointId = Guid.NewGuid().ToString();
+            var dockPoint = new ShipDockPoint
+            {
+                Location = GetLocation(waypoint),
+                Name = string.IsNullOrWhiteSpace(propertyId) ? GetName(waypoint) : string.Empty,
+                PropertyId = propertyId,
+                IsNPC = isNPC
+            };
+
+            _dockPoints[planet][dockPointId] = dockPoint;
+
+            SetLocalString(waypoint, "STARSHIP_DOCKPOINT_ID", dockPointId);
+        }
+
+        /// <summary>
+        /// Removes a waypoint from the landing point registration.
+        /// Once removed, this location will no longer be available to land at.
+        /// </summary>
+        /// <param name="waypoint">The waypoint to remove.</param>
+        /// <param name="cityArea">The area to remove from.</param>
+        public static void RemoveLandingPoint(uint waypoint, uint cityArea)
+        {
+            var planet = Planet.GetPlanetType(cityArea);
+
+            // Only waypoints in recognized planets are tracked.
+            if (planet == PlanetType.Invalid)
+                return;
+
+            var dockPointId = GetLocalString(waypoint, "STARSHIP_DOCKPOINT_ID");
+            if (_dockPoints.ContainsKey(planet) &&
+                _dockPoints[planet].ContainsKey(dockPointId))
+            {
+                _dockPoints[planet].Remove(dockPointId);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves all of the registered dock points for a given planet.
+        /// </summary>
+        /// <param name="planetType">The planet to search.</param>
+        /// <returns>A dictionary of dock points.</returns>
+        public static Dictionary<string, ShipDockPoint> GetDockPointsByPlanet(PlanetType planetType)
+        {
+            if (!_dockPoints.ContainsKey(planetType))
+                return new Dictionary<string, ShipDockPoint>();
+
+            return _dockPoints[planetType].ToDictionary(x => x.Key, y => y.Value);
         }
 
         /// <summary>
@@ -63,7 +192,7 @@ namespace WOD.Game.Server.Service
 
                 foreach (var (shipType, shipDetail) in ships)
                 {
-                    _ships.Add(shipType, shipDetail);
+                    _shipTypes.Add(shipType, shipDetail);
 
                     if (!_shipItemResrefs.Contains(shipDetail.ItemResref))
                         _shipItemResrefs.Add(shipDetail.ItemResref);
@@ -130,7 +259,7 @@ namespace WOD.Game.Server.Service
         /// <returns>A ship detail matching the type.</returns>
         public static ShipDetail GetShipDetailByItemTag(string itemTag)
         {
-            return _ships[itemTag];
+            return _shipTypes[itemTag];
         }
 
         /// <summary>
@@ -150,7 +279,7 @@ namespace WOD.Game.Server.Service
         /// <returns>true if registered, false otherwise</returns>
         public static bool IsRegisteredShip(string itemTag)
         {
-            return _ships.ContainsKey(itemTag);
+            return _shipTypes.ContainsKey(itemTag);
         }
 
         /// <summary>
@@ -190,16 +319,18 @@ namespace WOD.Game.Server.Service
         /// </summary>
         /// <param name="creature">The creature whose target will be set.</param>
         /// <param name="target">The target to set.</param>
-        /// <param name="vfx">The visual effect to use on the target.</param>
-        private static void SetCurrentTarget(uint creature, uint target, VisualEffect vfx = VisualEffect.Vfx_Target_Marker)
+        private static void SetCurrentTarget(uint creature, uint target)
         {
             // Set the VFX to the new target if creature is a player.
             if (GetIsObjectValid(target) &&
                 GetIsPC(creature))
             {
-                PlayerPlugin.ApplyLoopingVisualEffectToObject(creature, target, vfx);
+                PlayerPlugin.ApplyLoopingVisualEffectToObject(creature, target, VisualEffect.Vfx_Target_Marker);
             }
             SetLocalObject(creature, "SPACE_TARGET", target);
+
+            if(GetIsPC(creature) && !Gui.IsWindowOpen(creature, GuiWindowType.TargetStatus) && GetShipStatus(target) != null)
+                Gui.TogglePlayerWindow(creature, GuiWindowType.TargetStatus);
         }
 
         /// <summary>
@@ -228,6 +359,9 @@ namespace WOD.Game.Server.Service
             }
 
             DeleteLocalObject(creature, "SPACE_TARGET");
+
+            if(GetIsPC(creature) && Gui.IsWindowOpen(creature, GuiWindowType.TargetStatus))
+                Gui.TogglePlayerWindow(creature, GuiWindowType.TargetStatus);
         }
 
         /// <summary>
@@ -237,6 +371,7 @@ namespace WOD.Game.Server.Service
         public static void SelectTarget()
         {
             var player = OBJECT_SELF;
+            var position = GetPosition(player);
 
             if (!IsPlayerInSpaceMode(player)) return;
             EventsPlugin.SkipEvent();
@@ -248,10 +383,11 @@ namespace WOD.Game.Server.Service
 
             var target = StringToObject(EventsPlugin.GetEventData("TARGET"));
             var (currentTarget, _) = GetCurrentTarget(player);
-            
+
             // Targeted the same object - remove it.
             if (currentTarget == target)
             {
+                PlayerPlugin.ShowVisualEffect(player, (int)VisualEffect.Vfx_UI_Cancel, position);
                 ClearCurrentTarget(player);
             }
             // Targeted something new. Remove existing target and pick the new one.
@@ -259,7 +395,38 @@ namespace WOD.Game.Server.Service
             {
                 ClearCurrentTarget(player);
                 SetCurrentTarget(player, target);
+                PlayerPlugin.ShowVisualEffect(player, (int)VisualEffect.Vfx_UI_Select, position);
             }
+        }
+
+        /// <summary>
+        /// When a player enters a space area, update the property's space position.
+        /// </summary>
+        [NWNEventHandler("area_enter")]
+        public static void UpdateSpacePosition()
+        {
+            var player = GetEnteringObject();
+            if (!GetIsPC(player) || GetIsDM(player)) return;
+            if (!IsPlayerInSpaceMode(player)) return;
+
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+            var dbShip = DB.Get<PlayerShip>(dbPlayer.ActiveShipId);
+            var dbProperty = DB.Get<WorldProperty>(dbShip.PropertyId);
+            var position = GetPosition(player);
+            var areaResref = GetResRef(OBJECT_SELF);
+            var orientation = GetFacing(player);
+
+            dbProperty.Positions[PropertyLocationType.CurrentPosition] = new PropertyLocation
+            {
+                X = position.X,
+                Y = position.Y,
+                Z = position.Z,
+                Orientation = orientation,
+                AreaResref = areaResref
+            };
+
+            DB.Set(dbProperty);
         }
 
         /// <summary>
@@ -269,28 +436,158 @@ namespace WOD.Game.Server.Service
         public static void ClearTargetOnAreaExit()
         {
             var player = GetExitingObject();
-            if (!GetIsPC(player)) return;
+            if (GetIsDM(player)) return;
 
             ClearCurrentTarget(player);
         }
 
         /// <summary>
+        /// When the ship computer is used, check the user's permissions.
+        /// If player has permission and the ship isn't currently being controlled by another player,
+        /// send the player into space mode.
+        /// </summary>
+        [NWNEventHandler("ship_computer")]
+        public static void UseShipComputer()
+        {
+            var area = GetArea(OBJECT_SELF);
+            var player = GetLastUsedBy();
+            var playerId = GetObjectUUID(player);
+            var propertyId = Property.GetPropertyId(area);
+            var permissionQuery = new DBQuery<WorldPropertyPermission>()
+                .AddFieldSearch(nameof(WorldPropertyPermission.PropertyId), propertyId, false)
+                .AddFieldSearch(nameof(WorldPropertyPermission.PlayerId), playerId, false);
+            var permission = DB.Search(permissionQuery).FirstOrDefault();
+
+            if (permission == null || !permission.Permissions[PropertyPermissionType.PilotShip])
+            {
+                SendMessageToPC(player, ColorToken.Red("You do not have permission to pilot this starship."));
+                return;
+            }
+
+            var shipQuery = new DBQuery<PlayerShip>()
+                .AddFieldSearch(nameof(PlayerShip.PropertyId), propertyId, false);
+            var dbShip = DB.Search(shipQuery).FirstOrDefault();
+
+            if (dbShip == null)
+            {
+                SendMessageToPC(player, ColorToken.Red("ERROR: Could not locate ship. Notify an admin."));
+                return;
+            }
+
+            if (_shipClones.ContainsKey(dbShip.Id) &&
+                !GetIsObjectValid(_shipClones[dbShip.Id]))
+            {
+                SendMessageToPC(player, ColorToken.Red("This ship's controls are in use."));
+                return;
+            }
+
+            if (!CanPlayerUseShip(player, dbShip.Status))
+            {
+                SendMessageToPC(player, ColorToken.Red("You do not have the ability to pilot this ship."));
+                return;
+            }
+
+            SetLocalLocation(player, "SPACE_INSTANCE_LOCATION", GetLocation(player));
+            SetLocalBool(player, "SPACE_INSTANCE_LOCATION_SET", true);
+            EnterSpaceMode(player, dbShip.Id);
+
+            var dbProperty = DB.Get<WorldProperty>(propertyId);
+
+            // The existence of a current location means the ship is currently in space.
+            // Warp the player to the ship's location.
+            // Otherwise the player is docked. Warp the player to the space location of this dock.
+            var propertyLocation = dbProperty.Positions.ContainsKey(PropertyLocationType.CurrentPosition) 
+                ? dbProperty.Positions[PropertyLocationType.CurrentPosition]
+                : dbProperty.Positions[PropertyLocationType.SpacePosition];
+
+            var spaceArea = Area.GetAreaByResref(propertyLocation.AreaResref);
+            var spacePosition = Vector3(propertyLocation.X, propertyLocation.Y, propertyLocation.Z);
+            var location = Location(spaceArea, spacePosition, propertyLocation.Orientation);
+
+            AssignCommand(player, () => ClearAllActions());
+            AssignCommand(player, () => ActionJumpToLocation(location));
+        }
+
+        /// <summary>
+        /// Retrieves the slot number (1-30) of the ship module feat.
+        /// </summary>
+        /// <param name="feat">The feat to check</param>
+        /// <returns>The slot number (1-30) of the ship module feat.</returns>
+        public static int GetFeatSlotNumber(FeatType feat)
+        {
+            var slotNumber = (int)feat - (int)FeatType.ShipModule1 + 1;
+            return slotNumber;
+        }
+
+        /// <summary>
+        /// Retrieves the associated feat given a high slot number.
+        /// Must be in the range of 1-10
+        /// </summary>
+        /// <param name="slot">The slot number. Range is 1-10</param>
+        /// <returns>The feat associated with the high slot number</returns>
+        public static FeatType HighSlotToFeat(int slot)
+        {
+            var featId = (int)(FeatType.ShipModule1) - 1 + slot;
+            return (FeatType)featId;
+        }
+
+        /// <summary>
+        /// Retrieves the associated feat given a low slot number.
+        /// Must be in the range of 1-10
+        /// </summary>
+        /// <param name="slot">The slot number. Range is 1-10</param>
+        /// <returns>The feat associated with the low slot number.</returns>
+        public static FeatType LowSlotToFeat(int slot)
+        {
+            slot += 10; // Offset by 10 for low modules.
+            var featId = (int)(FeatType.ShipModule1) - 1 + slot;
+            return (FeatType)featId;
+        }
+
+        /// <summary>
+        /// Converts a high slot feat to its slot number.
+        /// </summary>
+        /// <param name="feat">The feat to convert</param>
+        /// <returns>The slot number associated with the feat.</returns>
+        public static int HighFeatToSlot(FeatType feat)
+        {
+            var offset = (int)FeatType.ShipModule1 - 1;
+            var slot = (int)feat - offset;
+
+            return slot;
+        }
+
+        /// <summary>
+        /// Converts a low slot feat to its slot number.
+        /// </summary>
+        /// <param name="feat">The feat to convert</param>
+        /// <returns>The slot number associated with the feat.</returns>
+        public static int LowFeatToSlot(FeatType feat)
+        {
+            var offset = (int)FeatType.ShipModule1 - 1;
+            var slot = (int)feat - offset;
+            slot -= 10; // Offset by 10 for low modules.
+
+            return slot;
+        }
+
+        /// <summary>
         /// When a player enters the game, reapply any custom TLK strings related to ship module feats.
         /// </summary>
-        [NWNEventHandler("mod_enter")]
-        public static void ReloadPlayerTlkStrings()
+        private static void ReloadPlayerTlkStrings()
         {
             var player = GetEnteringObject();
             if (!GetIsPC(player) || GetIsDM(player)) return;
             if (!IsPlayerInSpaceMode(player)) return;
 
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Entity.Player>(playerId);
-            var dbPlayerShip = dbPlayer.Ships[dbPlayer.ActiveShipId];
+            var dbPlayer = DB.Get<Player>(playerId);
+            var dbPlayerShip = DB.Get<PlayerShip>(dbPlayer.ActiveShipId);
 
-            foreach (var (feat, shipModule) in dbPlayerShip.HighPowerModules)
+            foreach (var (slot, shipModule) in dbPlayerShip.Status.HighPowerModules)
             {
                 var shipModuleDetail = _shipModules[shipModule.ItemTag];
+                var feat = HighSlotToFeat(slot);
                 ApplyShipModuleFeat(player, shipModuleDetail, feat);
             }
         }
@@ -302,11 +599,12 @@ namespace WOD.Game.Server.Service
         /// <returns>true if player is in space mode, false otherwise</returns>
         public static bool IsPlayerInSpaceMode(uint player)
         {
-            if (!GetIsPC(player) || GetIsDM(player)) return false;
+            if (!GetIsPC(player) || GetIsDM(player)) 
+                return false;
 
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Entity.Player>(playerId) ?? new Entity.Player();
-            return dbPlayer.ActiveShipId != Guid.Empty;
+            var dbPlayer = DB.Get<Player>(playerId) ?? new Player(playerId);
+            return dbPlayer.ActiveShipId != Guid.Empty.ToString();
         }
 
         /// <summary>
@@ -314,25 +612,49 @@ namespace WOD.Game.Server.Service
         /// </summary>
         /// <param name="player">The player entering space mode.</param>
         /// <param name="shipId">The Id of the ship to enter space with.</param>
-        public static void EnterSpaceMode(uint player, Guid shipId)
+        public static void EnterSpaceMode(uint player, string shipId)
         {
+            // Ground effects must be removed when entering space mode.
+            // Otherwise players could buff on the ground, then get those same bonuses while in space.
+            StatusEffect.RemoveAll(player);
+            for (var effect = GetFirstEffect(player); GetIsEffectValid(effect); effect = GetNextEffect(player))
+            {
+                RemoveEffect(player, effect);
+            }
+
+            ClonePlayerAndSit(player);
+
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Entity.Player>(playerId);
-            var dbPlayerShip = dbPlayer.Ships[shipId];
-            var shipDetail = _ships[dbPlayerShip.ItemTag];
+            var dbPlayer = DB.Get<Player>(playerId);
+            var dbPlayerShip = DB.Get<PlayerShip>(shipId);
+            var shipDetail = _shipTypes[dbPlayerShip.Status.ItemTag];
 
             // Update player appearance to match that of the ship.
             SetCreatureAppearanceType(player, shipDetail.Appearance);
+            CreaturePlugin.SetMovementRate(player, MovementRate.PC);
 
             // Set active ship Id and serialize the player's hot bar.
             dbPlayer.SerializedHotBar = CreaturePlugin.SerializeQuickbar(player);
             dbPlayer.ActiveShipId = shipId;
 
-            // Load ship modules as feats.
-            var allModules = dbPlayerShip.HighPowerModules.Concat(dbPlayerShip.LowPowerModules).ToList();
-
-            foreach(var (feat, shipModule) in allModules)
+            foreach(var (slot, shipModule) in dbPlayerShip.Status.HighPowerModules)
             {
+                var feat = HighSlotToFeat(slot);
+                var shipModuleDetail = _shipModules[shipModule.ItemTag];
+
+                // Passive modules shouldn't be converted to feats.
+                if (shipModuleDetail.Type == ShipModuleType.Passive) continue;
+
+                // Convert current ship module to feat.
+                CreaturePlugin.AddFeat(player, feat);
+
+                // Rename the feat to match the configured name on the ship module.
+                ApplyShipModuleFeat(player, shipModuleDetail, feat);
+            }
+
+            foreach (var (slot, shipModule) in dbPlayerShip.Status.LowPowerModules)
+            {
+                var feat = LowSlotToFeat(slot);
                 var shipModuleDetail = _shipModules[shipModule.ItemTag];
 
                 // Passive modules shouldn't be converted to feats.
@@ -346,19 +668,121 @@ namespace WOD.Game.Server.Service
             }
 
             // Load the player's ship hot bar.
-            if (string.IsNullOrWhiteSpace(dbPlayerShip.SerializedHotBar) ||
-                !CreaturePlugin.DeserializeQuickbar(player, dbPlayerShip.SerializedHotBar))
+            if (!dbPlayerShip.PlayerHotBars.ContainsKey(playerId) ||
+                !CreaturePlugin.DeserializeQuickbar(player, dbPlayerShip.PlayerHotBars[playerId]))
             {
+                const int MaxSlots = 35;
+
                 // Deserialization failed. Clear out the player's hot bar and start fresh.
-                for (var slot = 0; slot <= 35; slot++)
+                for (var slot = 0; slot <= MaxSlots; slot++)
                 {
                     PlayerPlugin.SetQuickBarSlot(player, slot, PlayerQuickBarSlot.Empty(QuickBarSlotType.Empty));
                 }
 
-                dbPlayer.Ships[shipId].SerializedHotBar = CreaturePlugin.SerializeQuickbar(player);
+                var currentSlot = 0;
+                foreach (var (slot, shipModule) in dbPlayerShip.Status.HighPowerModules)
+                {
+                    var feat = HighSlotToFeat(slot);
+                    var shipModuleDetail = _shipModules[shipModule.ItemTag];
+                    if (shipModuleDetail.Type != ShipModuleType.Passive)
+                    {
+                        PlayerPlugin.SetQuickBarSlot(player, currentSlot, PlayerQuickBarSlot.UseFeat(feat));
+
+                        currentSlot++;
+                    }
+                }
+                foreach (var (slot, shipModule) in dbPlayerShip.Status.LowPowerModules)
+                {
+                    var feat = LowSlotToFeat(slot);
+                    var shipModuleDetail = _shipModules[shipModule.ItemTag];
+                    if (shipModuleDetail.Type != ShipModuleType.Passive)
+                    {
+                        PlayerPlugin.SetQuickBarSlot(player, currentSlot, PlayerQuickBarSlot.UseFeat(feat));
+
+                        currentSlot++;
+                    }
+                }
+
+                dbPlayerShip.PlayerHotBars[playerId] = CreaturePlugin.SerializeQuickbar(player);
             }
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
+            DB.Set(dbPlayerShip);
+
+            // If the ship is in the "actively piloted" list, it means it's in space.
+            // Destroy the NPC clone that's associated with this ship since the player is taking over the controls.
+            if (_shipClones.ContainsKey(dbPlayerShip.Id))
+            {
+                var clone = _shipClones[dbPlayerShip.Id];
+                if (GetIsObjectValid(clone))
+                {
+                    DestroyObject(clone);
+                }
+            }
+            // Otherwise add the ship to the list and associate an invalid object to its clone.
+            else
+            {
+                _shipClones[dbPlayerShip.Id] = OBJECT_INVALID;
+            }
+
+            if(!_playersInSpace.Contains(player))
+                _playersInSpace.Add(player);
+
+            ExecuteScript("space_enter", player);
+        }
+
+        /// <summary>
+        /// When a player enters the module, if they were piloting a ship, send them to the instance.
+        /// Note that if the server rebooted since they logged off, the normal persistent locations script
+        /// will take over and send them to the last dock they were at.
+        /// </summary>
+        public static void WarpPlayerInsideShip(uint player)
+        {
+            ExitSpaceMode(player);
+
+            if (!GetLocalBool(player, "SPACE_INSTANCE_LOCATION_SET"))
+                return;
+
+            var location = GetLocalLocation(player, "SPACE_INSTANCE_LOCATION");
+            
+            AssignCommand(player, () => ClearAllActions());
+            AssignCommand(player, () => ActionJumpToLocation(location));
+
+            DeleteLocalLocation(player, "SPACE_INSTANCE_LOCATION");
+            DeleteLocalBool(player, "SPACE_INSTANCE_LOCATION_SET");
+        }
+
+        private static void ClonePlayerAndSit(uint player)
+        {
+            var chair = GetNearestObjectByTag("pilot_chair", player);
+            var location = GetLocation(player);
+            var copy = CopyObject(player, location, OBJECT_INVALID, "spaceship_copy");
+            ChangeToStandardFaction(copy, StandardFaction.Defender);
+            TakeGoldFromCreature(GetGold(copy), copy, true);
+
+            ApplyEffectToObject(DurationType.Instant, EffectHeal(GetMaxHitPoints(copy)), copy);
+
+            for (var item = GetFirstItemInInventory(copy); GetIsObjectValid(item); item = GetNextItemInInventory(copy))
+            {
+                SetDroppableFlag(item, false);
+                DestroyObject(item);
+            }
+
+            AssignCommand(copy, () =>
+            {
+                ClearAllActions();
+            });
+
+            DelayCommand(1f, () =>
+            {
+                AssignCommand(copy, () =>
+                {
+                    ActionSit(chair);
+                });
+            });
+
+            SetPlotFlag(copy, true);
+            SetLocalObject(player, "SPACE_PILOT_CLONE", copy);
         }
 
         /// <summary>
@@ -387,17 +811,24 @@ namespace WOD.Game.Server.Service
         /// <param name="player">The player exiting space mode.</param>
         public static void ExitSpaceMode(uint player)
         {
+            if (!IsPlayerInSpaceMode(player))
+                return;
+
+            CloneShip(player);
+
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Entity.Player>(playerId);
+            var dbPlayer = DB.Get<Player>(playerId);
             var shipId = dbPlayer.ActiveShipId;
+            var dbShip = DB.Get<PlayerShip>(shipId);
 
             ClearCurrentTarget(player);
             SetCreatureAppearanceType(player, dbPlayer.OriginalAppearanceType);
+            CreaturePlugin.SetMovementRate(player, MovementRate.PC);
             Enmity.RemoveCreatureEnmity(player);
 
             // Save the ship's hot bar and unassign the active ship Id.
-            dbPlayer.Ships[shipId].SerializedHotBar = CreaturePlugin.SerializeQuickbar(player);
-            dbPlayer.ActiveShipId = Guid.Empty;
+            dbShip.PlayerHotBars[playerId] = CreaturePlugin.SerializeQuickbar(player);
+            dbPlayer.ActiveShipId = Guid.Empty.ToString();
 
             // Remove all module feats from the player.
             foreach (var (feat, _) in ShipModuleFeats)
@@ -417,8 +848,71 @@ namespace WOD.Game.Server.Service
 
                 dbPlayer.SerializedHotBar = CreaturePlugin.SerializeQuickbar(player);
             }
-            
-            DB.Set(playerId, dbPlayer);
+
+            DB.Set(dbPlayer);
+            DB.Set(dbShip);
+
+            // Destroy the NPC clone.
+            DestroyPilotClone(player);
+
+            if (_playersInSpace.Contains(player))
+                _playersInSpace.Remove(player);
+
+            ExecuteScript("space_exit", player);
+        }
+
+        private static void CloneShip(uint player)
+        {
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+            var shipId = dbPlayer.ActiveShipId;
+            var dbShip = DB.Get<PlayerShip>(shipId);
+            var dbProperty = DB.Get<WorldProperty>(dbShip.PropertyId);
+            var shipDetail = GetShipDetailByItemTag(dbShip.Status.ItemTag);
+
+            // The existence of a current location on a ship property indicates it is currently in space.
+            // Spawn an NPC representing the ship at the location of the player.
+            if (dbProperty.Positions.ContainsKey(PropertyLocationType.CurrentPosition))
+            {
+                if (_shipClones.ContainsKey(shipId) &&
+                    !GetIsObjectValid(_shipClones[shipId]))
+                {
+                    var location = GetLocation(player);
+                    var position = GetPositionFromLocation(location);
+                    dbProperty.Positions[PropertyLocationType.CurrentPosition] = new PropertyLocation
+                    {
+                        AreaResref = GetResRef(GetAreaFromLocation(location)),
+                        X = position.X,
+                        Y = position.Y,
+                        Z = position.Z,
+                        Orientation = GetFacingFromLocation(location)
+                    };
+                    DB.Set(dbProperty);
+
+                    var clone = CreateObject(ObjectType.Creature, "player_starship", location);
+                    SetCreatureAppearanceType(clone, shipDetail.Appearance);
+                    SetName(clone, dbProperty.CustomName);
+
+                    _shipClones[dbShip.Id] = clone;
+                }
+            }
+            // Otherwise the assumption is the ship is docked. A clone isn't needed and the ship should be removed
+            // from the cache.
+            else
+            {
+                _shipClones.Remove(dbShip.Id);
+            }
+        }
+
+        private static void DestroyPilotClone(uint player)
+        {
+            var copy = GetLocalObject(player, "SPACE_PILOT_CLONE");
+            if (GetIsObjectValid(copy))
+            {
+                DestroyObject(copy);
+            }
+
+            DeleteLocalObject(player, "SPACE_PILOT_CLONE");
         }
 
         /// <summary>
@@ -430,9 +924,9 @@ namespace WOD.Game.Server.Service
         public static bool CanPlayerUseShip(uint player, ShipStatus playerShip)
         {
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Entity.Player>(playerId);
+            var dbPlayer = DB.Get<Player>(playerId);
             
-            var shipDetails = _ships[playerShip.ItemTag];
+            var shipDetails = _shipTypes[playerShip.ItemTag];
 
             // Check ship requirements
             foreach (var (perkType, requiredLevel) in shipDetails.RequiredPerks)
@@ -466,7 +960,7 @@ namespace WOD.Game.Server.Service
             if (!_shipModules.ContainsKey(itemTag)) return false;
 
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Entity.Player>(playerId);
+            var dbPlayer = DB.Get<Player>(playerId);
             var shipModule = _shipModules[itemTag];
 
             foreach (var (perkType, requiredLevel) in shipModule.RequiredPerks)
@@ -501,7 +995,7 @@ namespace WOD.Game.Server.Service
             if (string.IsNullOrWhiteSpace(moduleDetail.Description)) return;
 
             // Append the ship module's description to the item's description.
-            var description = GetDescription(item);
+            var description = GetDescription(item, true);
             description += moduleDetail.Description + "\n";
             SetDescription(item, description);
 
@@ -526,8 +1020,8 @@ namespace WOD.Game.Server.Service
 
             // Tag must be registered with the system.
             var itemTag = GetTag(item);
-            if (!_ships.ContainsKey(itemTag)) return;
-            var shipDetail = _ships[itemTag];
+            if (!_shipTypes.ContainsKey(itemTag)) return;
+            var shipDetail = _shipTypes[itemTag];
 
             foreach (var (perkType, level) in shipDetail.RequiredPerks)
             {
@@ -548,22 +1042,20 @@ namespace WOD.Game.Server.Service
             
             var activator = OBJECT_SELF;
             var activatorShipStatus = GetShipStatus(activator);
-            
-            // Check high powered modules
-            var shipModule = activatorShipStatus
-                .HighPowerModules
-                .SingleOrDefault(x => x.Key == feat);
+            var slotNumber = GetFeatSlotNumber(feat);
+            ShipStatus.ShipStatusModule shipModule;
 
-            // Not found in high powered modules, check low now.
-            if (shipModule.Value == null)
+            // Slot numbers between 1-10 are high powered slots
+            if (slotNumber <= 10)
             {
-                shipModule = activatorShipStatus
-                    .LowPowerModules
-                    .SingleOrDefault(x => x.Key == feat);
+                shipModule = activatorShipStatus.HighPowerModules[slotNumber];
             }
-
-            // Neither high nor low had this feat.Log an error.
-            if (shipModule.Value == null)
+            // Slot Numbers between 10-20 are low powered slots.
+            else if (slotNumber <= 20)
+            {
+                shipModule = activatorShipStatus.LowPowerModules[slotNumber-10];
+            }
+            else
             {
                 Log.Write(LogGroup.Error, $"Failed to locate matching ship module by its feat for player {GetName(activator)}");
                 SendMessageToPC(activator, "Unable to use that module.");
@@ -571,10 +1063,10 @@ namespace WOD.Game.Server.Service
             }
 
             // Found the ship module. Run validation checks.
-            var shipModuleDetails = _shipModules[shipModule.Value.ItemTag];
+            var shipModuleDetails = _shipModules[shipModule.ItemTag];
 
             // Check capacitor requirements
-            var requiredCapacitor = shipModuleDetails.CalculateCapacitorAction?.Invoke(activator, activatorShipStatus) ?? 0;
+            var requiredCapacitor = shipModuleDetails.CalculateCapacitorAction?.Invoke(activator, activatorShipStatus, shipModule.ModuleBonus) ?? 0;
 
             // Perk bonuses
             var capacitorReduction = 1.0f - Perk.GetEffectivePerkLevel(activator, PerkType.EnergyManagement) * 0.2f;
@@ -588,7 +1080,7 @@ namespace WOD.Game.Server.Service
 
             // Check recast requirements
             var now = DateTime.UtcNow;
-            if (shipModule.Value.RecastTime > now)
+            if (shipModule.RecastTime > now)
             {
                 SendMessageToPC(activator, "That module is not ready.");
                 return;
@@ -603,6 +1095,13 @@ namespace WOD.Game.Server.Service
                 return;
             }
 
+            // Check for a selected target that doesn't have a ship status.
+            if (GetObjectType(target) != ObjectType.Placeable && targetShipStatus == null)
+            {
+                SendMessageToPC(activator, "Invalid target.");
+                return;
+            }
+
             // Check for a valid target if the ship module requires it.
             if (shipModuleDetails.RequiresTarget && (!GetIsObjectValid(target) || targetShipStatus == null))
             {
@@ -610,10 +1109,19 @@ namespace WOD.Game.Server.Service
                 return;
             }
 
+            // Check to ensure activator is within maximum distance.
+            var maxDistance = shipModuleDetails.ModuleMaxDistanceAction == null ? 10f : shipModuleDetails.ModuleMaxDistanceAction(activator, activatorShipStatus, target, targetShipStatus, shipModule.ModuleBonus);
+            if (GetIsPC(activator) && GetDistanceBetween(activator, target) > maxDistance)
+            {
+                SendMessageToPC(activator, $"Target is too far away. Maximum distance: {maxDistance} meters.");
+                return;
+            }
+
+
             // Run any custom validation specific to the ship module.
             if (shipModuleDetails.ModuleValidationAction != null)
             {
-                var result = shipModuleDetails.ModuleValidationAction(activator, activatorShipStatus, target, targetShipStatus);
+                var result = shipModuleDetails.ModuleValidationAction(activator, activatorShipStatus, target, targetShipStatus, shipModule.ModuleBonus);
                 if (!string.IsNullOrWhiteSpace(result))
                 {
                     SendMessageToPC(activator, result);
@@ -622,14 +1130,14 @@ namespace WOD.Game.Server.Service
             }
 
             // Validation succeeded, run the module-specific code now.
-            shipModuleDetails.ModuleActivatedAction?.Invoke(activator, activatorShipStatus, target, targetShipStatus);
+            shipModuleDetails.ModuleActivatedAction?.Invoke(activator, activatorShipStatus, target, targetShipStatus, shipModule.ModuleBonus);
             
             // Update the recast timer.
             if (shipModuleDetails.CalculateRecastAction != null)
             {
-                var recastSeconds = shipModuleDetails.CalculateRecastAction(activator, activatorShipStatus);
+                var recastSeconds = shipModuleDetails.CalculateRecastAction(activator, activatorShipStatus, shipModule.ModuleBonus);
                 var recastTimer = now.AddSeconds(recastSeconds);
-                shipModule.Value.RecastTime = recastTimer;
+                shipModule.RecastTime = recastTimer;
             }
 
             // Reduce capacitor
@@ -642,26 +1150,27 @@ namespace WOD.Game.Server.Service
             if (GetIsPC(activator))
             {
                 var playerId = GetObjectUUID(activator);
-                var dbPlayer = DB.Get<Entity.Player>(playerId);
-                dbPlayer.Ships[dbPlayer.ActiveShipId] = activatorShipStatus;
-
-                DB.Set(playerId, dbPlayer);
+                var dbPlayer = DB.Get<Player>(playerId);
+                var dbShip = DB.Get<PlayerShip>(dbPlayer.ActiveShipId);
+                dbShip.Status = activatorShipStatus;
+                
+                DB.Set(dbShip);
+                ExecuteScript("pc_cap_adjusted", activator);
             }
 
             if (GetIsPC(target))
             {
                 var playerId = GetObjectUUID(target);
-                var dbPlayer = DB.Get<Entity.Player>(playerId);
-                dbPlayer.Ships[dbPlayer.ActiveShipId] = targetShipStatus;
+                var dbPlayer = DB.Get<Player>(playerId);
+                var dbShip = DB.Get<PlayerShip>(dbPlayer.ActiveShipId);
+                dbShip.Status = targetShipStatus;
 
-                DB.Set(playerId, dbPlayer);
+                DB.Set(dbShip);
             }
         }
 
-        private static void ApplyAutoShipRecovery(ShipStatus shipStatus)
+        private static void ApplyAutoShipRecovery(uint player, ShipStatus shipStatus)
         {
-            var shipDetail = _ships[shipStatus.ItemTag];
-
             // Shield recovery
             shipStatus.ShieldCycle++;
             var rechargeRate = shipStatus.ShieldRechargeRate;
@@ -670,48 +1179,102 @@ namespace WOD.Game.Server.Service
 
             if (shipStatus.ShieldCycle >= rechargeRate)
             {
-                shipStatus.Shield++;
-
-                // Clamp shield to max.
-                if (shipStatus.Shield > shipStatus.MaxShield)
-                    shipStatus.Shield = shipStatus.MaxShield;
-
+                RestoreShield(player, shipStatus, 1);
                 shipStatus.ShieldCycle = 0;
             }
 
             // Capacitor recovery
-            shipStatus.Capacitor++;
+            RestoreCapacitor(player, shipStatus, 1);
 
-            // Clamp capacitor to max.
-            if (shipStatus.Capacitor > shipDetail.MaxCapacitor)
-                shipStatus.Capacitor = shipDetail.MaxCapacitor;
+            if(GetIsPC(player))
+                ExecuteScript("pc_target_upd", player);
         }
 
         /// <summary>
-        /// When the player's heartbeat fires, recover capacitor and shield.
+        /// Recover player ships every second.
         /// </summary>
-        [NWNEventHandler("interval_pc_1s")]
-        public static void PlayerShipRecovery()
+        private static void PlayerShipRecovery()
         {
-            var player = OBJECT_SELF;
+            foreach (var player in _playersInSpace)
+            {
+                // Not in space mode, skip.
+                if (!IsPlayerInSpaceMode(player)) 
+                    continue;
 
-            // Not in space mode, exit early.
-            if (!IsPlayerInSpaceMode(player)) return;
+                var playerId = GetObjectUUID(player);
+                var dbPlayer = DB.Get<Player>(playerId);
+                var dbShip = DB.Get<PlayerShip>(dbPlayer.ActiveShipId);
 
-            var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Entity.Player>(playerId);
-            var playerShip = dbPlayer.Ships[dbPlayer.ActiveShipId];
+                ApplyAutoShipRecovery(player, dbShip.Status);
 
-            ApplyAutoShipRecovery(playerShip);
+                // Update changes
+                DB.Set(dbShip);
+            }
+        }
 
-            // Update changes
-            DB.Set(playerId, dbPlayer);
+        public static void RestoreShield(uint creature, ShipStatus shipStatus, int amount)
+        {
+            shipStatus.Shield += amount;
+            if (shipStatus.Shield > shipStatus.MaxShield)
+                shipStatus.Shield = shipStatus.MaxShield;
+
+            ExecuteScript("pc_shld_adjusted", creature);
+        }
+
+        public static void ReduceShield(uint creature, ShipStatus shipStatus, int amount)
+        {
+            shipStatus.Shield -= amount;
+            if (shipStatus.Shield < 0)
+                shipStatus.Shield = 0;
+
+            ExecuteScript("pc_shld_adjusted", creature);
+        }
+
+        public static void RestoreHull(uint creature, ShipStatus shipStatus, int amount)
+        {
+            shipStatus.Hull += amount;
+            if (shipStatus.Hull > shipStatus.MaxHull)
+                shipStatus.Hull = shipStatus.MaxHull;
+
+            ExecuteScript("pc_hull_adjusted", creature);
+        }
+
+        public static void ReduceHull(uint creature, ShipStatus shipStatus, int amount)
+        {
+            shipStatus.Hull -= amount;
+            if (shipStatus.Hull < 0)
+                shipStatus.Hull = 0;
+
+            if (shipStatus.Hull <= 0)
+            {
+                AssignCommand(OBJECT_SELF, () => ApplyEffectToObject(DurationType.Instant, EffectDeath(), creature));
+            }
+
+            ExecuteScript("pc_hull_adjusted", creature);
+        }
+
+        public static void RestoreCapacitor(uint creature, ShipStatus shipStatus, int amount)
+        {
+            shipStatus.Capacitor += amount;
+            if (shipStatus.Capacitor > shipStatus.MaxCapacitor)
+                shipStatus.Capacitor = shipStatus.MaxCapacitor;
+
+            ExecuteScript("pc_cap_adjusted", creature);
+        }
+
+        public static void ReduceCapacitor(uint creature, ShipStatus shipStatus, int amount)
+        {
+            shipStatus.Capacitor -= amount;
+            if (shipStatus.Capacitor < 0)
+                shipStatus.Capacitor = 0;
+
+            ExecuteScript("pc_cap_adjusted", creature);
         }
 
         /// <summary>
         /// When a creature spawns, track it in the cache.
         /// </summary>
-        [NWNEventHandler("crea_spawn")]
+        [NWNEventHandler("crea_spawn_bef")]
         public static void CreatureSpawn()
         {
             var creature = OBJECT_SELF;
@@ -721,12 +1284,11 @@ namespace WOD.Game.Server.Service
             if (!_spaceObjects.ContainsKey(creatureTag)) return;
 
             var registeredEnemyType = _spaceObjects[creatureTag];
-            var shipDetail = _ships[registeredEnemyType.ShipItemTag];
+            var shipDetail = _shipTypes[registeredEnemyType.ShipItemTag];
 
             var shipStatus = new ShipStatus
             {
                 ItemTag = registeredEnemyType.ShipItemTag,
-                Name = shipDetail.Name,
                 Shield = shipDetail.MaxShield,
                 MaxShield = shipDetail.MaxShield,
                 Hull = shipDetail.MaxHull,
@@ -746,8 +1308,9 @@ namespace WOD.Game.Server.Service
             foreach (var itemTag in registeredEnemyType.HighPoweredModules)
             {
                 var feat = ShipModuleFeats.ElementAt(featCount).Key;
+                var slot = HighFeatToSlot(feat);
                 var shipModule = _shipModules[itemTag];
-                shipStatus.HighPowerModules.Add(feat, new ShipStatus.ShipStatusModule
+                shipStatus.HighPowerModules.Add(slot, new ShipStatus.ShipStatusModule
                 {
                     ItemTag = itemTag,
                     RecastTime = DateTime.UtcNow
@@ -755,18 +1318,19 @@ namespace WOD.Game.Server.Service
 
                 if (shipModule.Type != ShipModuleType.Passive)
                 {
-                    shipStatus.ActiveModules.Add(feat);
+                    shipStatus.ActiveModules.Add(slot);
                 }
 
-                shipModule.ModuleEquippedAction?.Invoke(creature, shipStatus);
+                shipModule.ModuleEquippedAction?.Invoke(creature, shipStatus, 0);
 
                 featCount++;
             }
             foreach (var itemTag in registeredEnemyType.LowPowerModules)
             {
                 var feat = ShipModuleFeats.ElementAt(featCount).Key;
+                var slot = LowFeatToSlot(feat);
                 var shipModule = _shipModules[itemTag];
-                shipStatus.LowPowerModules.Add(feat, new ShipStatus.ShipStatusModule
+                shipStatus.LowPowerModules.Add(slot, new ShipStatus.ShipStatusModule
                 {
                     ItemTag = itemTag,
                     RecastTime = DateTime.UtcNow
@@ -774,10 +1338,10 @@ namespace WOD.Game.Server.Service
 
                 if (shipModule.Type != ShipModuleType.Passive)
                 {
-                    shipStatus.ActiveModules.Add(feat);
+                    shipStatus.ActiveModules.Add(slot);
                 }
 
-                shipModule.ModuleEquippedAction?.Invoke(creature, shipStatus);
+                shipModule.ModuleEquippedAction?.Invoke(creature, shipStatus, 0);
 
                 featCount++;
             }
@@ -788,7 +1352,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When a creature dies, remove it from the cache.
         /// </summary>
-        [NWNEventHandler("crea_death")]
+        [NWNEventHandler("crea_death_aft")]
         public static void CreatureDeath()
         {
             var creature = OBJECT_SELF;
@@ -817,14 +1381,14 @@ namespace WOD.Game.Server.Service
             if (GetIsPC(creature))
             {
                 var targetPlayerId = GetObjectUUID(creature);
-                var dbTargetPlayer = DB.Get<Entity.Player>(targetPlayerId);
+                var dbTargetPlayer = DB.Get<Player>(targetPlayerId);
 
-                if (dbTargetPlayer.ActiveShipId == Guid.Empty)
+                if (dbTargetPlayer.ActiveShipId == Guid.Empty.ToString())
                     return null;
 
-                var dbPlayerShip = dbTargetPlayer.Ships[dbTargetPlayer.ActiveShipId];
+                var dbPlayerShip = DB.Get<PlayerShip>(dbTargetPlayer.ActiveShipId);
 
-                return dbPlayerShip;
+                return dbPlayerShip?.Status;
             }
             // NPC ship statuses are stored directly in cache so we can return them immediately.
             else
@@ -839,15 +1403,19 @@ namespace WOD.Game.Server.Service
         /// Calculates attacker's chance to hit target.
         /// </summary>
         /// <param name="attacker">The creature attacking.</param>
-        /// <param name="target">The creature being targeted.</param>
-        public static int CalculateChanceToHit(uint attacker, uint target)
+        /// <param name="defender">The creature being targeted.</param>
+        public static int CalculateChanceToHit(uint attacker, uint defender)
         {
             var attackerShipStatus = GetShipStatus(attacker);
-            var targetShipStatus = GetShipStatus(target);
-            
-            var delta = attackerShipStatus.Accuracy - targetShipStatus.Evasion;
-            var chanceToHit = 75 + delta * 0.5f;
-            return (int)chanceToHit;
+            var defenderShipStatus = GetShipStatus(defender);
+
+            if (attackerShipStatus == null || defenderShipStatus == null)
+                return 0;
+
+            var attackerAccuracy = Stat.GetAccuracy(attacker, OBJECT_INVALID, AbilityType.Agility, SkillType.Piloting) + attackerShipStatus.Accuracy;
+            var defenderEvasion = Stat.GetEvasion(defender, SkillType.Piloting) + defenderShipStatus.Evasion;
+
+            return Combat.CalculateHitRate(attackerAccuracy, defenderEvasion, 0);
         }
 
         /// <summary>
@@ -863,6 +1431,10 @@ namespace WOD.Game.Server.Service
             if (amount < 0) return;
 
             var targetShipStatus = GetShipStatus(target);
+
+            if (targetShipStatus == null)
+                return;
+
             var remainingDamage = amount;
             // First deal damage to target's shields.
             if (remainingDamage <= targetShipStatus.Shield)
@@ -870,6 +1442,8 @@ namespace WOD.Game.Server.Service
                 // Shields have enough to cover the attack.
                 targetShipStatus.Shield -= remainingDamage;
                 remainingDamage = 0;
+                ApplyEffectToObject(DurationType.Temporary, EffectVisualEffect(VisualEffect.Vfx_Dur_Aura_Pulse_Cyan_Blue), target, 1.0f);
+                ApplyEffectToObject(DurationType.Instant, EffectVisualEffect(VisualEffect.Vfx_Ship_Deflect), target);
             }
             else
             {
@@ -882,6 +1456,7 @@ namespace WOD.Game.Server.Service
             if (remainingDamage > 0)
             {
                 targetShipStatus.Hull -= remainingDamage;
+                ApplyEffectToObject(DurationType.Instant, EffectVisualEffect(VisualEffect.Vfx_Ship_Explosion), target);
             }
 
             // Safety clamping
@@ -893,20 +1468,27 @@ namespace WOD.Game.Server.Service
             // Apply death if shield and hull have reached zero.
             if (targetShipStatus.Shield <= 0 && targetShipStatus.Hull <= 0)
             {
-                ApplyDeath(target);
+                AssignCommand(attacker, () => ApplyEffectToObject(DurationType.Instant, EffectDeath(), target));
+                ClearCurrentTarget(attacker);
             }
             else
             {
                 if (GetIsPC(target))
                 {
                     var targetPlayerId = GetObjectUUID(target);
-                    var dbTargetPlayer = DB.Get<Entity.Player>(targetPlayerId);
-                    var dbPlayerShip = dbTargetPlayer.Ships[dbTargetPlayer.ActiveShipId];
+                    var dbTargetPlayer = DB.Get<Player>(targetPlayerId);
+                    var dbPlayerShip = DB.Get<PlayerShip>(dbTargetPlayer.ActiveShipId);
+                    var instance = Property.GetRegisteredInstance(dbPlayerShip.PropertyId);
+                    var location = Location(instance.Area, Vector3.Zero, 0.0f);
 
-                    dbPlayerShip.Shield = targetShipStatus.Shield;
-                    dbPlayerShip.Hull = targetShipStatus.Hull;
+                    ApplyEffectAtLocation(DurationType.Instant, EffectVisualEffect(VisualEffect.Vfx_ShakeScreen), location);
 
-                    DB.Set(targetPlayerId, dbTargetPlayer);
+                    dbPlayerShip.Status.Shield = targetShipStatus.Shield;
+                    dbPlayerShip.Status.Hull = targetShipStatus.Hull;
+
+                    DB.Set(dbPlayerShip);
+                    ExecuteScript("pc_shld_adjusted", target);
+                    ExecuteScript("pc_hull_adjusted", target);
                 }
                 else
                 {
@@ -917,31 +1499,45 @@ namespace WOD.Game.Server.Service
 
             // Notify nearby players of damage taken by target.
             Messaging.SendMessageNearbyToPlayers(attacker, $"{GetName(attacker)} deals {amount} damage to {GetName(target)}.");
+            
+            if(GetIsPC(attacker))
+                ExecuteScript("pc_target_upd", attacker);
+
         }
 
         /// <summary>
         /// Applies death to a creature.
-        /// If this is a PC, their ship will be destroyed.
+        /// If this is a PC:
+        ///     - The ship modules will either drop or be destroyed.
+        ///     - The ship will require repairs
+        ///     - The pilot will be killed (inflicting default death system penalties)
+        ///     - Everyone inside the ship instance will be killed (inflicting default death system penalties)
+        ///     - The ship will relocate back to the last dock it was at
         /// If this is an NPC, they will be killed and explode in spectacular fashion.
         /// </summary>
-        /// <param name="creature">The creature who will be killed.</param>
-        private static void ApplyDeath(uint creature)
+        [NWNEventHandler("mod_death")]
+        public static void ApplyDeath()
         {
+            var creature = GetLastPlayerDied();
+
+            if (!IsPlayerInSpaceMode(creature))
+                return;
+
             ApplyEffectToObject(DurationType.Instant, EffectVisualEffect(VisualEffect.Fnf_Fireball), creature);
 
             // When a player dies, they have a chance to drop every module installed on their ship.
-            // The ship also gets permanently destroyed and removed from their database record.
-            // Finally, they return to their stored respawn point.
             if (GetIsPC(creature))
             {
+                const int ChanceToDropModule = 65;
                 var deathLocation = GetLocation(creature);
                 var playerId = GetObjectUUID(creature);
-                var dbPlayer = DB.Get<Entity.Player>(playerId);
-                var dbPlayerShip = dbPlayer.Ships[dbPlayer.ActiveShipId];
-                const int ChanceToDropModule = 65;
+                var dbPlayer = DB.Get<Player>(playerId);
+                var dbPlayerShip = DB.Get<PlayerShip>(dbPlayer.ActiveShipId);
+                var dbProperty = DB.Get<WorldProperty>(dbPlayerShip.PropertyId);
+                var instance = Property.GetRegisteredInstance(dbPlayerShip.PropertyId);
 
                 // Give a chance to drop each installed module.
-                foreach (var (_, shipModule) in dbPlayerShip.HighPowerModules)
+                foreach (var (_, shipModule) in dbPlayerShip.Status.HighPowerModules)
                 {
                     if (Random.D100(1) <= ChanceToDropModule)
                     {
@@ -949,9 +1545,13 @@ namespace WOD.Game.Server.Service
                         CopyObject(deserialized, deathLocation);
                         DestroyObject(deserialized);
                     }
+
+                    var moduleDetails = GetShipModuleDetailByItemTag(shipModule.ItemTag);
+                    moduleDetails.ModuleUnequippedAction?.Invoke(creature, dbPlayerShip.Status, shipModule.ModuleBonus);
+
                 }
 
-                foreach (var (_, shipModule) in dbPlayerShip.LowPowerModules)
+                foreach (var (_, shipModule) in dbPlayerShip.Status.LowPowerModules)
                 {
                     if (Random.D100(1) <= ChanceToDropModule)
                     {
@@ -959,11 +1559,22 @@ namespace WOD.Game.Server.Service
                         CopyObject(deserialized, deathLocation);
                         DestroyObject(deserialized);
                     }
+
+                    var moduleDetails = GetShipModuleDetailByItemTag(shipModule.ItemTag);
+                    moduleDetails.ModuleUnequippedAction?.Invoke(creature, dbPlayerShip.Status, shipModule.ModuleBonus);
                 }
+
+                // Player always loses all modules regardless if they actually dropped.
+                dbPlayerShip.Status.HighPowerModules.Clear();
+                dbPlayerShip.Status.LowPowerModules.Clear();
+                dbPlayerShip.PlayerHotBars.Clear();
+                dbPlayerShip.Status.Hull = 1;
+                dbPlayerShip.Status.Shield = 0;
 
                 // Exit space mode
                 ClearCurrentTarget(creature);
                 SetCreatureAppearanceType(creature, dbPlayer.OriginalAppearanceType);
+                CreaturePlugin.SetMovementRate(creature, MovementRate.PC);
                 Enmity.RemoveCreatureEnmity(creature);
                 
                 // Remove all module feats from the player.
@@ -985,34 +1596,30 @@ namespace WOD.Game.Server.Service
                     dbPlayer.SerializedHotBar = CreaturePlugin.SerializeQuickbar(creature);
                 }
 
-                // Jump player to their respawn point.
-                var respawnArea = Cache.GetAreaByResref(dbPlayer.RespawnAreaResref);
-                var respawnLocation = Location(
-                    respawnArea,
-                    Vector3(
-                        dbPlayer.RespawnLocationX,
-                        dbPlayer.RespawnLocationY,
-                        dbPlayer.RespawnLocationZ),
-                    dbPlayer.RespawnLocationOrientation);
+                _shipClones.Remove(dbPlayer.ActiveShipId);
+                dbPlayer.ActiveShipId = Guid.Empty.ToString();
 
-                AssignCommand(creature, () =>
+                // Removing the current position of the ship will automatically send it back to the last dock it was at.
+                if (dbProperty.Positions.ContainsKey(PropertyLocationType.CurrentPosition))
                 {
-                    ClearAllActions();
-                    ActionJumpToLocation(respawnLocation);
-                });
-
-                // Remove the destroyed ship from the player's data.
-                dbPlayer.Ships.Remove(dbPlayer.ActiveShipId);
-                dbPlayer.ActiveShipId = Guid.Empty;
-                dbPlayer.SelectedShipId = Guid.Empty;
+                    dbProperty.Positions.Remove(PropertyLocationType.CurrentPosition);
+                }
 
                 // Update the changes
-                DB.Set(playerId, dbPlayer);
-            }
-            // Simply kill NPCs
-            else
-            {
-                ApplyEffectToObject(DurationType.Instant, EffectDeath(), creature);
+                DB.Set(dbProperty);
+                DB.Set(dbPlayerShip);
+                DB.Set(dbPlayer);
+
+                // Murder everyone inside the ship's instance.
+                foreach (var player in instance.Players)
+                {
+                    ApplyEffectToObject(DurationType.Instant, EffectVisualEffect(VisualEffect.Fnf_Fireball), player);
+                    ApplyEffectToObject(DurationType.Instant, EffectDeath(), player);
+
+                    FloatingTextStringOnCreature(ColorToken.Red("The ship has exploded!"), player, false);
+                }
+
+                DestroyPilotClone(creature);
             }
         }
 
@@ -1025,26 +1632,38 @@ namespace WOD.Game.Server.Service
 
             foreach (var (creature, shipStatus) in _shipNPCs)
             {
-                ApplyAutoShipRecovery(shipStatus);
+                ApplyAutoShipRecovery(creature, shipStatus);
 
                 // Determine target
                 var target = Enmity.GetHighestEnmityTarget(creature);
                 if (!GetIsObjectValid(target)) continue;
 
                 // Determine which modules are available.
-                var allModules = shipStatus.HighPowerModules.Concat(shipStatus.LowPowerModules);
-                var availableModules = allModules.Where(x =>
+                var highModules = shipStatus.HighPowerModules.Where(x =>
                 {
                     var shipModuleDetail = _shipModules[x.Value.ItemTag];
-                    var requiredCapacitor = shipModuleDetail.CalculateCapacitorAction?.Invoke(creature, shipStatus) ?? 0;
+                    var requiredCapacitor = shipModuleDetail.CalculateCapacitorAction?.Invoke(creature, shipStatus, 0) ?? 0;
 
                     return x.Value.RecastTime <= now &&
                            shipStatus.Capacitor >= requiredCapacitor;
-                });
+                })
+                    .Select(s => new Tuple<FeatType, ShipStatus.ShipStatusModule>(HighSlotToFeat(s.Key), s.Value));
 
+                var lowModules = shipStatus.LowPowerModules.Where(x =>
+                {
+                    var shipModuleDetail = _shipModules[x.Value.ItemTag];
+                    var requiredCapacitor = shipModuleDetail.CalculateCapacitorAction?.Invoke(creature, shipStatus, 0) ?? 0;
+
+                    return x.Value.RecastTime <= now &&
+                           shipStatus.Capacitor >= requiredCapacitor;
+                })
+                    .Select(s => new Tuple<FeatType, ShipStatus.ShipStatusModule>(LowSlotToFeat(s.Key), s.Value));
+
+                var availableModules = highModules.Concat(lowModules);
                 // Keep distance from target.
                 AssignCommand(creature, () =>
                 {
+                    ClearAllActions();
                     ActionMoveAwayFromObject(target, true, 10f);
                 });
 
@@ -1118,8 +1737,159 @@ namespace WOD.Game.Server.Service
             else
             {
                 ClearCurrentTarget(creature);
-                SetCurrentTarget(creature, self, VisualEffect.Vfx_Dur_Aura_Red);
+                SetCurrentTarget(creature, self);
             }
         }
+
+        /// <summary>
+        /// Performs an emergency exit on a ship.
+        /// This will send the ship back to the last place it docked if there are no players in the property 
+        /// and no one is currently piloting the ship.
+        /// </summary>
+        /// <param name="instance">The area instance</param>
+        public static void PerformEmergencyExit(uint instance)
+        {
+            var propertyId = Property.GetPropertyId(instance);
+            var shipQuery = new DBQuery<PlayerShip>()
+                .AddFieldSearch(nameof(PlayerShip.PropertyId), propertyId, false);
+            var dbShip = DB.Search(shipQuery).FirstOrDefault();
+
+            if (dbShip == null)
+                return;
+
+            var playerCount = AreaPlugin.GetNumberOfPlayersInArea(instance);
+            var shipClone = _shipClones.ContainsKey(dbShip.Id)
+                ? _shipClones[dbShip.Id]
+                : OBJECT_INVALID;
+            var isPiloted = !GetIsObjectValid(shipClone);
+
+            // Other players are in the instance or someone is piloting the ship.
+            // No need to send the ship back to the dock.
+            if (playerCount > 1 || isPiloted)
+                return;
+
+            // No one's in the ship and it's lost in space. Let's send it back to the last dock
+            // and apply penalties.
+            var dbProperty = DB.Get<WorldProperty>(propertyId);
+
+            if (dbProperty.Positions.ContainsKey(PropertyLocationType.CurrentPosition))
+            {
+                dbProperty.Positions.Remove(PropertyLocationType.CurrentPosition);
+
+                dbShip.Status.Shield = 0;
+                dbShip.Status.Hull = 1;
+
+                DB.Set(dbProperty);
+                DB.Set(dbShip);
+            }
+
+            if (_shipClones.ContainsKey(dbShip.Id))
+            {
+                _shipClones.Remove(dbShip.Id);
+            }
+
+            DestroyObject(shipClone);
+        }
+
+        /// <summary>
+        /// Retrieves the module bonus item property off a given item.
+        /// If the item property doesn't exist, 0 will be returned.
+        /// </summary>
+        /// <param name="item">The item to calculate.</param>
+        /// <returns>The module bonus of an item or 0 if none are found.</returns>
+        public static int GetModuleBonus(uint item)
+        {
+            var moduleBonus = 0;
+            for (var ip = GetFirstItemProperty(item); GetIsItemPropertyValid(ip); ip = GetNextItemProperty(item))
+            {
+                if (GetItemPropertyType(ip) == ItemPropertyType.ModuleBonus)
+                {
+                    moduleBonus += GetItemPropertyCostTableValue(ip);
+                }
+            }
+
+            return moduleBonus;
+        }
+
+        /// <summary>
+        /// Reads all starship bonus properties off an item and returns their cumulative values.
+        /// </summary>
+        /// <param name="item">The item to read.</param>
+        /// <returns>An object containing cumulative starship bonus information</returns>
+        public static ShipBonuses GetShipBonuses(uint item)
+        {
+            var bonuses = new ShipBonuses();
+            for (var ip = GetFirstItemProperty(item); GetIsItemPropertyValid(ip); ip = GetNextItemProperty(item))
+            {
+                if (GetItemPropertyType(ip) == ItemPropertyType.StarshipBonus)
+                {
+                    var type = GetItemPropertySubType(ip);
+                    var amount = GetItemPropertyCostTableValue(ip);
+
+                    switch (type)
+                    {
+                        case 46: // Starship Hull
+                            bonuses.Hull += amount;
+                            break;
+                        case 47: // Starship Capacitor
+                            bonuses.Capacitor += amount;
+                            break;
+                        case 48: // Starship Shield
+                            bonuses.Shield += amount;
+                            break;
+                        case 49: // Starship Shield Recharge Rate
+                            bonuses.ShieldRechargeRate += amount;
+                            break;
+                        case 50: // Starship EM Damage
+                            bonuses.EMDamage += amount;
+                            break;
+                        case 51: // Starship Thermal Damage
+                            bonuses.ThermalDamage += amount;
+                            break;
+                        case 52: // Starship Explosive Damage
+                            bonuses.ExplosiveDamage += amount;
+                            break;
+                        case 53: // Starship Accuracy
+                            bonuses.Accuracy += amount;
+                            break;
+                        case 54: // Starship Evasion
+                            bonuses.Evasion += amount;
+                            break;
+                        case 55: // Starship Thermal Defense
+                            bonuses.ThermalDefense += amount;
+                            break;
+                        case 56: // Starship Explosive Defense
+                            bonuses.ExplosiveDefense += amount;
+                            break;
+                        case 57: // Starship EM Defense
+                            bonuses.EMDefense += amount;
+                            break;
+                    }
+                }
+            }
+
+            return bonuses;
+        }
+
+        /// <summary>
+        /// When a player attempts to stealth while in space mode,
+        /// exit the stealth mode and send an error message.
+        /// </summary>
+        [NWNEventHandler("stlent_add_bef")]
+        public static void PreventSpaceStealth()
+        {
+            var creature = OBJECT_SELF;
+
+            if (!IsPlayerInSpaceMode(creature))
+                return;
+
+            AssignCommand(creature, () =>
+            {
+                SetActionMode(creature, ActionMode.Stealth, false);
+            });
+
+            SendMessageToPC(creature, ColorToken.Red($"You cannot enter stealth mode in space."));
+        }
+
     }
 }

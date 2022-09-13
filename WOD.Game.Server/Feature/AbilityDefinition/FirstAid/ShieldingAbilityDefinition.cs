@@ -2,12 +2,11 @@
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.PerkService;
+using WOD.Game.Server.Service.SkillService;
 using WOD.Game.Server.Service.StatusEffectService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
 {
@@ -30,7 +29,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 return "Your target is too far away.";
             }
 
-            if (!HasMedicalSupplies(activator))
+            if (!HasStimPack(activator))
             {
                 return "You have no stim packs.";
             }
@@ -54,8 +53,10 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.Shielding1, PerkType.Shielding)
                 .Name("Shielding I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.Shielding, 30f)
                 .HasActivationDelay(2f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(3)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
@@ -64,6 +65,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 .HasImpactAction((activator, target, _, _) =>
                 {
                     Impact(activator, target, StatusEffectType.Shielding1);
+
+                    Enmity.ModifyEnmityOnAll(activator, 300);
+                    CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
                 });
         }
 
@@ -71,8 +75,10 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.Shielding2, PerkType.Shielding)
                 .Name("Shielding II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.Shielding, 30f)
                 .HasActivationDelay(2f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(4)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
@@ -81,6 +87,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 .HasImpactAction((activator, target, _, _) =>
                 {
                     Impact(activator, target, StatusEffectType.Shielding2);
+
+                    Enmity.ModifyEnmityOnAll(activator, 450);
+                    CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
                 });
         }
 
@@ -88,8 +97,10 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.Shielding3, PerkType.Shielding)
                 .Name("Shielding III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.Shielding, 30f)
                 .HasActivationDelay(2f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(5)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
@@ -98,6 +109,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 .HasImpactAction((activator, target, _, _) =>
                 {
                     Impact(activator, target, StatusEffectType.Shielding3);
+
+                    Enmity.ModifyEnmityOnAll(activator, 650);
+                    CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
                 });
         }
 
@@ -105,8 +119,10 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.Shielding4, PerkType.Shielding)
                 .Name("Shielding IV")
+                .Level(4)
                 .HasRecastDelay(RecastGroup.Shielding, 30f)
                 .HasActivationDelay(2f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(6)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
@@ -115,6 +131,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 .HasImpactAction((activator, target, _, _) =>
                 {
                     Impact(activator, target, StatusEffectType.Shielding4);
+
+                    Enmity.ModifyEnmityOnAll(activator, 800);
+                    CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
                 });
         }
     }

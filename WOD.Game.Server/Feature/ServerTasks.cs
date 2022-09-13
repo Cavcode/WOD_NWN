@@ -1,8 +1,11 @@
 ﻿using System;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
+using WOD.Game.Server.Core.NWNX.Enum;
+using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.DBService;
+using WOD.Game.Server.Service.LogService;
 
 namespace WOD.Game.Server.Feature
 {
@@ -46,6 +49,27 @@ namespace WOD.Game.Server.Feature
         public static void ProcessBootUp()
         {
             Log.Write(LogGroup.Server, "Server is starting up.");
+            ConfigureServerSettings();
+            ApplyBans();
+        }
+
+        private static void ConfigureServerSettings()
+        {
+            AdministrationPlugin.SetPlayOption(AdministrationOption.ExamineChallengeRating, false);
+            AdministrationPlugin.SetPlayOption(AdministrationOption.UseMaxHitpoints, true);
+        }
+
+        private static void ApplyBans()
+        {
+            var query = new DBQuery<PlayerBan>();
+
+            var dbBanCount = (int)DB.SearchCount(query);
+            var dbBans = DB.Search(query.AddPaging(dbBanCount, 0));
+
+            foreach (var ban in dbBans)
+            {
+                AdministrationPlugin.AddBannedCDKey(ban.CDKey);
+            }
         }
     }
 }

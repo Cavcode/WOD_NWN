@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WOD.Game.Server.Core;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Core.NWNX;
+using CombatPoint = WOD.Game.Server.Service.CombatPoint;
 
 namespace WOD.Game.Server.Service
 {
@@ -16,7 +18,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When an enemy is damaged, increase enmity toward that creature by the amount of damage dealt.
         /// </summary>
-        [NWNEventHandler("crea_damaged")]
+        [NWNEventHandler("crea_damaged_bef")]
         public static void CreatureDamaged()
         {
             var enemy = OBJECT_SELF;
@@ -29,7 +31,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When a creature attacks an enemy, increase enmity by 1.
         /// </summary>
-        [NWNEventHandler("crea_attacked")]
+        [NWNEventHandler("crea_attack_bef")]
         public static void CreatureAttacked()
         {
             var enemy = OBJECT_SELF;
@@ -41,7 +43,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When a creature dies, remove all enmity tables it is associated with.
         /// </summary>
-        [NWNEventHandler("crea_death")]
+        [NWNEventHandler("crea_death_aft")]
         public static void CreatureDeath()
         {
             var enemy = OBJECT_SELF;
@@ -63,10 +65,31 @@ namespace WOD.Game.Server.Service
         /// When a player leaves, remove them from all enmity tables.
         /// </summary>
         [NWNEventHandler("mod_exit")]
+        [NWNEventHandler("area_exit")]
         public static void PlayerExit()
         {
             var player = GetExitingObject();
             RemoveCreatureEnmity(player);
+        }
+
+        /// <summary>
+        /// When a DM limbos creatures, ensure their enmity is wiped.
+        /// </summary>
+        [NWNEventHandler("dm_limbo_bef")]
+        public static void CreatureLimbo()
+        {
+            var count = Convert.ToInt32(EventsPlugin.GetEventData("NUM_TARGETS"));
+
+            for (var x = 1; x <= count; x++)
+            {
+                var targetData = EventsPlugin.GetEventData($"TARGET_{x}");
+
+                if (uint.TryParse(targetData, out var target))
+                {
+                    ClearEnmityTables(target);
+                    RemoveCreatureEnmity(target);
+                }
+            }
         }
 
         /// <summary>
@@ -92,7 +115,7 @@ namespace WOD.Game.Server.Service
         public static uint GetHighestEnmityTarget(uint enemy)
         {
             var enmityTable = GetEnmityTable(enemy);
-            var target = enmityTable.Count <= 0 ? OBJECT_INVALID : enmityTable.OrderBy(o => o.Value).First().Key;
+            var target = enmityTable.Count <= 0 ? OBJECT_INVALID : enmityTable.MaxBy(o => o.Value).Key;
 
             return target;
         }
@@ -105,14 +128,27 @@ namespace WOD.Game.Server.Service
         /// <param name="amount">The amount of enmity to adjust by</param>
         public static void ModifyEnmity(uint creature, uint enemy, int amount)
         {
+            // Enmity shouldn't matter if you're dead.
+            if (GetIsDead(creature) || GetIsDead(enemy))
+                return;
+
+            // Players cannot be placed on an enmity table against each other.
+            if (GetIsPC(creature) && GetIsPC(enemy))
+                return;
+
             // Value is zero, no action necessary.
             if (amount == 0) return;
 
             // Retrieve the creature's list of associated enemies.
             var enemyList = _creatureToEnemies.ContainsKey(creature) ? _creatureToEnemies[creature] : new List<uint>();
 
+            // Fire off an event if this creature isn't currently on
+            // any enmity lists already.
+            if (enemyList.Count <= 0)
+                ExecuteScript("enmity_acquired", creature);
+
             // Enemy isn't on the creature's list. Add it now.
-            if(!enemyList.Contains(enemy))
+            if (!enemyList.Contains(enemy))
                 enemyList.Add(enemy);
 
             // Enemy doesn't have any tables yet.
@@ -136,10 +172,18 @@ namespace WOD.Game.Server.Service
             // Update this creature's list of enemies.
             _creatureToEnemies[creature] = enemyList;
 
+            // If one creature is a player, add the NPC to the Combat Point tracker.
+            if (GetIsPC(creature)) { CombatPoint.AddPlayerToNPCReferenceToCache(creature, enemy); }
+            else if (GetIsPC(enemy)) { CombatPoint.AddPlayerToNPCReferenceToCache(enemy, creature); }
+
             // In the event that this enemy does not have a target, immediately start attacking this creature.
             if (GetAttackTarget(enemy) == OBJECT_INVALID)
             {
-                AssignCommand(enemy, () => ActionAttack(creature));
+                AssignCommand(enemy, () =>
+                {
+                    ClearAllActions();
+                    ActionAttack(creature);
+                });
             }
         }
 
@@ -204,6 +248,17 @@ namespace WOD.Game.Server.Service
             }
 
             _enemyEnmityTables.Remove(enemy);
+        }
+
+        /// <summary>
+        /// Determines if a creature has enmity towards any other creature.
+        /// </summary>
+        /// <param name="creature">The creature to check</param>
+        /// <returns>true if creature has enmity on any other creature, false otherwise</returns>
+        public static bool HasEnmity(uint creature)
+        {
+            return _creatureToEnemies.ContainsKey(creature)
+                   && _creatureToEnemies[creature].Count > 0;
         }
     }
 }

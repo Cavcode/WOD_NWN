@@ -1,7 +1,7 @@
 ﻿using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Service;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.KeyItemService;
 
 namespace WOD.Game.Server.Feature
 {
@@ -10,8 +10,8 @@ namespace WOD.Game.Server.Feature
         private const string AreaMiniMapVariable = "MINI_MAP_DISABLED";
 
         /// <summary>
-        /// If a player enters an area with a disabled mini-map,
-        /// disable it.
+        /// If a player enters an area with a disabled mini-map and they do not have the map key item, disable the window.
+        /// If a player enters an area with the associated map key item, fully explore it for them.
         /// </summary>
         [NWNEventHandler("area_enter")]
         public static void DisableMiniMap()
@@ -21,9 +21,23 @@ namespace WOD.Game.Server.Feature
             if (!GetIsPC(player) || GetIsDM(player)) return;
 
             var isMiniMapDisabled = GetLocalInt(area, AreaMiniMapVariable);
-            if (isMiniMapDisabled != 1) return;
+            if (isMiniMapDisabled == 1)
+            {
+                SetGuiPanelDisabled(player, GuiPanel.Minimap, true);
+            }
 
-            SetGuiPanelDisabled(player, GuiPanel.Minimap, true);
+            var keyItemId = GetLocalInt(area, "MAP_KEY_ITEM_ID");
+            if (keyItemId > 0)
+            {
+                var keyItemType = (KeyItemType)keyItemId;
+                var hasKeyItem = KeyItem.HasKeyItem(player, keyItemType);
+
+                if (hasKeyItem)
+                {
+                    SetGuiPanelDisabled(player, GuiPanel.Minimap, false);
+                    ExploreAreaForPlayer(area, player);
+                }
+            }
         }
 
         /// <summary>
@@ -42,7 +56,7 @@ namespace WOD.Game.Server.Feature
         /// Skips the character sheet panel open event and shows the WOD character sheet instead.
         /// </summary>
         [NWNEventHandler("mod_gui_event")]
-        public static void CharacterSheetGui()
+        public static void MiniMapGui()
         {
             var player = GetLastGuiEventPlayer();
             var type = GetLastGuiEventType();

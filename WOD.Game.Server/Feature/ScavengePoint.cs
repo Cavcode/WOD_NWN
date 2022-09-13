@@ -1,10 +1,9 @@
 ﻿using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 using Random = WOD.Game.Server.Service.Random;
 using Skill = WOD.Game.Server.Service.Skill;
 
@@ -46,13 +45,14 @@ namespace WOD.Game.Server.Feature
             {
                 SendMessageToPC(user, $"You aren't skilled enough to scavenge through this. (Required level: {requiredLevel})");
                 AssignCommand(user, () => ActionInteractObject(placeable));
+                SetLocalBool(placeable, "DO_NOT_DESTROY", true);
                 return;
             }
 
             var attempts = 1;
 
-            // Chance for a second attempt based on the hard look perk level.
-            if (Random.D100(1) <= hardLookLevel * 10)
+            // Chance for a second attempt based on the hard look perk level and the user's Perception modifier.
+            if (Random.D100(1) <= (hardLookLevel * 10 + GetAbilityModifier(AbilityType.Perception, user) * 5))
             {
                 attempts++;
             }
@@ -62,30 +62,46 @@ namespace WOD.Game.Server.Feature
             var lootTable = Loot.GetLootTableByName(lootTableName);
             var dc = 6;
             var xp = 0;
+
+            var playerId = GetObjectUUID(user);
+            var dbPlayer = DB.Get<Player>(playerId);
+            var dbSkill = dbPlayer.Skills[SkillType.Gathering];
+            var scavLevel = 10 * requiredLevel;            
+            var delta = scavLevel - dbSkill.Rank;
+            var deltaXP = Skill.GetDeltaXP(delta);
+            var treasureHunterLevel = Perk.GetEffectivePerkLevel(user, PerkType.TreasureHunter);
+            var creditFinderLevel = Perk.GetEffectivePerkLevel(user, PerkType.CreditFinder);
+            var creditPercentIncrease = creditFinderLevel * 0.2f;
+
             for (var attempt = 1; attempt <= attempts; attempt++)
             {
                 var roll = Random.D20(1);
 
-                if (roll >= dc)
+                if (roll + GetAbilityModifier(AbilityType.Perception, user) >= dc)
                 {
-                    FloatingTextStringOnCreature(ColorToken.SkillCheck($"Search *success*: ({roll} vs. DC: {dc})"), user, false);
+                    FloatingTextStringOnCreature(ColorToken.SkillCheck($"Search *success*: ({roll} + {GetAbilityModifier(AbilityType.Perception, user)} vs. DC: {dc})"), user, false);
 
-                    var item = lootTable.GetRandomItem();
+                    var item = lootTable.GetRandomItem(treasureHunterLevel);
                     var quantity = Random.Next(item.MaxQuantity) + 1;
+
+                    if (item.Resref == "nw_it_gold001")
+                    {
+                        quantity += (int)(quantity * creditPercentIncrease);
+                    }
+
                     CreateItemOnObject(item.Resref, placeable, quantity);
-                    xp = 200;
+                    xp = deltaXP;
                 }
                 else
                 {
-                    FloatingTextStringOnCreature(ColorToken.SkillCheck($"Search *failure*: ({roll} vs DC: {dc})"), user, false);
-                    xp = 50;
+                    FloatingTextStringOnCreature(ColorToken.SkillCheck($"Search *failure*: ({roll} + {GetAbilityModifier(AbilityType.Perception, user)} vs DC: {dc})"), user, false);
+                    xp = deltaXP / 4;
                 }
 
                 dc += Random.D3(1);
+                Skill.GiveSkillXP(user, SkillType.Gathering, xp);
             }
 
-            Skill.GiveSkillXP(user, SkillType.Gathering, xp);
-            
             SetLocalBool(placeable, "FULLY_HARVESTED", true);
         }
 
@@ -112,7 +128,10 @@ namespace WOD.Game.Server.Feature
                 var firstItem = GetFirstItemInInventory(placeable);
                 if (!GetIsObjectValid(firstItem))
                 {
-                    DestroyObject(placeable);
+                    // DestroyObject bypasses the OnDeath event, and removes the object so we can't send events.
+                    // Use EffectDeath to ensure that we trigger death processing.
+                    SetPlotFlag(placeable, false);
+                    ApplyEffectToObject(DurationType.Instant, EffectDeath(), placeable);
                 }
             }
 
@@ -129,10 +148,20 @@ namespace WOD.Game.Server.Feature
 
             if (!GetIsPC(user) || GetIsDM(user)) return;
 
+            // In case the user is not skilled enough to scavenge this resource, we don't want to destroy it. 
+            if (GetLocalBool(placeable, "DO_NOT_DESTROY"))
+            {
+                DeleteLocalBool(placeable, "DO_NOT_DESTROY");
+                return;
+            }
+
             var firstItem = GetFirstItemInInventory(placeable);
             if (!GetIsObjectValid(firstItem))
             {
-                DestroyObject(placeable);
+                // DestroyObject bypasses the OnDeath event, and removes the object so we can't send events.
+                // Use EffectDeath to ensure that we trigger death processing.
+                SetPlotFlag(placeable, false);
+                ApplyEffectToObject(DurationType.Instant, EffectDeath(), placeable);
             }
 
         }

@@ -1,8 +1,6 @@
 ﻿using WOD.Game.Server.Entity;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.FactionService;
 using WOD.Game.Server.Service.KeyItemService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service.QuestService
 {

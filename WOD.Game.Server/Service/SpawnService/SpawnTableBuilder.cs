@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using WOD.Game.Server.Core.NWScript.Enum;
+using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
 using WOD.Game.Server.Service.AIService;
+using WOD.Game.Server.Service.AnimationService;
 
 namespace WOD.Game.Server.Service.SpawnService
 {
@@ -127,6 +129,29 @@ namespace WOD.Game.Server.Service.SpawnService
         {
             ActiveSpawn.AIFlags |= AIFlag.RandomWalk;
 
+            return this;
+        }
+
+        /// <summary>
+        /// Indicates that this spawn object will return home if they stray too far from their spawn point.
+        /// </summary>
+        /// <returns>A spawn table builder with the configured settings.</returns>
+        public SpawnTableBuilder ReturnsHome()
+        {
+            ActiveSpawn.AIFlags |= AIFlag.ReturnHome;
+
+            return this;
+        }
+
+        public SpawnTableBuilder PlayAnimation(DurationType duration, AnimationEvent animEvent, VisualEffect vfx)
+        {
+            var animation = new Animator()
+            {
+                Duration = duration,
+                Event = animEvent,
+                Vfx = vfx
+            };
+            ActiveSpawn.Animators.Add(animation);
             return this;
         }
 

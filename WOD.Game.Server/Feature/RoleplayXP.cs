@@ -4,8 +4,8 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Service;
+using WOD.Game.Server.Service.PropertyService;
 using Player = WOD.Game.Server.Entity.Player;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 using ChatChannel = WOD.Game.Server.Core.NWNX.Enum.ChatChannel;
 
 namespace WOD.Game.Server.Feature
@@ -49,8 +49,8 @@ namespace WOD.Game.Server.Feature
         {
             if (!GetIsPC(player) || GetIsDM(player)) return;
 
-            var playerID = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Player>(playerID) ?? new Player();
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId) ?? new Player(playerId);
 
             if (dbPlayer.RoleplayProgress.RPPoints >= 50)
             {
@@ -59,11 +59,13 @@ namespace WOD.Game.Server.Feature
                 var delta = dbPlayer.RoleplayProgress.RPPoints - 50;
                 var bonusXP = delta * 25;
                 var xp = BaseXP + bonusXP + socialModifier * (BaseXP / 4);
+                var cantinaBonus = Property.GetEffectiveUpgradeLevel(dbPlayer.CitizenPropertyId, PropertyUpgradeType.CantinaLevel);
+                xp += (int)(BaseXP * (cantinaBonus * 0.05f));
 
                 dbPlayer.RoleplayProgress.RPPoints = 0;
                 dbPlayer.RoleplayProgress.TotalRPExpGained += (ulong)xp;
                 dbPlayer.UnallocatedXP += xp;
-                DB.Set(playerID, dbPlayer);
+                DB.Set(dbPlayer);
                 
                 SendMessageToPC(player, $"You gained {xp} roleplay XP.");
             }
@@ -78,7 +80,7 @@ namespace WOD.Game.Server.Feature
         {
             var channel = ChatPlugin.GetChannel();
             var player = ChatPlugin.GetSender();
-            if (!GetIsPC(player) || GetIsDM(player)) return;
+            if (!GetIsPC(player) || GetIsDM(player) || GetIsDMPossessed(player)) return;
 
             var message = ChatPlugin.GetMessage().Trim();
             var now = DateTime.UtcNow;
@@ -114,7 +116,7 @@ namespace WOD.Game.Server.Feature
                 if (now <= lastSend.AddSeconds(1))
                 {
                     dbPlayer.RoleplayProgress.SpamMessageCount++;
-                    DB.Set(playerID, dbPlayer);
+                    DB.Set(dbPlayer);
                     return;
                 }
             }
@@ -123,7 +125,7 @@ namespace WOD.Game.Server.Feature
             if (!CanReceiveRPPoint(player, channel)) return;
 
             dbPlayer.RoleplayProgress.RPPoints++;
-            DB.Set(playerID, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
         /// <summary>

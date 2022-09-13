@@ -1,5 +1,4 @@
-﻿using WOD.Game.Server.Enumeration;
-using WOD.Game.Server.Service.PerkService;
+﻿using WOD.Game.Server.Service.PerkService;
 
 namespace WOD.Game.Server.Service.CraftService
 {

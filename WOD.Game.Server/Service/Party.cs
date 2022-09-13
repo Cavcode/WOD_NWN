@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
 {
@@ -88,7 +87,7 @@ namespace WOD.Game.Server.Service
         {
             if (!GetIsPC(player) || GetIsDM(player)) return;
             if (!_playerToParty.ContainsKey(player)) return;
-
+            
             var partyId = _playerToParty[player];
 
             // Remove this player from the caches.
@@ -99,6 +98,11 @@ namespace WOD.Game.Server.Service
             // Party needs to be disbanded and caches updated.
             if (_parties[partyId].Count <= 1)
             {
+                foreach (var member in _parties[partyId])
+                {
+                    _playerToParty.Remove(member);
+                }
+
                 _parties.Remove(partyId);
                 _partyLeaders.Remove(partyId);
                 return;

@@ -55,7 +55,7 @@ namespace WOD.Game.Server.Service.QuestService
         [NPCGroup("Sandswimmer")]
         Tatooine_Sandswimmer = 24,
         [NPCGroup("Sand Beetle")]
-        Tatooine_Wraid = 25,
+        Tatooine_SandBeetle = 25,
         [NPCGroup("Sand Demon")]
         Tatooine_SandDemon = 26,
         [NPCGroup("Tusken Raider")]
@@ -65,7 +65,25 @@ namespace WOD.Game.Server.Service.QuestService
         [NPCGroup("Qion Slugs")]
         Hutlar_QionSlugs = 29,
         [NPCGroup("Qion Tigers")]
-        Hutlar_QionTigers = 30
+        Hutlar_QionTigers = 30,
+        [NPCGroup("Pelko Bug Swarm")]
+        Korriban_Tukata = 31,
+        [NPCGroup("K'lor'slug")]
+        Korriban_Hssiss = 32,
+        [NPCGroup("Shyrack")]
+        Korriban_Shyrack = 33,
+        [NPCGroup("Moraband Serpent")]
+        Korriban_MorabandSerpent = 34,
+        [NPCGroup("Sith Apprentice")]
+        Korriban_SithApprenticeGhost = 35,
+        [NPCGroup("Wraid")]
+        Korriban_Terentatek = 36,
+        [NPCGroup("Octotench")]
+        MonCala_Octotench = 37,
+        [NPCGroup("Microtench")]
+        MonCala_Microtench = 38,
+        [NPCGroup("Scorchellus")]
+        MonCala_Scorchellus = 39,
     }
 
     public class NPCGroupAttribute : Attribute

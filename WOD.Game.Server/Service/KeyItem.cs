@@ -4,10 +4,9 @@ using System.Linq;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX.Enum;
 using WOD.Game.Server.Entity;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Extension;
+using WOD.Game.Server.Feature.GuiDefinition.RefreshEvent;
 using WOD.Game.Server.Service.KeyItemService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
 {
@@ -30,7 +29,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When the module loads, cache all key item data.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void LoadData()
         {
             // Organize categories
@@ -62,7 +61,7 @@ namespace WOD.Game.Server.Service
                     _keyItemsByTypeName[enumName] = keyItem;
                 }
 
-                _keyItemsByTypeId[(int)keyItem] = keyItem;
+                _keyItemsByTypeId[(int) keyItem] = keyItem;
 
                 if (keyItemDetail.IsActive)
                 {
@@ -103,8 +102,8 @@ namespace WOD.Game.Server.Service
         /// <returns>A KeyItemType matching the Id.</returns>
         public static KeyItemType GetKeyItemTypeById(int keyItemId)
         {
-            return !_keyItemsByTypeId.ContainsKey(keyItemId) ?
-                KeyItemType.Invalid :
+            return !_keyItemsByTypeId.ContainsKey(keyItemId) ? 
+                KeyItemType.Invalid : 
                 _keyItemsByTypeId[keyItemId];
         }
 
@@ -116,8 +115,8 @@ namespace WOD.Game.Server.Service
         /// <returns>A KeyItemType matching the name.</returns>
         public static KeyItemType GetKeyItemTypeByName(string name)
         {
-            return !_keyItemsByTypeName.ContainsKey(name) ?
-                KeyItemType.Invalid :
+            return !_keyItemsByTypeName.ContainsKey(name) ? 
+                KeyItemType.Invalid : 
                 _keyItemsByTypeName[name];
         }
 
@@ -137,7 +136,7 @@ namespace WOD.Game.Server.Service
         /// <returns>A dictionary containing key item type and key item attribute data.</returns>
         public static Dictionary<KeyItemType, KeyItemAttribute> GetActiveKeyItemsByCategory(KeyItemCategoryType category)
         {
-            if (!_activeKeyItemsByCategory.ContainsKey(category))
+            if(!_activeKeyItemsByCategory.ContainsKey(category))
                 return new Dictionary<KeyItemType, KeyItemAttribute>();
 
             return _activeKeyItemsByCategory[category].ToDictionary(s => s.Key, s => s.Value);
@@ -161,10 +160,11 @@ namespace WOD.Game.Server.Service
                 return;
 
             dbPlayer.KeyItems[keyItem] = DateTime.UtcNow;
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
 
             var keyItemDetail = _allKeyItems[keyItem];
             SendMessageToPC(player, $"You acquire the '{keyItemDetail.Name}' key item.");
+            Gui.PublishRefreshEvent(player, new KeyItemReceivedRefreshEvent(keyItem));
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace WOD.Game.Server.Service
                 return;
 
             dbPlayer.KeyItems.Remove(keyItem);
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
 
             var keyItemDetail = _allKeyItems[keyItem];
             SendMessageToPC(player, $"You lost the '{keyItemDetail.Name}' key item.");
@@ -225,7 +225,7 @@ namespace WOD.Game.Server.Service
 
             var playerId = GetObjectUUID(player);
             var dbPlayer = DB.Get<Player>(playerId);
-
+            
             foreach (var ki in keyItems)
             {
                 if (!dbPlayer.KeyItems.ContainsKey(ki))
@@ -251,7 +251,7 @@ namespace WOD.Game.Server.Service
 
             if (keyItemID <= 0) return;
 
-            var keyItem = (KeyItemType)keyItemID;
+            var keyItem = (KeyItemType) keyItemID;
             if (HasKeyItem(player, keyItem))
             {
                 SendMessageToPC(player, "You already have this key item.");

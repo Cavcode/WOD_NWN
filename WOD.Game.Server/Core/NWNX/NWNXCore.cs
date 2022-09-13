@@ -1,6 +1,4 @@
 ﻿
-using static WOD.Game.Server.Core.NWScript.NWScript;
-
 namespace WOD.Game.Server.Core.NWNX
 {
     public static class NWNXCore

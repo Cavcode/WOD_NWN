@@ -1,14 +1,11 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Core.NWScript.Enum.Item;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
 {
@@ -27,22 +24,19 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
         private static string Validation(uint activator, uint target, int level, Location targetLocation)
         {
             var weapon = GetItemInSlot(InventorySlot.RightHand, activator);
+            var rightHandType = GetBaseItemType(weapon);
 
-            if (Item.FinesseVibrobladeBaseItemTypes.Contains(GetBaseItemType(weapon))
-                && (GetBaseItemType((GetItemInSlot(InventorySlot.LeftHand))) == BaseItem.SmallShield ||
-                    GetBaseItemType((GetItemInSlot(InventorySlot.LeftHand))) == BaseItem.LargeShield ||
-                    GetBaseItemType((GetItemInSlot(InventorySlot.LeftHand))) == BaseItem.TowerShield ||
-                    GetBaseItemType((GetItemInSlot(InventorySlot.LeftHand))) == BaseItem.Invalid))
+            if (Item.FinesseVibrobladeBaseItemTypes.Contains(rightHandType))
             {
-                return "This is a one-handed ability.";
+                return string.Empty;
             }
             else
-                return string.Empty;
+                return "A finesse vibroblade must be equipped in your right hand to use this ability.";
         }
 
         private static void ImpactAction(uint activator, uint target, int level, Location targetLocation)
         {
-            var dmg = 0.0f;
+            var dmg = 0;
 
             // If activator is in stealth mode, force them out of stealth mode.
             if (GetActionMode(activator, ActionMode.Stealth) == true)
@@ -51,17 +45,19 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
             switch (level)
             {
                 case 1:
-                    dmg = 4.0f;
+                    dmg = 14;
                     break;
                 case 2:
-                    dmg = 9.0f;
+                    dmg = 30;
                     break;
                 case 3:
-                    dmg = 14.0f;
+                    dmg = 45;
                     break;
                 default:
                     break;
             }
+
+            dmg += Combat.GetAbilityDamageBonus(activator, SkillType.OneHanded);
 
             if (abs((int)(GetFacing(activator) - GetFacing(target))) > 200f ||
                 abs((int)(GetFacing(activator) - GetFacing(target))) < 160f ||
@@ -70,23 +66,35 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
                 dmg /= 2;
             }
 
-            var perception = GetAbilityModifier(AbilityType.Perception, activator);
-            var defense = Stat.GetDefense(target, CombatDamageType.Physical);
-            var vitality = GetAbilityModifier(AbilityType.Vitality, target);
-            var damage = Combat.CalculateDamage(dmg, perception, defense, vitality, false);
+            CombatPoint.AddCombatPoint(activator, target, SkillType.OneHanded, 3);
+
+            var attackerStat = GetAbilityScore(activator, AbilityType.Perception);
+            var attack = Stat.GetAttack(activator, AbilityType.Perception, SkillType.OneHanded);
+            var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
+            var defenderStat = GetAbilityScore(target, AbilityType.Vitality);
+            var damage = Combat.CalculateDamage(
+                attack,
+                dmg, 
+                attackerStat, 
+                defense, 
+                defenderStat, 
+                0);
             ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Slashing), target);
 
-            CombatPoint.AddCombatPoint(activator, target, SkillType.OneHanded, 3);
+            AssignCommand(activator, () => ActionPlayAnimation(Animation.Backstab));
+            Enmity.ModifyEnmity(activator, target, 250 * level + damage);
         }
 
         private static void Backstab1(AbilityBuilder builder)
         {
             builder.Create(FeatType.Backstab1, PerkType.Backstab)
                 .Name("Backstab I")
-                .HasRecastDelay(RecastGroup.Backstab, 30f)
-                .HasActivationDelay(2.0f)
+                .Level(1)
+                .HasRecastDelay(RecastGroup.Backstab, 60f)
+                .HasActivationDelay(0.5f)
                 .RequirementStamina(3)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -95,10 +103,12 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
         {
             builder.Create(FeatType.Backstab2, PerkType.Backstab)
                 .Name("Backstab II")
-                .HasRecastDelay(RecastGroup.Backstab, 30f)
-                .HasActivationDelay(2.0f)
+                .Level(2)
+                .HasRecastDelay(RecastGroup.Backstab, 60f)
+                .HasActivationDelay(0.5f)
                 .RequirementStamina(5)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -107,10 +117,12 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
         {
             builder.Create(FeatType.Backstab3, PerkType.Backstab)
                 .Name("Backstab III")
-                .HasRecastDelay(RecastGroup.Backstab, 30f)
-                .HasActivationDelay(2.0f)
+                .Level(3)
+                .HasRecastDelay(RecastGroup.Backstab, 60f)
+                .HasActivationDelay(0.5f)
                 .RequirementStamina(8)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);

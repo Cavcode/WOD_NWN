@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service.DialogService
 {

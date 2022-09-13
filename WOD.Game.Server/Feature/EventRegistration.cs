@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Core.NWScript.Enum.Item;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Entity;
+using WOD.Game.Server.Extension;
+using WOD.Game.Server.Service;
+using WOD.Game.Server.Service.LogService;
 
 namespace WOD.Game.Server.Feature
 {
-    public class EventRegistration
+    public static class EventRegistration
     {
         /// <summary>
         /// Fires on the module PreLoad event. This event should be specified in the environment variables.
@@ -16,6 +19,8 @@ namespace WOD.Game.Server.Feature
         [NWNEventHandler("mod_preload")]
         public static void OnModulePreload()
         {
+            var serverConfig = DB.Get<ModuleCache>("WOD_CACHE") ?? new ModuleCache();
+
             Console.WriteLine("Hooking all module events.");
             HookModuleEvents();
 
@@ -27,6 +32,23 @@ namespace WOD.Game.Server.Feature
 
             Console.WriteLine("Hooking all application-specific events");
             HookApplicationEvents();
+
+            // Module has changed since last run.
+            // Run procedures dependent on the module file changing.
+            if (UtilPlugin.GetModuleMTime() != serverConfig.LastModuleMTime)
+            {
+                Console.WriteLine("Module has changed since last boot. Running module changed event.");
+
+                // DB record must be updated before the event fires, as some
+                // events use the server configuration record.
+                serverConfig.LastModuleMTime = UtilPlugin.GetModuleMTime();
+                DB.Set(serverConfig);
+
+                ExecuteScript("mod_content_chg", GetModule());
+            }
+
+            // Fire off the mod_cache event which is used for caching data, before mod_load runs.
+            ExecuteScript("mod_cache", GetModule());
         }
 
         [NWNEventHandler("mod_heartbeat")]
@@ -38,11 +60,21 @@ namespace WOD.Game.Server.Feature
             }
         }
 
+        /// <summary>
+        /// When a player enters the server, hook their event scripts.
+        /// Also add them to a UI processor list.
+        /// </summary>
         [NWNEventHandler("mod_enter")]
-        public static void HookPlayerEvents()
+        public static void EnterServer()
+        {
+            HookPlayerEvents();
+        }
+
+        private static void HookPlayerEvents()
         {
             var player = GetEnteringObject();
-            if (!GetIsPC(player) || GetIsDM(player)) return;
+            if (!GetIsPC(player) || GetIsDM(player)) 
+                return;
 
             SetEventScript(player, EventScript.Creature_OnHeartbeat, "pc_heartbeat");
             SetEventScript(player, EventScript.Creature_OnNotice, "pc_perception");
@@ -57,6 +89,7 @@ namespace WOD.Game.Server.Feature
             SetEventScript(player, EventScript.Creature_OnUserDefined, "pc_userdef");
             SetEventScript(player, EventScript.Creature_OnBlockedByDoor, "pc_blocked");
         }
+
 
         /// <summary>
         /// Hooks module-wide scripts.
@@ -128,7 +161,7 @@ namespace WOD.Game.Server.Feature
             EventsPlugin.SubscribeEvent("NWNX_ON_STEALTH_EXIT_AFTER", "stlex_add_aft");
 
             // Examine events
-            EventsPlugin.SubscribeEvent("NWNX_ON_EXAMINE_OBJECT_BEFORE", "examine_reset");
+            EventsPlugin.SubscribeEvent("NWNX_ON_EXAMINE_OBJECT_BEFORE", "examine_bef");
             EventsPlugin.SubscribeEvent("NWNX_ON_EXAMINE_OBJECT_AFTER", "examine_aft");
 
             // Validate Use Item events
@@ -308,6 +341,10 @@ namespace WOD.Game.Server.Feature
             // Healer Kit Use events
             EventsPlugin.SubscribeEvent("NWNX_ON_HEALER_KIT_BEFORE", "heal_kit_bef");
             EventsPlugin.SubscribeEvent("NWNX_ON_HEALER_KIT_AFTER", "heal_kit_aft");
+
+            // Healing events
+            EventsPlugin.SubscribeEvent("NWNX_ON_HEAL_BEFORE", "heal_bef");
+            EventsPlugin.SubscribeEvent("NWNX_ON_HEAL_AFTER", "heal_aft");
 
             // Party Action events
             EventsPlugin.SubscribeEvent("NWNX_ON_PARTY_LEAVE_BEFORE", "pty_leave_bef");
@@ -503,6 +540,10 @@ namespace WOD.Game.Server.Feature
             EventsPlugin.SubscribeEvent("NWNX_ON_STORE_REQUEST_BUY_AFTER", "store_buy_aft");
             EventsPlugin.SubscribeEvent("NWNX_ON_STORE_REQUEST_SELL_BEFORE", "store_sell_bef");
             EventsPlugin.SubscribeEvent("NWNX_ON_STORE_REQUEST_SELL_AFTER", "store_sell_aft");
+
+            // Input Drop Item Events
+            EventsPlugin.SubscribeEvent("NWNX_ON_INPUT_DROP_ITEM_BEFORE", "item_drop_bef");
+            EventsPlugin.SubscribeEvent("NWNX_ON_INPUT_DROP_ITEM_AFTER", "item_drop_aft");
         }
 
         /// <summary>
@@ -522,25 +563,6 @@ namespace WOD.Game.Server.Feature
             EventsPlugin.SubscribeEvent("WOD_GAIN_SKILL_POINT", "WOD_gain_skill");
             EventsPlugin.SubscribeEvent("WOD_COMPLETE_QUEST", "WOD_comp_qst");
             EventsPlugin.SubscribeEvent("WOD_CACHE_SKILLS_LOADED", "WOD_skl_cache");
-            EventsPlugin.SubscribeEvent("WOD_EXAMINE_OBJECT_BEFORE", "examine_bef");
-        }
-
-        /// <summary>
-        /// When an object is examined, reset the description back to its original text.
-        /// This ensures examine events hooked with the 'examine_bef' event will be able
-        /// to modify the text without respect to the order in which they are called.
-        /// </summary>
-        [NWNEventHandler("examine_reset")]
-        public static void ResetExamineDescription()
-        {
-            var objectId = EventsPlugin.GetEventData("EXAMINEE_OBJECT_ID");
-            var obj = StringToObject(objectId);
-
-            var description = GetDescription(obj, true) + "\n\n";
-            SetDescription(obj, description);
-            
-            EventsPlugin.PushEventData("EXAMINEE_OBJECT_ID", objectId);
-            EventsPlugin.SignalEvent("WOD_EXAMINE_OBJECT_BEFORE", OBJECT_SELF);
         }
 
         /// <summary>
@@ -552,6 +574,84 @@ namespace WOD.Game.Server.Feature
         {
             var firstObject = GetFirstObjectInArea(GetFirstArea());
             CreaturePlugin.SetCriticalRangeModifier(firstObject, 0, 0, true);
+        }
+
+        private static readonly Dictionary<int, List<uint>> _intervalPlayers = new();
+
+        /// <summary>
+        /// Schedules five player processors which fire off at 0.2 second intervals.
+        /// This is done to stagger out the processing overhead of scripts that run on player one-second events.
+        /// </summary>
+        [NWNEventHandler("mod_load")]
+        public static void ScheduleProcessors()
+        {
+            const int GroupCount = 5;
+
+            for (var x = 1; x <= GroupCount; x++)
+            {
+                var interval = x == 1 ? 0f : 0.2f * (x - 1);
+                var groupId = x;
+                _intervalPlayers[x] = new List<uint>();
+                Scheduler.ScheduleRepeating(() => ProcessIntervalGroup(groupId), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(interval));
+            }
+        }
+
+        /// <summary>
+        /// When a player joins the server they are added to the processor queue with the
+        /// fewest number of active players.
+        /// DMs are excluded from this.
+        /// </summary>
+        [NWNEventHandler("mod_enter")]
+        public static void ScheduleProcessor()
+        {
+            var player = GetEnteringObject();
+            if (!GetIsPC(player) || GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
+            AddPlayerToIntervalGroup(player);
+        }
+
+        private static void AddPlayerToIntervalGroup(uint player)
+        {
+            var groupId = 1;
+            var lowestCount = 999;
+            foreach (var (group, players) in _intervalPlayers)
+            {
+                if (players.Count < lowestCount)
+                {
+                    lowestCount = players.Count;
+                    groupId = group;
+                }
+            }
+
+            _intervalPlayers[groupId].Add(player);
+        }
+
+        private static void ProcessIntervalGroup(int intervalGroup)
+        {
+            var players = _intervalPlayers[intervalGroup];
+
+            for (var index = players.Count - 1; index >= 0; index--)
+            {
+                var player = players[index];
+
+                if (GetIsObjectValid(player))
+                {
+                    // It's imperative a script doesn't cause this processor to exit upon error.
+                    try
+                    {
+                        ExecuteScript("interval_pc_1s", player);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Write(LogGroup.Error, ex.ToMessageAndCompleteStacktrace());
+                    }
+                }
+                else
+                {
+                    _intervalPlayers[intervalGroup].Remove(player);
+                }
+            }
         }
     }
 }

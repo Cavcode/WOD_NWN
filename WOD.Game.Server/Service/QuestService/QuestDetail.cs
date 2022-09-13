@@ -5,12 +5,14 @@ using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Feature.DialogDefinition;
+using WOD.Game.Server.Feature.GuiDefinition.RefreshEvent;
 using Player = WOD.Game.Server.Entity.Player;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service.QuestService
 {
     public delegate void AcceptQuestDelegate(uint player, uint questSourceObject);
+
+    public delegate void AbandonQuestDelegate(uint player);
     public delegate void AdvanceQuestDelegate(uint player, uint questSourceObject, int questState);
     public delegate void CompleteQuestDelegate(uint player, uint questSourceObject);
 
@@ -28,6 +30,7 @@ namespace WOD.Game.Server.Service.QuestService
 
         public Dictionary<int, QuestStateDetail> States { get; } = new Dictionary<int, QuestStateDetail>();
         public List<AcceptQuestDelegate> OnAcceptActions { get; } = new List<AcceptQuestDelegate>();
+        public List<AbandonQuestDelegate> OnAbandonActions { get; } = new List<AbandonQuestDelegate>();
         public List<AdvanceQuestDelegate> OnAdvanceActions { get; } = new List<AdvanceQuestDelegate>();
         public List<CompleteQuestDelegate> OnCompleteActions { get; } = new List<CompleteQuestDelegate>();
 
@@ -183,6 +186,40 @@ namespace WOD.Game.Server.Service.QuestService
         }
 
         /// <summary>
+        /// Abandons a quest.
+        /// </summary>
+        /// <param name="player">The player abandoning a quest.</param>
+        public void Abandon(uint player)
+        {
+            if (!GetIsPC(player) || GetIsDM(player)) return;
+
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+            if (!dbPlayer.Quests.ContainsKey(QuestId))
+                return;
+
+            // This is a repeatable quest. Mark the completion date to now
+            // so that we don't lose how many times it's been completed.
+            if (dbPlayer.Quests[QuestId].TimesCompleted > 0)
+            {
+                dbPlayer.Quests[QuestId].DateLastCompleted = DateTime.UtcNow;
+            }
+            // This quest hasn't been completed yet. It's safe to remove it completely.
+            else
+            {
+                dbPlayer.Quests.Remove(QuestId);
+            }
+
+            DB.Set(dbPlayer);
+            SendMessageToPC(player, $"Quest '{Name}' has been abandoned!");
+
+            foreach (var action in OnAbandonActions)
+            {
+                action.Invoke(player);
+            }
+        }
+
+        /// <summary>
         /// Accepts a quest using the configured settings.
         /// </summary>
         /// <param name="player">The player accepting the quest.</param>
@@ -206,7 +243,7 @@ namespace WOD.Game.Server.Service.QuestService
             playerQuest.CurrentState = 1;
             playerQuest.DateLastCompleted = null;
             dbPlayer.Quests[QuestId] = playerQuest;
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
 
             var state = GetState(1);
             foreach (var objective in state.GetObjectives())
@@ -237,6 +274,8 @@ namespace WOD.Game.Server.Service.QuestService
             {
                 action.Invoke(player, questSource);
             }
+
+            Gui.PublishRefreshEvent(player, new QuestAcquiredRefreshEvent(QuestId));
         }
 
         /// <summary>
@@ -308,7 +347,7 @@ namespace WOD.Game.Server.Service.QuestService
 
                 // Save changes
                 dbPlayer.Quests[QuestId] = playerQuest;
-                DB.Set(playerId, dbPlayer);
+                DB.Set(dbPlayer);
 
                 // Create any extended data entries for the next state of the quest.
                 foreach (var objective in nextState.GetObjectives())
@@ -321,6 +360,8 @@ namespace WOD.Game.Server.Service.QuestService
                 {
                     action.Invoke(player, questSource, playerQuest.CurrentState);
                 }
+
+                Gui.PublishRefreshEvent(player, new QuestProgressedRefreshEvent(QuestId));
             }
 
         }
@@ -345,6 +386,14 @@ namespace WOD.Game.Server.Service.QuestService
             quest.CurrentState = GetStates().Count();
             quest.TimesCompleted++;
 
+            // Note - we must update the database before we give rewards.  Otherwise rewards that update the
+            // database (e.g. key items) will be discarded when we commit this change.
+            quest.ItemProgresses.Clear();
+            quest.KillProgresses.Clear();
+            quest.DateLastCompleted = DateTime.UtcNow;
+            dbPlayer.Quests[QuestId] = quest;
+            DB.Set(dbPlayer);
+
             // No selected reward, simply give all available rewards to the player.
             if (selectedReward == null)
             {
@@ -365,12 +414,6 @@ namespace WOD.Game.Server.Service.QuestService
                 selectedReward.GiveReward(player);
             }
 
-            quest.ItemProgresses.Clear();
-            quest.KillProgresses.Clear();
-            quest.DateLastCompleted = DateTime.UtcNow;
-            dbPlayer.Quests[QuestId] = quest;
-            DB.Set(playerId, dbPlayer);
-
             foreach (var action in OnCompleteActions)
             {
                 action.Invoke(player, questSource);
@@ -380,6 +423,7 @@ namespace WOD.Game.Server.Service.QuestService
             RemoveJournalQuestEntry(QuestId, player, false);
 
             EventsPlugin.SignalEvent("WOD_COMPLETE_QUEST", player);
+            Gui.PublishRefreshEvent(player, new QuestCompletedRefreshEvent(QuestId));
         }
     }
 }

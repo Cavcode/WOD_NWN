@@ -4,7 +4,7 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWNX.Enum;
 using WOD.Game.Server.Entity;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.LogService;
 
 namespace WOD.Game.Server.Service
 {
@@ -16,7 +16,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When the module loads, cycle through every area and every object to identify the visibility objects.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void LoadVisibilityObjects()
         {
             for (var area = GetFirstArea(); GetIsObjectValid(area); area = GetNextArea())
@@ -32,7 +32,6 @@ namespace WOD.Game.Server.Service
                         {
                             _defaultHiddenObjects.Add(obj);
                         }
-
                     }
                 }
             }
@@ -55,7 +54,7 @@ namespace WOD.Game.Server.Service
 
             // Now iterate over the player's objects and adjust visibility.
             var playerId = GetObjectUUID(player);
-            var visibilities = (DB.Get<Player>(playerId) ?? new Player());
+            var visibilities = (DB.Get<Player>(playerId) ?? new Player(playerId));
             for(var index = visibilities.ObjectVisibilities.Count-1; index >= 0; index--)
             {
                 var (objectId, visibilityType) = visibilities.ObjectVisibilities.ElementAt(index);
@@ -90,9 +89,9 @@ namespace WOD.Game.Server.Service
             }
 
             var playerId = GetObjectUUID(player);
-            var dbVisibility = DB.Get<Player>(playerId) ?? new Player();
+            var dbVisibility = DB.Get<Player>(playerId) ?? new Player(playerId);
             dbVisibility.ObjectVisibilities[visibilityObjectId] = type;
-            DB.Set(playerId, dbVisibility);
+            DB.Set(dbVisibility);
 
             VisibilityPlugin.SetVisibilityOverride(player, target, type);
         }

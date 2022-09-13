@@ -3,13 +3,11 @@
 using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
 {
@@ -39,7 +37,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
 
         private static void ImpactAction(uint activator, uint target, int level, Location targetLocation)
         {
-            var dmg = 0.0f;
+            var dmg = 0;
             // If activator is in stealth mode, force them out of stealth mode.
             if (GetActionMode(activator, ActionMode.Stealth) == true)
                 SetActionMode(activator, ActionMode.Stealth, false);
@@ -47,36 +45,55 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
             switch (level)
             {
                 case 1:
-                    dmg = 1.5f;
+                    dmg = 12;
                     break;
                 case 2:
-                    dmg = 4.0f;
+                    dmg = 21;
                     break;
                 case 3:
-                    dmg = 6.0f;
+                    dmg = 29;
                     break;
                 default:
                     break;
             }
 
-            var willpower = GetAbilityModifier(AbilityType.Willpower, activator);
-            var defense = Stat.GetDefense(target, CombatDamageType.Physical);
-            var vitality = GetAbilityModifier(AbilityType.Vitality, target);
-            var damage = Combat.CalculateDamage(dmg, willpower, defense, vitality, false);
+            dmg += Combat.GetAbilityDamageBonus(activator, SkillType.TwoHanded);
+
+            var stat = AbilityType.Perception;
+            if (Ability.IsAbilityToggled(activator, AbilityToggleType.StrongStyleSaberstaff))
+            {
+                stat = AbilityType.Might;
+            }
+
+            var attackerStat = GetAbilityScore(activator, stat);
+            var attack = Stat.GetAttack(activator, stat, SkillType.TwoHanded);
+            var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
+            var defenderStat = GetAbilityScore(target, AbilityType.Vitality);
+            var damage = Combat.CalculateDamage(
+                attack, 
+                dmg, 
+                attackerStat, 
+                defense, 
+                defenderStat, 
+                0);
             ApplyEffectToObject(DurationType.Instant, EffectDamage(damage, DamageType.Sonic), target);
 
-            Enmity.ModifyEnmityOnAll(activator, 1);
-            CombatPoint.AddCombatPointToAllTagged(activator, SkillType.TwoHanded, 3);
+            AssignCommand(activator, () => ActionPlayAnimation(Animation.DoubleStrike));
+
+            CombatPoint.AddCombatPoint(activator, target, SkillType.TwoHanded, 3);
+            Enmity.ModifyEnmity(activator, target, 250 * level + damage);
         }
 
         private static void DoubleStrike1(AbilityBuilder builder)
         {
             builder.Create(FeatType.DoubleStrike1, PerkType.DoubleStrike)
                 .Name("Double Strike I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.DoubleStrike, 60f)
-                .HasActivationDelay(2.0f)
+                .HasActivationDelay(0.5f)
                 .RequirementStamina(3)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction((activator, target, level, targetLocation) =>
@@ -89,10 +106,12 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
         {
             builder.Create(FeatType.DoubleStrike2, PerkType.DoubleStrike)
                 .Name("Double Strike II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.DoubleStrike, 60f)
-                .HasActivationDelay(2.0f)
+                .HasActivationDelay(0.5f)
                 .RequirementStamina(5)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction((activator, target, level, targetLocation) =>
@@ -105,10 +124,12 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
         {
             builder.Create(FeatType.DoubleStrike3, PerkType.DoubleStrike)
                 .Name("Double Strike III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.DoubleStrike, 60f)
-                .HasActivationDelay(2.0f)
+                .HasActivationDelay(0.5f)
                 .RequirementStamina(8)
                 .IsCastedAbility()
+                .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
                 .HasImpactAction((activator, target, level, targetLocation) =>

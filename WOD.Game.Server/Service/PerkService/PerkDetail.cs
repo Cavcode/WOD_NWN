@@ -1,12 +1,15 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
 
 namespace WOD.Game.Server.Service.PerkService
 {
+    public delegate string PerkPurchaseRequirementAction(uint player, PerkType perkType, int effectivePerkLevel);
+    public delegate string PerkRefundRequirementAction(uint player, PerkType perkType, int effectivePerkLevel);
+
     public delegate void PerkTriggerEquippedAction(uint player, uint item, InventorySlot slot, PerkType perkType, int effectivePerkLevel);
     public delegate void PerkTriggerUnequippedAction(uint player, uint item, InventorySlot slot, PerkType perkType, int effectivePerkLevel);
     public delegate void PerkTriggerPurchasedRefundedAction(uint player, PerkType perkType, int effectivePerkLevel);
+
 
     public class PerkDetail
     {
@@ -15,7 +18,10 @@ namespace WOD.Game.Server.Service.PerkService
         public string Name { get; set; }
         public string Description { get; set; }
         public bool IsActive { get; set; }
+        public string IconResref { get; set; }
 
+        public PerkPurchaseRequirementAction PurchaseRequirement { get; set; }
+        public PerkRefundRequirementAction RefundRequirement { get; set; }
         public Dictionary<int, PerkLevel> PerkLevels { get; set; }
         public List<PerkTriggerEquippedAction> EquippedTriggers { get; set; }
         public List<PerkTriggerUnequippedAction> UnequippedTriggers { get; set; }

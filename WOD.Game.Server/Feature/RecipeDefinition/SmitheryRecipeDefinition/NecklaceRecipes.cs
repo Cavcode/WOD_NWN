@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.CraftService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
@@ -30,9 +29,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(2)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 1)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("ref_veldite", 3)
-                .Component("jade", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 2)
+                .Component("jade", 1);
 
             // Spiritmaster Necklace
             _builder.Create(RecipeType.SpiritmasterNecklace, SkillType.Smithery)
@@ -41,9 +40,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(2)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 1)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("ref_veldite", 3)
-                .Component("jade", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 2)
+                .Component("jade", 1);
 
             // Combat Necklace
             _builder.Create(RecipeType.CombatNecklace, SkillType.Smithery)
@@ -52,9 +51,57 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(2)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 1)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("ref_veldite", 3)
-                .Component("jade", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 2)
+                .Component("jade", 1);
+
+            // Advent Necklace
+            _builder.Create(RecipeType.AdventNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("advent_necklace")
+                .Level(10)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 1)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 5)
+                .Component("lth_ruined", 5)
+                .Component("jade", 3);
+
+            // Amateur Necklace
+            _builder.Create(RecipeType.AmateurNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("engi_necklace_1")
+                .Level(10)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 1)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 5)
+                .Component("lth_ruined", 5)
+                .Component("jade", 3);
+
+            // Cloth Necklace
+            _builder.Create(RecipeType.ClothNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("fabr_necklace_1")
+                .Level(10)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 1)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 5)
+                .Component("lth_ruined", 5)
+                .Component("jade", 3);
+
+            // Chef Necklace
+            _builder.Create(RecipeType.ChefNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("chef_necklace_1")
+                .Level(10)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 1)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 5)
+                .Component("lth_ruined", 5)
+                .Component("jade", 3);
         }
 
         private void Tier2()
@@ -66,9 +113,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(12)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 2)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("ref_scordspar", 3)
-                .Component("agate", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 2)
+                .Component("agate", 1);
 
             // Vivid Necklace
             _builder.Create(RecipeType.VividNecklace, SkillType.Smithery)
@@ -77,9 +124,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(12)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 2)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("ref_scordspar", 3)
-                .Component("agate", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 2)
+                .Component("agate", 1);
 
             // Valor Necklace
             _builder.Create(RecipeType.ValorNecklace, SkillType.Smithery)
@@ -88,9 +135,57 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(12)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 2)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("ref_scordspar", 3)
-                .Component("agate", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 2)
+                .Component("agate", 1);
+
+            // Frontier Necklace
+            _builder.Create(RecipeType.FrontierNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("frontier_necklace")
+                .Level(20)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 5)
+                .Component("lth_flawed", 5)
+                .Component("agate", 3);
+
+            // Worker Necklace
+            _builder.Create(RecipeType.WorkerNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("engi_necklace_2")
+                .Level(20)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 5)
+                .Component("lth_flawed", 5)
+                .Component("agate", 3);
+
+            // Linen Necklace
+            _builder.Create(RecipeType.LinenNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("fabr_necklace_2")
+                .Level(20)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 5)
+                .Component("lth_flawed", 5)
+                .Component("agate", 3);
+
+            // Velveteen Necklace
+            _builder.Create(RecipeType.VelveteenNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("chef_necklace_2")
+                .Level(20)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 2)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 5)
+                .Component("lth_flawed", 5)
+                .Component("agate", 3);
         }
 
         private void Tier3()
@@ -102,9 +197,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(22)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 3)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_plagionite", 3)
-                .Component("citrine", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 2)
+                .Component("citrine", 1);
 
             // Reginal Necklace
             _builder.Create(RecipeType.ReginalNecklace, SkillType.Smithery)
@@ -113,9 +208,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(22)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 3)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_plagionite", 3)
-                .Component("citrine", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 2)
+                .Component("citrine", 1);
 
             // Forza Necklace
             _builder.Create(RecipeType.ForzaNecklace, SkillType.Smithery)
@@ -124,9 +219,57 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(22)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 3)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_plagionite", 3)
-                .Component("citrine", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 2)
+                .Component("citrine", 1);
+
+            // Majestic Necklace
+            _builder.Create(RecipeType.MajesticNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("majestic_necklac")
+                .Level(30)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 3)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 5)
+                .Component("lth_good", 5)
+                .Component("citrine", 3);
+
+            // Mechanic Necklace
+            _builder.Create(RecipeType.MechanicNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("engi_necklace_3")
+                .Level(30)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 3)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 5)
+                .Component("lth_good", 5)
+                .Component("citrine", 3);
+
+            // Designer Necklace
+            _builder.Create(RecipeType.DesignerNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("fabr_necklace_3")
+                .Level(30)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 3)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 5)
+                .Component("lth_good", 5)
+                .Component("citrine", 3);
+
+            // Silk Necklace
+            _builder.Create(RecipeType.SilkNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("chef_necklace_3")
+                .Level(30)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 3)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 5)
+                .Component("lth_good", 5)
+                .Component("citrine", 3);
         }
 
         private void Tier4()
@@ -138,9 +281,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(32)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 4)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_keromber", 3)
-                .Component("ruby", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 2)
+                .Component("ruby", 1);
 
             // Grenada Necklace
             _builder.Create(RecipeType.GrenadaNecklace, SkillType.Smithery)
@@ -149,9 +292,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(32)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 4)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_keromber", 3)
-                .Component("ruby", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 2)
+                .Component("ruby", 1);
 
             // Survival Necklace
             _builder.Create(RecipeType.SurvivalNecklace, SkillType.Smithery)
@@ -160,9 +303,57 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(32)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 4)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_keromber", 3)
-                .Component("ruby", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 2)
+                .Component("ruby", 1);
+
+            // Dream Necklace
+            _builder.Create(RecipeType.DreamNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("dream_necklace")
+                .Level(40)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 4)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 5)
+                .Component("lth_imperfect", 5)
+                .Component("ruby", 3);
+
+            // Devotion Necklace
+            _builder.Create(RecipeType.DevotionNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("engi_necklace_4")
+                .Level(40)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 4)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 5)
+                .Component("lth_imperfect", 5)
+                .Component("ruby", 3);
+
+            // Oasis Necklace
+            _builder.Create(RecipeType.OasisNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("fabr_necklace_4")
+                .Level(40)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 4)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 5)
+                .Component("lth_imperfect", 5)
+                .Component("ruby", 3);
+
+            // Vintage Necklace
+            _builder.Create(RecipeType.VintageNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("chef_necklace_4")
+                .Level(40)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 4)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 5)
+                .Component("lth_imperfect", 5)
+                .Component("ruby", 3);
         }
 
         private void Tier5()
@@ -174,9 +365,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(42)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 5)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_jasioclase", 3)
-                .Component("emerald", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 2)
+                .Component("emerald", 1);
 
             // Transcendent Necklace
             _builder.Create(RecipeType.TranscendentNecklace, SkillType.Smithery)
@@ -185,9 +376,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(42)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 5)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_jasioclase", 3)
-                .Component("emerald", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 2)
+                .Component("emerald", 1);
 
             // Supreme Necklace
             _builder.Create(RecipeType.SupremeNecklace, SkillType.Smithery)
@@ -196,9 +387,57 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(42)
                 .Quantity(1)
                 .RequirementPerk(PerkType.AccessoryBlueprints, 5)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_jasioclase", 3)
-                .Component("emerald", 2);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 2)
+                .Component("emerald", 1);
+
+            // Eternal Necklace
+            _builder.Create(RecipeType.EternalNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("eternal_necklace")
+                .Level(50)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 5)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 5)
+                .Component("lth_high", 5)
+                .Component("emerald", 3);
+
+            // Skysteel Necklace
+            _builder.Create(RecipeType.SkysteelNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("engi_necklace_5")
+                .Level(50)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 5)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 5)
+                .Component("lth_high", 5)
+                .Component("emerald", 3);
+
+            // Rose Necklace
+            _builder.Create(RecipeType.RoseNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("fabr_necklace_5")
+                .Level(50)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 5)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 5)
+                .Component("lth_high", 5)
+                .Component("emerald", 3);
+
+            // Moonflame Necklace
+            _builder.Create(RecipeType.MoonflameNecklace, SkillType.Smithery)
+                .Category(RecipeCategoryType.Necklace)
+                .Resref("chef_necklace_5")
+                .Level(50)
+                .Quantity(1)
+                .RequirementPerk(PerkType.ArmorBlueprints, 5)
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 5)
+                .Component("lth_high", 5)
+                .Component("emerald", 3);
         }
 
     }

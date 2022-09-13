@@ -1,12 +1,12 @@
-﻿using System;
-using WOD.Game.Server.Entity;
+﻿using WOD.Game.Server.Entity;
+using WOD.Game.Server.Feature.GuiDefinition.RefreshEvent;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.GuiService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 {
-    public class KeyItemsViewModel: GuiViewModelBase<KeyItemsViewModel, GuiPayloadBase>
+    public class KeyItemsViewModel: GuiViewModelBase<KeyItemsViewModel, GuiPayloadBase>,
+        IGuiRefreshable<KeyItemReceivedRefreshEvent>
     {
         public GuiBindingList<string> Names
         {
@@ -72,5 +72,9 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             Descriptions = descriptions;
         }
 
+        public void Refresh(KeyItemReceivedRefreshEvent payload)
+        {
+            LoadKeyItems();
+        }
     }
 }

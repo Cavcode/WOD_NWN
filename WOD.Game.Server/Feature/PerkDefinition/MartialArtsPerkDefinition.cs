@@ -1,142 +1,172 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Item;
 using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.AbilityService;
 using Item = WOD.Game.Server.Service.Item;
 
 namespace WOD.Game.Server.Feature.PerkDefinition
 {
     public class MartialArtsPerkDefinition : IPerkListDefinition
     {
+        private readonly PerkBuilder _builder = new PerkBuilder();
+
         public Dictionary<PerkType, PerkDetail> BuildPerks()
         {
-            var builder = new PerkBuilder();
-            Knockdown(builder);
-            FlurryOfBlows(builder);
-            InnerStrength(builder);
-            MartialFinesse(builder);
-            WeaponFocusKatars(builder);
-            ImprovedCriticalKatars(builder);
-            KatarProficiency(builder);
-            KatarMastery(builder);
-            ElectricFist(builder);
-            StrikingCobra(builder);
-            WeaponFocusStaves(builder);
-            ImprovedCriticalStaves(builder);
-            StaffProficiency(builder);
-            StaffMastery(builder);
-            Slam(builder);
-            SpinningWhirl(builder);
+            Knockdown();
+            Furor();
+            InnerStrength();
+            Chi();
+            WeaponFocusKatars();
+            ImprovedCriticalKatars();
+            KatarProficiency();
+            KatarMastery();
+            ElectricFist();
+            StrikingCobra();
+            WeaponFocusStaves();
+            ImprovedCriticalStaves();
+            StaffProficiency();
+            StaffMastery();
+            Slam();
+            LegSweep();
+            FlurryStyle();
+            CrushingStyle();
 
-            return builder.Build();
+            return _builder.Build();
         }
 
-        private void Knockdown(PerkBuilder builder)
+        private void Knockdown()
         {
-            builder.Create(PerkCategoryType.MartialArtsGeneral, PerkType.Knockdown)
+            _builder.Create(PerkCategoryType.MartialArtsGeneral, PerkType.Knockdown)
                 .Name("Knockdown")
 
                 .AddPerkLevel()
-                .Description("Your next attack has a 60% chance to inflict knockdown on your target for 12 seconds.")
+                .Description("Your next attack has a 60% chance to inflict knockdown on your target for 12 seconds. [Cross Skill]")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 15)
                 .GrantsFeat(FeatType.Knockdown);
         }
 
-        private void FlurryOfBlows(PerkBuilder builder)
+        private void Furor()
         {
-            builder.Create(PerkCategoryType.MartialArtsGeneral, PerkType.FlurryOfBlows)
-                .Name("Flurry of Blows")
+            _builder.Create(PerkCategoryType.MartialArtsGeneral, PerkType.Furor)
+                .Name("Furor")
 
                 .AddPerkLevel()
-                .Description("Grants the Flurry of Blows feat. You receive an extra attack per round when fighting with unarmed attacks or a staff. However, all attacks in that round suffer a -2 attack penalty.")
+                .Description("Grants an additional attack to the user for one minute. [Cross Skill]")
                 .Price(4)
                 .RequirementSkill(SkillType.MartialArts, 25)
-                
-                .GrantsFeat(FeatType.FlurryOfBlows);
+                .RequirementCharacterType(CharacterType.Standard)
+                .GrantsFeat(FeatType.Furor);
         }
 
-        private void InnerStrength(PerkBuilder builder)
+        private void InnerStrength()
         {
-            builder.Create(PerkCategoryType.MartialArtsGeneral, PerkType.InnerStrength)
+            _builder.Create(PerkCategoryType.MartialArtsGeneral, PerkType.InnerStrength)
                 .Name("Inner Strength")
 
                 .AddPerkLevel()
-                .Description("Improves critical range by 1.")
+                .Description("Improves critical chance by 5%. [Cross Skill]")
                 .Price(5)
                 .RequirementSkill(SkillType.MartialArts, 35)
-                
+                .RequirementCharacterType(CharacterType.Standard)
                 .GrantsFeat(FeatType.InnerStrength1)
 
                 .AddPerkLevel()
-                .Description("Improves critical range by 2.")
+                .Description("Improves critical chance by 5%. [Cross Skill]")
                 .Price(6)
                 .RequirementSkill(SkillType.MartialArts, 45)
-                
+                .RequirementCharacterType(CharacterType.Standard)
                 .GrantsFeat(FeatType.InnerStrength2)
 
+                .TriggerEquippedItem((player, item, slot, type, level) =>
+                {
+                    if (slot != InventorySlot.RightHand) return;
+
+                    Stat.ApplyCritModifier(player, item);
+                })
+                .TriggerUnequippedItem((player, item, slot, type, level) =>
+                {
+                    if (slot != InventorySlot.RightHand) return;
+
+                    Stat.ApplyCritModifier(player, OBJECT_INVALID);
+                })
                 .TriggerPurchase((player, type, level) =>
                 {
-                    CreaturePlugin.SetCriticalRangeModifier(player, -level, 0, true, BaseItem.Gloves);
+                    var item = GetItemInSlot(InventorySlot.RightHand, player);
+                    Stat.ApplyCritModifier(player, item);
                 })
                 .TriggerRefund((player, type, level) =>
                 {
-                    CreaturePlugin.SetCriticalRangeModifier(player, 0, 0, true, BaseItem.Gloves);
+                    var item = GetItemInSlot(InventorySlot.RightHand, player);
+                    Stat.ApplyCritModifier(player, item);
                 });
         }
 
-        private void MartialFinesse(PerkBuilder builder)
+        private void Chi()
         {
-            builder.Create(PerkCategoryType.MartialArtsGeneral, PerkType.MartialFinesse)
-                .Name("Martial Finesse")
+            _builder.Create(PerkCategoryType.MartialArtsGeneral, PerkType.Chi)
+                .Name("Chi")
 
                 .AddPerkLevel()
-                .Description("You make melee attack rolls with your PER score if it is higher than your MGT score.")
-                .Price(5)
-                .RequirementSkill(SkillType.MartialArts, 35)
-                
-                .GrantsFeat(FeatType.MartialFinesse);
+                .Description("Restores your HP by a base amount of 45 points. [Cross Skill]")
+                .Price(3)
+                .RequirementSkill(SkillType.MartialArts, 5)
+                .GrantsFeat(FeatType.Chi1)
+
+                .AddPerkLevel()
+                .Description("Restores your HP by a base amount of 115 points. [Cross Skill]")
+                .Price(4)
+                .RequirementSkill(SkillType.MartialArts, 25)
+                .RequirementCharacterType(CharacterType.Standard)
+                .GrantsFeat(FeatType.Chi2)
+
+                .AddPerkLevel()
+                .Description("Restores your HP by a base amount of 170 points. [Cross Skill]")
+                .Price(4)
+                .RequirementSkill(SkillType.MartialArts, 40)
+                .RequirementCharacterType(CharacterType.Standard)
+                .GrantsFeat(FeatType.Chi3);
         }
 
-        private void WeaponFocusKatars(PerkBuilder builder)
+        private void WeaponFocusKatars()
         {
-            builder.Create(PerkCategoryType.MartialArtsKatars, PerkType.WeaponFocusKatars)
+            _builder.Create(PerkCategoryType.MartialArtsKatars, PerkType.WeaponFocusKatars)
                 .Name("Weapon Focus - Katars")
 
                 .AddPerkLevel()
-                .Description("You gain the Weapon Focus feat which grants a +1 attack bonus when equipped with katars.")
+                .Description("Your accuracy with katars is increased by 5.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 5)
                 .GrantsFeat(FeatType.WeaponFocusKatars)
 
                 .AddPerkLevel()
-                .Description("You gain the Weapon Specialization feat which grants a +2 damage when equipped with katars.")
+                .Description("Your base damage with katars is increased by 2 DMG.")
                 .Price(4)
                 .RequirementSkill(SkillType.MartialArts, 15)
-                
                 .GrantsFeat(FeatType.WeaponSpecializationKatars);
         }
 
-        private void ImprovedCriticalKatars(PerkBuilder builder)
+        private void ImprovedCriticalKatars()
         {
-            builder.Create(PerkCategoryType.MartialArtsKatars, PerkType.ImprovedCriticalKatars)
+            _builder.Create(PerkCategoryType.MartialArtsKatars, PerkType.ImprovedCriticalKatars)
                 .Name("Improved Critical - Katars")
 
                 .AddPerkLevel()
-                .Description("Improves the critical hit chance when using katars.")
+                .Description("Improves the chance to critically hit with katars by 5%.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 25)
-                
                 .GrantsFeat(FeatType.ImprovedCriticalKatars);
         }
 
-        private void KatarProficiency(PerkBuilder builder)
+        private void KatarProficiency()
         {
-            builder.Create(PerkCategoryType.MartialArtsKatars, PerkType.KatarProficiency)
+            _builder.Create(PerkCategoryType.MartialArtsKatars, PerkType.KatarProficiency)
                 .Name("Katar Proficiency")
 
                 .AddPerkLevel()
@@ -169,164 +199,133 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .GrantsFeat(FeatType.KatarProficiency5);
         }
 
-        private void KatarMastery(PerkBuilder builder)
+        private void KatarMastery()
         {
-            builder.Create(PerkCategoryType.MartialArtsKatars, PerkType.KatarMastery)
+            _builder.Create(PerkCategoryType.MartialArtsKatars, PerkType.KatarMastery)
                 .Name("Katar Mastery")
                 .TriggerEquippedItem((player, item, slot, type, level) =>
                 {
                     if (slot != InventorySlot.RightHand) return;
 
-                    var itemType = GetBaseItemType(item);
-                    if (Item.KatarBaseItemTypes.Contains(itemType))
-                    {
-                        var bab = GetBaseAttackBonus(player) + level;
-                        CreaturePlugin.SetBaseAttackBonus(player, bab);
-                    }
+                    Stat.ApplyAttacksPerRound(player, item);
                 })
                 .TriggerUnequippedItem((player, item, slot, type, level) =>
                 {
                     if (slot != InventorySlot.RightHand) return;
 
-                    var itemType = GetBaseItemType(item);
-                    if (Item.KatarBaseItemTypes.Contains(itemType))
-                    {
-                        var bab = GetBaseAttackBonus(player) - level;
-                        CreaturePlugin.SetBaseAttackBonus(player, bab);
-                    }
-
+                    Stat.ApplyAttacksPerRound(player, OBJECT_INVALID);
                 })
                 .TriggerPurchase((player, type, level) =>
                 {
                     var item = GetItemInSlot(InventorySlot.RightHand, player);
-                    var itemType = GetBaseItemType(item);
-
-                    if (Item.KatarBaseItemTypes.Contains(itemType))
-                    {
-                        var bab = GetBaseAttackBonus(player) + 1;
-                        CreaturePlugin.SetBaseAttackBonus(player, bab);
-                    }
+                    Stat.ApplyAttacksPerRound(player, item);
                 })
                 .TriggerRefund((player, type, level) =>
                 {
                     var item = GetItemInSlot(InventorySlot.RightHand, player);
-                    var itemType = GetBaseItemType(item);
-
-                    if (Item.KatarBaseItemTypes.Contains(itemType))
-                    {
-                        var bab = GetBaseAttackBonus(player) - level;
-                        CreaturePlugin.SetBaseAttackBonus(player, bab);
-                    }
+                    Stat.ApplyAttacksPerRound(player, item);
                 })
 
                 .AddPerkLevel()
-                .Description("Grants +1 BAB when equipped with a Katars.")
+                .Description("Grants an additional attack when equipped with a Katars.")
                 .Price(8)
                 .RequirementSkill(SkillType.MartialArts, 25)
-                
                 .GrantsFeat(FeatType.KatarMastery1)
-
-                .AddPerkLevel()
-                .Description("Grants +2 BAB when equipped with a Katars.")
-                .Price(8)
-                .RequirementSkill(SkillType.MartialArts, 40)
                 
-                .GrantsFeat(FeatType.KatarMastery2)
-
                 .AddPerkLevel()
-                .Description("Grants +3 BAB when equipped with a Katars.")
+                .Description("Grants an additional attack when equipped with a Katars.")
                 .Price(8)
                 .RequirementSkill(SkillType.MartialArts, 50)
-                
-                .GrantsFeat(FeatType.KatarMastery3);
+                .GrantsFeat(FeatType.KatarMastery2);
         }
 
-        private void ElectricFist(PerkBuilder builder)
+        private void ElectricFist()
         {
-            builder.Create(PerkCategoryType.MartialArtsKatars, PerkType.ElectricFist)
+            _builder.Create(PerkCategoryType.MartialArtsKatars, PerkType.ElectricFist)
                 .Name("Electric Fist")
 
                 .AddPerkLevel()
-                .Description("Your next attack deals an additional 4.0 DMG and has a 50% chance to inflict Shock for 30 seconds.")
+                .Description("Your next attack deals an additional 8 DMG and has a 50% chance to inflict Shock for 30 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 15)
+                .RequirementCharacterType(CharacterType.Standard)
                 .GrantsFeat(FeatType.ElectricFist1)
 
                 .AddPerkLevel()
-                .Description("Your next attack deals an additional 6.0 DMG and has a 75% chance to inflict Shock for 1 minute.")
+                .Description("Your next attack deals an additional 17 DMG and has a 75% chance to inflict Shock for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 30)
-                
+                .RequirementCharacterType(CharacterType.Standard)
                 .GrantsFeat(FeatType.ElectricFist2)
 
                 .AddPerkLevel()
-                .Description("Your next attack deals an additional 9.5 DMG and has a 100% chance to inflict Shock for 1 minute.")
+                .Description("Your next attack deals an additional 24 DMG and has a 100% chance to inflict Shock for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 45)
-                
+                .RequirementCharacterType(CharacterType.Standard)
                 .GrantsFeat(FeatType.ElectricFist3);
         }
 
-        private void StrikingCobra(PerkBuilder builder)
+        private void StrikingCobra()
         {
-            builder.Create(PerkCategoryType.MartialArtsKatars, PerkType.StrikingCobra)
+            _builder.Create(PerkCategoryType.MartialArtsKatars, PerkType.StrikingCobra)
                 .Name("Striking Cobra")
 
                 .AddPerkLevel()
-                .Description("Your next attack deals an additional 4.5 DMG and has a 50% chance to inflict Poison for 30 seconds.")
+                .Description("Your next attack deals an additional 6 DMG and has a 50% chance to inflict Poison for 30 seconds.")
                 .Price(2)
                 .RequirementSkill(SkillType.MartialArts, 5)
+                .RequirementCharacterType(CharacterType.Standard)
                 .GrantsFeat(FeatType.StrikingCobra1)
 
                 .AddPerkLevel()
-                .Description("Your next attack deals an additional 6.5 DMG and has a 75% chance to inflict Poison for 1 minute.")
+                .Description("Your next attack deals an additional 15 DMG and has a 75% chance to inflict Poison for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 20)
+                .RequirementCharacterType(CharacterType.Standard)
                 .GrantsFeat(FeatType.StrikingCobra2)
 
                 .AddPerkLevel()
-                .Description("Your next attack deals an additional 10.0 DMG and has a 100% chance to inflict Poison for 1 minute.")
+                .Description("Your next attack deals an additional 22 DMG and has a 100% chance to inflict Poison for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 35)
-                
+                .RequirementCharacterType(CharacterType.Standard)
                 .GrantsFeat(FeatType.StrikingCobra3);
         }
 
-        private void WeaponFocusStaves(PerkBuilder builder)
+        private void WeaponFocusStaves()
         {
-            builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.WeaponFocusStaves)
+            _builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.WeaponFocusStaves)
                 .Name("Weapon Focus - Staves")
 
                 .AddPerkLevel()
-                .Description("You gain the Weapon Focus feat which grants a +1 attack bonus when equipped with staves.")
+                .Description("Your accuracy with staves is increased by 5.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 5)
                 .GrantsFeat(FeatType.WeaponFocusStaves)
 
                 .AddPerkLevel()
-                .Description("You gain the Weapon Specialization feat which grants a +2 damage when equipped with staves.")
+                .Description("Your base damage with staves is increased by 2 DMG.")
                 .Price(4)
                 .RequirementSkill(SkillType.MartialArts, 15)
-                
                 .GrantsFeat(FeatType.WeaponSpecializationStaves);
         }
 
-        private void ImprovedCriticalStaves(PerkBuilder builder)
+        private void ImprovedCriticalStaves()
         {
-            builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.ImprovedCriticalStaves)
+            _builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.ImprovedCriticalStaves)
                 .Name("Improved Critical - Staves")
 
                 .AddPerkLevel()
-                .Description("Improves the critical hit chance when using a staff.")
+                .Description("Improves the chance to critically hit with staves by 5%.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 25)
-                
                 .GrantsFeat(FeatType.ImprovedCriticalStaff);
         }
 
-        private void StaffProficiency(PerkBuilder builder)
+        private void StaffProficiency()
         {
-            builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.StaffProficiency)
+            _builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.StaffProficiency)
                 .Name("Staff Proficiency")
 
                 .AddPerkLevel()
@@ -359,128 +358,146 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .GrantsFeat(FeatType.StaffProficiency5);
         }
 
-        private void StaffMastery(PerkBuilder builder)
+        private void StaffMastery()
         {
-            builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.StaffMastery)
+            _builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.StaffMastery)
                 .Name("Staff Mastery")
                 .TriggerEquippedItem((player, item, slot, type, level) =>
                 {
                     if (slot != InventorySlot.RightHand) return;
 
-                    var itemType = GetBaseItemType(item);
-                    if (Item.StaffBaseItemTypes.Contains(itemType))
-                    {
-                        var bab = GetBaseAttackBonus(player) + level;
-                        CreaturePlugin.SetBaseAttackBonus(player, bab);
-                    }
+                    Stat.ApplyAttacksPerRound(player, item);
                 })
                 .TriggerUnequippedItem((player, item, slot, type, level) =>
                 {
                     if (slot != InventorySlot.RightHand) return;
 
-                    var itemType = GetBaseItemType(item);
-                    if (Item.StaffBaseItemTypes.Contains(itemType))
-                    {
-                        var bab = GetBaseAttackBonus(player) - level;
-                        CreaturePlugin.SetBaseAttackBonus(player, bab);
-                    }
-
+                    Stat.ApplyAttacksPerRound(player, OBJECT_INVALID);
                 })
                 .TriggerPurchase((player, type, level) =>
                 {
                     var item = GetItemInSlot(InventorySlot.RightHand, player);
-                    var itemType = GetBaseItemType(item);
-
-                    if (Item.StaffBaseItemTypes.Contains(itemType))
-                    {
-                        var bab = GetBaseAttackBonus(player) + 1;
-                        CreaturePlugin.SetBaseAttackBonus(player, bab);
-                    }
+                    Stat.ApplyAttacksPerRound(player, item);
                 })
                 .TriggerRefund((player, type, level) =>
                 {
                     var item = GetItemInSlot(InventorySlot.RightHand, player);
-                    var itemType = GetBaseItemType(item);
-
-                    if (Item.StaffBaseItemTypes.Contains(itemType))
-                    {
-                        var bab = GetBaseAttackBonus(player) - level;
-                        CreaturePlugin.SetBaseAttackBonus(player, bab);
-                    }
+                    Stat.ApplyAttacksPerRound(player, item);
                 })
 
                 .AddPerkLevel()
-                .Description("Grants +1 BAB when equipped with a Staff.")
+                .Description("Grants an additional attack when equipped with a Staff.")
                 .Price(8)
                 .RequirementSkill(SkillType.MartialArts, 25)
-                
                 .GrantsFeat(FeatType.StaffMastery1)
-
-                .AddPerkLevel()
-                .Description("Grants +2 BAB when equipped with a Staff.")
-                .Price(8)
-                .RequirementSkill(SkillType.MartialArts, 40)
                 
-                .GrantsFeat(FeatType.StaffMastery2)
-
                 .AddPerkLevel()
-                .Description("Grants +3 BAB when equipped with a Staff.")
+                .Description("Grants an additional attack when equipped with a Staff.")
                 .Price(8)
                 .RequirementSkill(SkillType.MartialArts, 50)
-                
-                .GrantsFeat(FeatType.StaffMastery3);
+                .GrantsFeat(FeatType.StaffMastery2);
         }
 
-        private void Slam(PerkBuilder builder)
+        private void Slam()
         {
-            builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.Slam)
+            _builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.Slam)
                 .Name("Slam")
 
                 .AddPerkLevel()
-                .Description("Your next attack deals an additional 2.0 DMG and has a 50% chance to inflict Blindness for 30 seconds.")
-                .Price(3)
+                .Description("Your next attack deals an additional 6 DMG and has a 50% chance to inflict Blindness for 12 seconds.")
+                .Price(2)
                 .RequirementSkill(SkillType.MartialArts, 15)
+                .RequirementCharacterType(CharacterType.Standard)
                 .GrantsFeat(FeatType.Slam1)
 
                 .AddPerkLevel()
-                .Description("Your next attack deals an additional 4.5 DMG and has a 75% chance to inflict Blindness for 1 minute.")
+                .Description("Your next attack deals an additional 15 DMG and has a 75% chance to inflict Blindness for 12 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 30)
-                
+                .RequirementCharacterType(CharacterType.Standard)
                 .GrantsFeat(FeatType.Slam2)
 
                 .AddPerkLevel()
-                .Description("Your next attack deals an additional 7.0 DMG and has a 100% chance to inflict Blindness for 1 minute.")
+                .Description("Your next attack deals an additional 22 DMG and has a 100% chance to inflict Blindness for 12 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 45)
-                
+                .RequirementCharacterType(CharacterType.Standard)
                 .GrantsFeat(FeatType.Slam3);
         }
 
-        private void SpinningWhirl(PerkBuilder builder)
+        private void LegSweep()
         {
-            builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.SpinningWhirl)
-                .Name("Spinning Whirl")
+            _builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.LegSweep)
+                .Name("Leg Sweep")
 
                 .AddPerkLevel()
-                .Description("Attacks up to 3 nearby enemies for 2.0 DMG each.")
-                .Price(2)
+                .Description("Your next attack deals an additional 4 DMG and has a 25% chance to inflict knockdown on your target for 6 seconds.")
+                .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 5)
-                .GrantsFeat(FeatType.SpinningWhirl1)
+                .RequirementCharacterType(CharacterType.Standard)
+                .GrantsFeat(FeatType.LegSweep1)
 
                 .AddPerkLevel()
-                .Description("Attacks up to 3 nearby enemies for 4.5 DMG each.")
+                .Description("Your next attack deals an additional 13 DMG and has a 40% chance to inflict knockdown on your target for 6 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 20)
-                
-                .GrantsFeat(FeatType.SpinningWhirl2)
+                .RequirementCharacterType(CharacterType.Standard)
+                .GrantsFeat(FeatType.LegSweep2)
 
                 .AddPerkLevel()
-                .Description("Attacks up to 3 nearby enemies for 7.0 DMG each.")
+                .Description("Your next attack deals an additional 20 DMG and has a 50% chance to inflict knockdown on your target for 6 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 35)
-                
-                .GrantsFeat(FeatType.SpinningWhirl3);
+                .RequirementCharacterType(CharacterType.Standard)
+                .GrantsFeat(FeatType.LegSweep3);
         }
+
+        private void FlurryStyle()
+        {
+            _builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.FlurryStyle)
+                .Name("Flurry Style")
+                .TriggerEquippedItem((player, item, slot, type, level) =>
+                {
+                    if (slot != InventorySlot.RightHand) return;
+
+                    Stat.ApplyAttacksPerRound(player, item);
+                })
+                .TriggerUnequippedItem((player, item, slot, type, level) =>
+                {
+                    if (slot != InventorySlot.RightHand) return;
+
+                    Stat.ApplyAttacksPerRound(player, OBJECT_INVALID);
+                })
+
+                .AddPerkLevel()
+                .Description("Your staff attacks now use Agility for accuracy and Perception for damage. In addition, you gain an additional attack with staves, but all staff attacks are made with a -10% to-hit penalty.")
+                .Price(1)
+                .RequirementCannotHavePerk(PerkType.CrushingStyle)
+                .GrantsFeat(FeatType.FlurryStyle)
+
+                .AddPerkLevel()
+                .Description("You gain an additional attack with staves, and no longer suffer a to-hit penalty for attacks made with staves.")
+                .Price(4)
+                .RequirementSkill(SkillType.MartialArts, 35)
+                .GrantsFeat(FeatType.FlurryMastery);
+        }
+        private void CrushingStyle()
+        {
+            _builder.Create(PerkCategoryType.MartialArtsStaff, PerkType.CrushingStyle)
+                .Name("Crushing Style")
+
+                .AddPerkLevel()
+                .Description("Your attacks with a staff now gain a DMG bonus equal to your MGT modifier. In addition, your critical chance is raised by 15%.")
+                .Price(1)
+                .RequirementCannotHavePerk(PerkType.FlurryStyle)
+                .GrantsFeat(FeatType.CrushingStyle)
+
+                .AddPerkLevel()
+                .Description("Your MGT DMG bonus is increased to twice your MGT modifier, and critical chance is increased by a further 15%.")
+                .Price(4)
+                .RequirementSkill(SkillType.MartialArts, 35)
+                .GrantsFeat(FeatType.CrushingMastery);
+        }
+
     }
 }

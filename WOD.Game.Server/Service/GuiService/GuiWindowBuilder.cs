@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using WOD.Game.Server.Core;
+using WOD.Game.Server.Core.Beamdog;
 using WOD.Game.Server.Service.GuiService.Component;
 
 namespace WOD.Game.Server.Service.GuiService
@@ -58,6 +61,7 @@ namespace WOD.Game.Server.Service.GuiService
                 Gui.RegisterElementEvent(windowEventKey, "close", _activeWindow.ClosedEventMethodInfo);
             
             // Recurse over all elements in the window, looking for and registering any events
+            RegisterElementEvents(_activeWindow.PartialViews.Values.ToList(), windowId);
             RegisterElementEvents(_activeWindow.Elements, windowId);
         }
 
@@ -67,6 +71,70 @@ namespace WOD.Game.Server.Service.GuiService
         /// <returns>A constructed window.</returns>
         public GuiConstructedWindow Build()
         {
+            _activeWindow
+                .DefinePartialView("%%WINDOW_MAIN%%", group =>
+                {
+                    group.AddColumn(col =>
+                    {
+                        col.AddRow(row =>
+                        {
+                            row.Elements.AddRange(_activeWindow.Elements.ToList());
+                        });
+                    });
+                })
+                .DefinePartialView("%%WINDOW_MODAL%%", group =>
+                {
+                    group.AddColumn(mainCol =>
+                    {
+                        mainCol.AddRow(mainRow =>
+                        {
+                            mainRow.AddColumn(col =>
+                            {
+                                col.AddRow(row =>
+                                {
+                                    row.AddText()
+                                        .BindText(model => model.ModalPromptText)
+                                        .SetScrollbars(NuiScrollbars.Auto)
+                                        .SetShowBorder(false);
+                                });
+
+
+                                col.AddRow(row =>
+                                {
+                                    row.AddSpacer();
+                                    row.AddButton()
+                                        .BindText(model => model.ModalConfirmButtonText)
+                                        .BindOnClicked(model => model.OnModalConfirmClick())
+                                        .SetHeight(35f);
+
+                                    row.AddButton()
+                                        .BindText(model => model.ModalCancelButtonText)
+                                        .BindOnClicked(model => model.OnModalCancelClick())
+                                        .SetHeight(35f);
+                                    row.AddSpacer();
+                                });
+                            });
+                        });
+                    });
+                });
+
+            _activeWindow.Elements.Clear();
+
+            _activeWindow
+                .AddColumn(col =>
+                {
+                    col.AddRow(row =>
+                    {
+                        row.AddPartialView("%%WINDOW_MAIN_PARTIAL%%");
+                    });
+                });
+
+            var partialViews = new Dictionary<string, Json>();
+            foreach (var (key, partial) in _activeWindow.PartialViews)
+            {
+                partialViews[key] = partial.ToJson();
+            }
+
             var json = _activeWindow.Build();
             var windowId = Gui.BuildWindowId(_type);
             RegisterAllElementEvents();
@@ -76,6 +144,7 @@ namespace WOD.Game.Server.Service.GuiService
                 windowId,
                 json,
                 _activeWindow.Geometry,
+                partialViews,
                 () =>
             {
                 var dataModelInstance = Activator.CreateInstance<T>();

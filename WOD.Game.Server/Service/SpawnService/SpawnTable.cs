@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Service.AIService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.AnimationService;
 
 namespace WOD.Game.Server.Service.SpawnService
 {
@@ -24,13 +24,13 @@ namespace WOD.Game.Server.Service.SpawnService
         /// Retrieves the next spawn resref, object type, and AI flags based on the rules for this specific spawn table.
         /// </summary>
         /// <returns>A tuple containing the object type and resref to spawn.</returns>
-        public (ObjectType, string, AIFlag) GetNextSpawn()
+        public (ObjectType, string, AIFlag, List<IAnimator>) GetNextSpawn()
         {
             var selectedObject = SelectRandomSpawnObject();
             if (selectedObject == null)
-                return (ObjectType.All, string.Empty, AIFlag.None);
+                return (ObjectType.All, string.Empty, AIFlag.None, new List<IAnimator>());
 
-            return (selectedObject.Type, selectedObject.Resref, selectedObject.AIFlags);
+            return (selectedObject.Type, selectedObject.Resref, selectedObject.AIFlags, selectedObject.Animators);
         }
 
         /// <summary>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWNX.Enum;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Entity;
 
 namespace WOD.Game.Server.Service
 {
@@ -14,56 +14,15 @@ namespace WOD.Game.Server.Service
     /// </summary>
     public static class Cache
     {
-        private static Dictionary<string, uint> AreasByResref { get; } = new();
-        private static Dictionary<string, string> ItemNamesByResref { get; } = new();
+        private static bool _cachedThisRun;
+        private static Dictionary<string, string> ItemNamesByResref { get; set; } = new();
         private static Dictionary<int, int> PortraitIdsByInternalId { get; } = new();
         private static Dictionary<int, int> PortraitInternalIdsByPortraitId { get; } = new();
         private static Dictionary<int, string> PortraitResrefByInternalId { get; } = new();
+        private static Dictionary<string, int> PortraitInternalIdsByPortraitResref { get; } = new();
 
-        /// <summary>
-        /// Handles caching data into server memory for quicker lookup later.
-        /// </summary>
-        [NWNEventHandler("mod_load")]
-        public static void OnModuleLoad()
-        {
-            CacheAreasByResref();
-            CacheItemNamesByResref();
-            CachePortraitsById();
-
-            Console.WriteLine($"Loaded {AreasByResref.Count} areas by resref.");
-            Console.WriteLine($"Loaded {ItemNamesByResref.Count} item names by resref.");
-            Console.WriteLine($"Loaded {PortraitIdsByInternalId.Count} portraits by Id.");
-        }
-
-        /// <summary>
-        /// Caches all areas by their resref.
-        /// </summary>
-        private static void CacheAreasByResref()
-        {
-            for (var area = GetFirstArea(); GetIsObjectValid(area); area = GetNextArea())
-            {
-                var resref = GetResRef(area);
-                AreasByResref[resref] = area;
-            }
-        }
-
-        /// <summary>
-        /// Retrieves an area by its resref. If the area does not exist, OBJECT_INVALID will be returned.
-        /// </summary>
-        /// <param name="resref">The resref to use for the search.</param>
-        /// <returns>The area ID or OBJECT_INVALID if area does not exist.</returns>
-        public static uint GetAreaByResref(string resref)
-        {
-            if (!AreasByResref.ContainsKey(resref))
-                return OBJECT_INVALID;
-
-            return AreasByResref[resref];
-        }
-
-        /// <summary>
-        /// Stores the names of every item in the module. This speeds up the look-ups later on.
-        /// </summary>
-        private static void CacheItemNamesByResref()
+        [NWNEventHandler("mod_content_chg")]
+        public static void CacheItemNamesByResref()
         {
             var resref = UtilPlugin.GetFirstResRef(ResRefType.Item);
 
@@ -72,6 +31,35 @@ namespace WOD.Game.Server.Service
                 CacheItemNameByResref(resref);
                 resref = UtilPlugin.GetNextResRef();
             }
+
+            var dbModuleCache = DB.Get<ModuleCache>("WOD_CACHE");
+            dbModuleCache.ItemNamesByResref = ItemNamesByResref;
+            DB.Set(dbModuleCache);
+
+            _cachedThisRun = true;
+        }
+
+        /// <summary>
+        /// Handles caching data into server memory for quicker lookup later.
+        /// </summary>
+        [NWNEventHandler("mod_cache")]
+        public static void CacheData()
+        {
+            LoadItemCache();
+            CachePortraitsById();
+
+            Console.WriteLine($"Loaded {ItemNamesByResref.Count} item names by resref.");
+            Console.WriteLine($"Loaded {PortraitIdsByInternalId.Count} portraits by Id.");
+        }
+
+        private static void LoadItemCache()
+        {
+            // No need to load from the DB, it's already in memory.
+            if (_cachedThisRun)
+                return;
+
+            var dbModuleCache = DB.Get<ModuleCache>("WOD_CACHE");
+            ItemNamesByResref = dbModuleCache.ItemNamesByResref;
         }
 
         /// <summary>
@@ -124,6 +112,7 @@ namespace WOD.Game.Server.Service
                     PortraitIdsByInternalId[internalId] = row;
                     PortraitInternalIdsByPortraitId[row] = internalId;
                     PortraitResrefByInternalId[internalId] = "po_" + baseResref;
+                    PortraitInternalIdsByPortraitResref["po_" + baseResref] = internalId;
                     internalId++;
                 }
             }
@@ -159,6 +148,14 @@ namespace WOD.Game.Server.Service
         public static string GetPortraitResrefByInternalId(int portraitInternalId)
         {
             return PortraitResrefByInternalId[portraitInternalId];
+        }
+
+        public static int GetPortraitInternalIdByResref(string resref)
+        {
+            if (!PortraitInternalIdsByPortraitResref.ContainsKey(resref))
+                return -1;
+
+            return PortraitInternalIdsByPortraitResref[resref];
         }
     }
 }

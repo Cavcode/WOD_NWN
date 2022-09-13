@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Service;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.AIDefinition
 {
@@ -451,7 +450,7 @@ namespace WOD.Game.Server.Feature.AIDefinition
             // Bite
             if (CheckIfCanUseFeat(self, target, FeatType.Bite))
             {
-                return (FeatType.Roar, target);
+                return (FeatType.Bite, target);
             }
 
             // Iron Shell

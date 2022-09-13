@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using Newtonsoft.Json;
 using NRediSearch;
 using NReJSON;
@@ -12,9 +13,9 @@ using WOD.Game.Server.Service.DBService;
 
 namespace WOD.Game.Server.Service
 {
-    internal static class DB
+    public static class DB
     {
-        internal class JsonSerializer : ISerializerProxy
+        internal class JsonSerializer: ISerializerProxy
         {
             public TResult Deserialize<TResult>(RedisResult serializedValue)
             {
@@ -47,10 +48,23 @@ namespace WOD.Game.Server.Service
             LoadEntities();
 
             // Runs at the end of every main loop. Clears out all data retrieved during this cycle.
-            Entrypoints.OnScriptContextEnd += () =>
+            Internal.OnScriptContextEnd += () =>
             {
                 _cachedEntities.Clear();
             };
+
+            // This is a hack to ensure the background process of index scanning completes before we kick off
+            // the rest of the server initialization process.
+            // If we don't wait long enough, DB searches won't retrieve any data. If you have a better solution 
+            // please submit a fix, thanks!
+            Console.WriteLine($"Waiting ten seconds for background index scanning to complete.");
+            Thread.Sleep(10000);
+
+            // CLI tools also use this class and don't have access to the NWN context.
+            // Perform an environment variable check to ensure we're in the game server context before executing the event.
+            var context = Environment.GetEnvironmentVariable("GAME_SERVER_CONTEXT");
+            if (!string.IsNullOrWhiteSpace(context) && context.ToLower() == "true")
+                ExecuteScript("db_loaded", OBJECT_SELF);
         }
 
         /// <summary>
@@ -82,7 +96,6 @@ namespace WOD.Game.Server.Service
                 var attribute = prop.GetCustomAttribute(typeof(IndexedAttribute));
                 if (attribute != null)
                 {
-                    var detail = (IndexedAttribute)attribute;
                     if (prop.PropertyType == typeof(int) ||
                         prop.PropertyType == typeof(int?) ||
                         prop.PropertyType == typeof(ulong) ||
@@ -130,7 +143,7 @@ namespace WOD.Game.Server.Service
                 var type = entity.GetType();
                 // Register the type by itself first.
                 _keyPrefixByType[type] = type.Name;
-
+                
                 // Register the search client.
                 _searchClientsByType[type] = new Client(type.Name, _multiplexer.GetDatabase());
                 ProcessIndex(entity);
@@ -140,18 +153,18 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// Stores a specific object in the database by an arbitrary key.
+        /// Stores a specific object in the database by its Id.
         /// </summary>
         /// <typeparam name="T">The type of data to store</typeparam>
         /// <param name="entity">The data to store.</param>
-        /// <param name="key">The arbitrary key to set this object under.</param>
-        public static void Set<T>(string key, T entity)
+        public static void Set<T>(T entity)
             where T : EntityBase
         {
             var type = typeof(T);
             var data = JsonConvert.SerializeObject(entity);
+
             var keyPrefix = _keyPrefixByType[type];
-            var indexKey = $"Index:{keyPrefix}:{key}";
+            var indexKey = $"Index:{keyPrefix}:{entity.Id}";
             var indexData = new Dictionary<string, RedisValue>();
 
             foreach (var prop in _indexedPropertiesByName[type])
@@ -163,57 +176,48 @@ namespace WOD.Game.Server.Service
                 {
                     // Convert enums to numeric values
                     if (property.PropertyType.IsEnum)
-                        value = (int)value;
+                        value = (int) value;
 
                     if (property.PropertyType == typeof(Guid))
                     {
-                        value = EscapeTokens(((Guid)value).ToString());
+                        value = EscapeTokens(((Guid) value).ToString());
                     }
 
                     if (property.PropertyType == typeof(string))
                     {
-                        value = EscapeTokens((string)value);
+                        value = EscapeTokens((string) value);
                     }
 
                     indexData[prop] = (dynamic)value;
                 }
             }
-
             _searchClientsByType[type].ReplaceDocument(indexKey, indexData);
-            _multiplexer.GetDatabase().JsonSet($"{keyPrefix}:{key}", data);
-            _cachedEntities[key] = entity;
+            _multiplexer.GetDatabase().JsonSet($"{keyPrefix}:{entity.Id}", data);
+            _cachedEntities[entity.Id] = entity;
         }
 
         /// <summary>
         /// Retrieves a specific object in the database by an arbitrary key.
         /// </summary>
         /// <typeparam name="T">The type of data to retrieve</typeparam>
-        /// <param name="key">The arbitrary key the data is stored under</param>
+        /// <param name="id">The arbitrary key the data is stored under</param>
         /// <returns>The object stored in the database under the specified key</returns>
-        public static T Get<T>(string key)
-            where T : EntityBase
+        public static T Get<T>(string id)
+            where T: EntityBase
         {
             var keyPrefix = _keyPrefixByType[typeof(T)];
-            if (_cachedEntities.ContainsKey(key))
+            if (_cachedEntities.ContainsKey(id))
             {
-                return (T)_cachedEntities[key];
+                return (T)_cachedEntities[id];
             }
             else
             {
-                RedisValue data;
-
-                using (new Profiler("RedisGet"))
-                {
-                    data = _multiplexer.GetDatabase().JsonGet($"{keyPrefix}:{key}").ToString();
-                }
-
+                RedisValue data = _multiplexer.GetDatabase().JsonGet($"{keyPrefix}:{id}").ToString();
+                
                 if (string.IsNullOrWhiteSpace(data))
                     return default;
 
-                using (new Profiler("Deserialization"))
-                {
-                    return JsonConvert.DeserializeObject<T>(data);
-                }
+                return JsonConvert.DeserializeObject<T>(data);
             }
         }
 
@@ -221,31 +225,31 @@ namespace WOD.Game.Server.Service
         /// Returns true if an entry with the specified key exists.
         /// Returns false if not.
         /// </summary>
-        /// <param name="key">The key of the entity.</param>
+        /// <param name="id">The key of the entity.</param>
         /// <returns>true if found, false otherwise.</returns>
-        public static bool Exists<T>(string key)
+        public static bool Exists<T>(string id)
             where T : EntityBase
         {
             var keyPrefix = _keyPrefixByType[typeof(T)];
-            if (_cachedEntities.ContainsKey(key))
+            if (_cachedEntities.ContainsKey(id))
                 return true;
             else
-                return _multiplexer.GetDatabase().KeyExists($"{keyPrefix}:{key}");
+                return _multiplexer.GetDatabase().KeyExists($"{keyPrefix}:{id}");
         }
 
         /// <summary>
         /// Deletes an entry by a specified key.
         /// </summary>
         /// <typeparam name="T">The type of entity to delete.</typeparam>
-        /// <param name="key">The key of the entity</param>
-        public static void Delete<T>(string key)
-            where T : EntityBase
+        /// <param name="id">The key of the entity</param>
+        public static void Delete<T>(string id)
+            where T: EntityBase
         {
             var keyPrefix = _keyPrefixByType[typeof(T)];
-            var indexKey = $"Index:{keyPrefix}:{key}";
+            var indexKey = $"Index:{keyPrefix}:{id}";
             _searchClientsByType[typeof(T)].DeleteDocument(indexKey);
-            _multiplexer.GetDatabase().JsonDelete($"{keyPrefix}:{key}");
-            _cachedEntities.Remove(key);
+            _multiplexer.GetDatabase().JsonDelete($"{keyPrefix}:{id}");
+            _cachedEntities.Remove(id);
         }
 
         /// <summary>
@@ -265,7 +269,9 @@ namespace WOD.Game.Server.Service
                 .Replace("|", "\\|")
                 .Replace("-", "\\-")
                 .Replace("=", "\\=")
-                .Replace(">", "\\>");
+                .Replace(">", "\\>")
+                .Replace("'", "\\'")
+                .Replace("\"", "\\\"");
         }
 
         /// <summary>
@@ -275,7 +281,7 @@ namespace WOD.Game.Server.Service
         /// <param name="query">The query to run.</param>
         /// <returns>An enumerable of entities matching the criteria.</returns>
         public static IEnumerable<T> Search<T>(DBQuery<T> query)
-            where T : EntityBase
+            where T: EntityBase
         {
             var result = _searchClientsByType[typeof(T)].Search(query.BuildQuery());
 
@@ -295,7 +301,7 @@ namespace WOD.Game.Server.Service
         /// <param name="query">The query to run.</param>
         /// <returns>The number of records matching the query criteria.</returns>
         public static long SearchCount<T>(DBQuery<T> query)
-            where T : EntityBase
+            where T: EntityBase
         {
             var result = _searchClientsByType[typeof(T)].Search(query.BuildQuery(true));
 

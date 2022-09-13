@@ -1,8 +1,9 @@
 ﻿using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Entity;
+using WOD.Game.Server.Feature.StatusEffectDefinition.StatusEffectData;
 using WOD.Game.Server.Service;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.StatusEffectService;
 
 namespace WOD.Game.Server.Feature
 {
@@ -20,13 +21,25 @@ namespace WOD.Game.Server.Feature
             var tick = GetLocalInt(player, "NATURAL_REGENERATION_TICK") + 1;
             if (tick >= 5) // 6 seconds * 5 = 30 seconds
             {
+                var vitalityBonus = GetAbilityModifier(AbilityType.Vitality, player);
+                if (vitalityBonus < 0)
+                    vitalityBonus = 0;
+
                 var playerId = GetObjectUUID(player);
                 var dbPlayer = DB.Get<Player>(playerId);
-                var hpRegen = dbPlayer.HPRegen;
-                var fpRegen = dbPlayer.FPRegen;
-                var stmRegen = dbPlayer.STMRegen;
+                var hpRegen = dbPlayer.HPRegen + vitalityBonus * 4;
+                var fpRegen = 1 + dbPlayer.FPRegen + vitalityBonus / 2;
+                var stmRegen = 1 + dbPlayer.STMRegen + vitalityBonus / 2;
+                var foodEffect = StatusEffect.GetEffectData<FoodEffectData>(player, StatusEffectType.Food);
 
-                if (hpRegen > 0)
+                if (foodEffect != null)
+                {
+                    hpRegen += foodEffect.HPRegen;
+                    fpRegen += foodEffect.FPRegen;
+                    stmRegen += foodEffect.STMRegen;
+                }
+
+                if (hpRegen > 0 && GetCurrentHitPoints(player) < GetMaxHitPoints(player))
                 {
                     ApplyEffectToObject(DurationType.Instant, EffectHeal(hpRegen), player);
                 }

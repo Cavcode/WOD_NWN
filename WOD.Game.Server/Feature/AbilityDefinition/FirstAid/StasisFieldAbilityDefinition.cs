@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Item.Property;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.PerkService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
-using Random = WOD.Game.Server.Service.Random;
+using WOD.Game.Server.Service.SkillService;
 
 namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
 {
@@ -33,7 +28,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 return "Your target is too far away.";
             }
             
-            if (!HasMedicalSupplies(activator))
+            if (!HasStimPack(activator))
             {
                 return "You have no stim packs.";
             }
@@ -47,7 +42,15 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
             const float BaseLength = 900f;
             var length = BaseLength + willpowerMod * 30f;
 
-            ApplyEffectToObject(DurationType.Temporary, EffectACIncrease(baseAmount, ArmorClassModiferType.Natural), target, length);
+            for (var effect = GetFirstEffect(target); GetIsEffectValid(effect); effect = GetNextEffect(target))
+            {
+                if(GetEffectTag(effect) == "STASIS_FIELD")
+                    RemoveEffect(target, effect);
+            }
+
+            var acEffect = EffectACIncrease(baseAmount, ArmorClassModiferType.Natural);
+            acEffect = TagEffect(acEffect, "STASIS_FIELD");
+            ApplyEffectToObject(DurationType.Temporary, acEffect, target, length);
             ApplyEffectToObject(DurationType.Instant, EffectVisualEffect(VisualEffect.Vfx_Imp_Ac_Bonus), target);
 
             TakeStimPack(activator);
@@ -57,8 +60,10 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.StasisField1, PerkType.StasisField)
                 .Name("Stasis Field I")
+                .Level(1)
                 .HasRecastDelay(RecastGroup.StasisField, 30f)
                 .HasActivationDelay(2f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(5)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
@@ -67,6 +72,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 .HasImpactAction((activator, target, _, _) =>
                 {
                     Impact(activator, target, 2);
+
+                    Enmity.ModifyEnmityOnAll(activator, 250);
+                    CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
                 });
         }
 
@@ -74,8 +82,10 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.StasisField2, PerkType.StasisField)
                 .Name("Stasis Field II")
+                .Level(2)
                 .HasRecastDelay(RecastGroup.StasisField, 30f)
                 .HasActivationDelay(2f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(6)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
@@ -84,6 +94,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 .HasImpactAction((activator, target, _, _) =>
                 {
                     Impact(activator, target, 4);
+
+                    Enmity.ModifyEnmityOnAll(activator, 350);
+                    CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
                 });
         }
 
@@ -91,8 +104,10 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
         {
             Builder.Create(FeatType.StasisField3, PerkType.StasisField)
                 .Name("Stasis Field III")
+                .Level(3)
                 .HasRecastDelay(RecastGroup.StasisField, 30f)
                 .HasActivationDelay(2f)
+                .HasMaxRange(30.0f)
                 .RequirementStamina(7)
                 .UsesAnimation(Animation.LoopingGetMid)
                 .IsCastedAbility()
@@ -101,6 +116,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.FirstAid
                 .HasImpactAction((activator, target, _, _) =>
                 {
                     Impact(activator, target, 6);
+
+                    Enmity.ModifyEnmityOnAll(activator, 450);
+                    CombatPoint.AddCombatPointToAllTagged(activator, SkillType.FirstAid, 3);
                 });
         }
     }

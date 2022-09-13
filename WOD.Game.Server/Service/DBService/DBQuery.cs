@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using NRediSearch;
 using WOD.Game.Server.Entity;
@@ -54,6 +53,32 @@ namespace WOD.Game.Server.Service.DBService
         public DBQuery<T> AddFieldSearch(string fieldName, IEnumerable<int> search)
         {
             var searchText = string.Join("|", search);
+            var criteria = new SearchCriteria(searchText)
+            {
+                SkipEscaping = true
+            };
+
+            FieldSearches.Add(fieldName, criteria);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a filter based on a field's name for the given text.
+        /// Will search for any matches in the provided list of strings.
+        /// </summary>
+        /// <param name="fieldName">The name of the field to search for</param>
+        /// <param name="search">The list of values to search for</param>
+        /// <returns>A configured DBQuery</returns>
+        public DBQuery<T> AddFieldSearch(string fieldName, IEnumerable<string> search)
+        {
+            var list = new List<string>();
+            foreach (var s in search)
+            {
+                list.Add(DB.EscapeTokens(s));
+            }
+
+            var searchText = string.Join("|", list);
             var criteria = new SearchCriteria(searchText)
             {
                 SkipEscaping = true

@@ -1,7 +1,8 @@
 ﻿using WOD.Game.Server.Core;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.KeyItemService;
+using WOD.Game.Server.Service.LogService;
 
 namespace WOD.Game.Server.Feature
 {
@@ -19,7 +20,7 @@ namespace WOD.Game.Server.Feature
             if (!GetIsPC(player) || GetIsDM(player)) return;
 
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Player>(playerId) ?? new Player();
+            var dbPlayer = DB.Get<Player>(playerId) ?? new Player(playerId);
             var area = OBJECT_SELF;
             var areaResref = GetResRef(area);
 
@@ -29,7 +30,7 @@ namespace WOD.Game.Server.Feature
 
             dbPlayer.MapProgressions[areaResref] = progression;
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
         /// <summary>
@@ -40,9 +41,28 @@ namespace WOD.Game.Server.Feature
         {
             var player = GetEnteringObject();
 
-            if (!GetIsPC(player) || GetIsDM(player)) return;
+            if (!GetIsPC(player) || GetIsDM(player) || GetIsDMPossessed(player)) 
+                return;
 
             var area = OBJECT_SELF;
+            var mapKeyItemId = GetLocalInt(area, "MAP_KEY_ITEM_ID");
+
+            // If the area has a map associated and the player has this key item,
+            // exit early. There's no reason to load their progression - the map explores it for them automatically.
+            if (mapKeyItemId > 0)
+            {
+                try
+                {
+                    var keyItemType = (KeyItemType)mapKeyItemId;
+                    if (KeyItem.HasKeyItem(player, keyItemType))
+                        return;
+                }
+                catch
+                {
+                    Log.Write(LogGroup.Error, $"MAP_KEY_ITEM_ID '{mapKeyItemId}' is misconfigured on area '{GetName(area)}'.");
+                }
+            }
+            
             var areaResref = GetResRef(area);
 
             // Did we already load this area's progression since the last restart?
@@ -51,6 +71,8 @@ namespace WOD.Game.Server.Feature
 
             var playerId = GetObjectUUID(player);
             var dbPlayer = DB.Get<Player>(playerId);
+            if (dbPlayer == null)
+                return;
 
             if (!dbPlayer.MapProgressions.ContainsKey(areaResref))
                 return;

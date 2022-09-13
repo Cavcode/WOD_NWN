@@ -50,7 +50,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// When the module loads, cache all perk and character type information.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void CacheData()
         {
             CachePerks();
@@ -82,7 +82,7 @@ namespace WOD.Game.Server.Service
 
             foreach (var type in types)
             {
-                var instance = (IPerkListDefinition)Activator.CreateInstance(type);
+                var instance = (IPerkListDefinition) Activator.CreateInstance(type);
                 var perks = instance.BuildPerks();
 
                 foreach (var (perkType, perkDetail) in perks)
@@ -124,7 +124,7 @@ namespace WOD.Game.Server.Service
                     // If the perk has an "unlock requirement", add it to that cache.
                     foreach (var level in perkDetail.PerkLevels)
                     {
-                        var reqExists = level.Value.Requirements.Count(x => x.GetType() == typeof(PerkUnlockRequirement)) > 0;
+                        var reqExists = level.Value.Requirements.Count(x => x.GetType() == typeof(PerkRequirementUnlock)) > 0;
                         if (reqExists)
                         {
                             _perksWithUnlockRequirements[perkType] = perkDetail;
@@ -167,7 +167,7 @@ namespace WOD.Game.Server.Service
             // Equipped Triggers: Fires when an item is equipped.
             if (perk.EquippedTriggers.Count > 0)
             {
-                if (!_equipTriggers.ContainsKey(perk.Type))
+                if(!_equipTriggers.ContainsKey(perk.Type))
                     _equipTriggers[perk.Type] = new List<PerkTriggerEquippedAction>();
 
                 _equipTriggers[perk.Type].AddRange(perk.EquippedTriggers);
@@ -176,7 +176,7 @@ namespace WOD.Game.Server.Service
             // Unequipped Triggers: Fires when an item is unequipped.
             if (perk.UnequippedTriggers.Count > 0)
             {
-                if (!_unequipTriggers.ContainsKey(perk.Type))
+                if(!_unequipTriggers.ContainsKey(perk.Type))
                     _unequipTriggers[perk.Type] = new List<PerkTriggerUnequippedAction>();
 
                 _unequipTriggers[perk.Type].AddRange(perk.UnequippedTriggers);
@@ -185,7 +185,7 @@ namespace WOD.Game.Server.Service
             // Purchased Triggers: Fires when a perk is purchased.
             if (perk.PurchasedTriggers.Count > 0)
             {
-                if (!_purchaseTriggers.ContainsKey(perk.Type))
+                if(!_purchaseTriggers.ContainsKey(perk.Type))
                     _purchaseTriggers[perk.Type] = new List<PerkTriggerPurchasedRefundedAction>();
 
                 _purchaseTriggers[perk.Type].AddRange(perk.PurchasedTriggers);
@@ -194,7 +194,7 @@ namespace WOD.Game.Server.Service
             // Refunded Triggers: Fires when a perk is refunded.
             if (perk.PurchasedTriggers.Count > 0)
             {
-                if (!_refundTriggers.ContainsKey(perk.Type))
+                if(!_refundTriggers.ContainsKey(perk.Type))
                     _refundTriggers[perk.Type] = new List<PerkTriggerPurchasedRefundedAction>();
 
                 _refundTriggers[perk.Type].AddRange(perk.RefundedTriggers);

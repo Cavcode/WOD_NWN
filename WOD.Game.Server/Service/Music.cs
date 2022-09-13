@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
 {
@@ -28,7 +27,7 @@ namespace WOD.Game.Server.Service
         /// When the module loads, read the ambientmusic.2da file for all active songs.
         /// Add these to the cache.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void LoadSongList()
         {
             const string File = "ambientmusic";
@@ -66,10 +65,14 @@ namespace WOD.Game.Server.Service
         public static void ApplyBattleThemeToPlayer()
         {
             var player = GetEnteringObject();
-            if (!GetIsPC(player) || GetIsDM(player)) return;
+            if (!GetIsPC(player) || GetIsDM(player) || GetIsDMPossessed(player)) 
+                return;
 
             var playerId = GetObjectUUID(player);
             var dbPlayer = DB.Get<Entity.Player>(playerId);
+            if (dbPlayer == null)
+                return;
+
             if (dbPlayer.Settings.BattleThemeId == null) return;
             var area = OBJECT_SELF;
             var battleThemeId = dbPlayer.Settings.BattleThemeId ?? MusicBackgroundGetBattleTrack(area);

@@ -13,7 +13,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
         {
             _builder.CreateWindow(GuiWindowType.Perks)
                 .SetIsResizable(true)
-                .SetInitialGeometry(0, 0, 545f, 295.5f)
+                .SetIsCollapsible(true)
+                .SetInitialGeometry(0, 0, 545f, 600f)
                 .SetTitle("Perks")
                 .AddColumn(col =>
                 {
@@ -75,6 +76,20 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                         {
                             template.AddCell(cell =>
                             {
+                                cell.AddGroup(group =>
+                                {
+                                    group.AddImage()
+                                        .BindResref(model => model.PerkButtonIcons)
+                                        .SetHorizontalAlign(NuiHorizontalAlign.Center)
+                                        .SetVerticalAlign(NuiVerticalAlign.Middle)
+                                        .SetAspect(NuiAspect.Stretch);
+                                });
+
+                                cell.SetWidth(40f);
+                                cell.SetIsVariable(false);
+                            });
+                            template.AddCell(cell =>
+                            {
                                 cell.AddToggleButton()
                                     .BindText(model => model.PerkButtonTexts)
                                     .BindIsToggled(model => model.PerkDetailSelected)
@@ -82,6 +97,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                                     .BindOnClicked(model => model.OnSelectPerk());
                             });
                         })
+                            .SetRowHeight(40f)
+                            .SetScrollbars(NuiScrollbars.Both)
                             .BindRowCount(model => model.PerkButtonTexts);
 
                         row.AddColumn(col2 =>
@@ -115,6 +132,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                                             .SetVerticalAlign(NuiVerticalAlign.Top);
                                     });
                                 })
+                                    .SetScrollbars(NuiScrollbars.Both)
                                     .BindRowCount(model => model.SelectedRequirements)
                                     .BindIsVisible(model => model.IsPerkSelected);
                             });

@@ -2,7 +2,6 @@
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.SnippetService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.SnippetDefinition
 {
@@ -27,7 +26,7 @@ namespace WOD.Game.Server.Feature.SnippetDefinition
                 .AppearsWhenAction((player, args) =>
                 {
                     var cdKey = GetPCPublicCDKey(player);
-                    var dbAccount = DB.Get<Account>(cdKey) ?? new Account();
+                    var dbAccount = DB.Get<Account>(cdKey) ?? new Account(cdKey);
 
                     return dbAccount.HasCompletedTutorial;
                 });

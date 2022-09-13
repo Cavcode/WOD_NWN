@@ -1,6 +1,5 @@
 ﻿using WOD.Game.Server.Core;
 using WOD.Game.Server.Service.ActivityService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Service
 {
@@ -58,6 +57,16 @@ namespace WOD.Game.Server.Service
         public static void WipeStatusOnEntry()
         {
             var player = GetEnteringObject();
+            ClearBusy(player);
+        }
+
+        /// <summary>
+        /// When a player dies, wipe their temporary "busy" status.
+        /// </summary>
+        [NWNEventHandler("mod_death")]
+        public static void WipeStatusOnDeath()
+        {
+            var player = GetLastPlayerDied();
             ClearBusy(player);
         }
     }

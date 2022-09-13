@@ -2,19 +2,18 @@
 using System.Collections.Generic;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum.Item;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.SkillService;
 
 namespace WOD.Game.Server.Service
 {
     public static partial class Skill
     {
-        private static readonly Dictionary<BaseItem, SkillType> _itemToSkillMapping = new Dictionary<BaseItem, SkillType>();
+        private static readonly Dictionary<BaseItem, SkillType> _itemToSkillMapping = new();
 
         /// <summary>
         /// Handles creating all of the mapping dictionaries used by the skill system on module load.
         /// </summary>
-        [NWNEventHandler("mod_load")]
+        [NWNEventHandler("mod_cache")]
         public static void LoadMappings()
         {
             LoadItemToSkillMapping();
@@ -44,7 +43,7 @@ namespace WOD.Game.Server.Service
             _itemToSkillMapping[BaseItem.Sickle] = SkillType.OneHanded;
             _itemToSkillMapping[BaseItem.Whip] = SkillType.OneHanded;
             _itemToSkillMapping[BaseItem.Lightsaber] = SkillType.OneHanded;
-            _itemToSkillMapping[BaseItem.Saberstaff] = SkillType.OneHanded;
+            _itemToSkillMapping[BaseItem.Electroblade] = SkillType.OneHanded;
 
             // Two-Handed Skills
             _itemToSkillMapping[BaseItem.DireMace] = SkillType.TwoHanded;
@@ -59,6 +58,8 @@ namespace WOD.Game.Server.Service
             _itemToSkillMapping[BaseItem.ShortSpear] = SkillType.TwoHanded;
             _itemToSkillMapping[BaseItem.TwoBladedSword] = SkillType.TwoHanded;
             _itemToSkillMapping[BaseItem.DoubleAxe] = SkillType.TwoHanded;
+            _itemToSkillMapping[BaseItem.Saberstaff] = SkillType.TwoHanded;
+            _itemToSkillMapping[BaseItem.TwinElectroBlade] = SkillType.TwoHanded;
 
             // Martial Arts Skills
             _itemToSkillMapping[BaseItem.Club] = SkillType.MartialArts;

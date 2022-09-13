@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using WOD.Game.Server.Entity;
 using WOD.Game.Server.Feature.DialogDefinition;
+using WOD.Game.Server.Feature.GuiDefinition.RefreshEvent;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.ItemService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.ItemDefinition
 {
@@ -32,12 +33,35 @@ namespace WOD.Game.Server.Feature.ItemDefinition
         private static void PerkRefundTome(ItemBuilder builder)
         {
             builder.Create("refund_tome")
+                .ValidationAction((user, item, target, location) =>
+                {
+                    if (!GetIsPC(user) || GetIsDM(user))
+                    {
+                        return "Only players may use this item.";
+                    }
+
+                    var playerId = GetObjectUUID(user);
+                    var dbPlayer = DB.Get<Player>(playerId);
+
+                    if (dbPlayer.NumberPerkResetsAvailable >= 99)
+                    {
+                        return "You cannot add any more perk resets to your collection.";
+                    }
+
+                    return string.Empty;
+                })
                 .ApplyAction((user, item, target, location) =>
                 {
-                    SetLocalObject(user, "PERK_REFUND_OBJECT", item);
-                    AssignCommand(user, () => ClearAllActions());
+                    var playerId = GetObjectUUID(user);
+                    var dbPlayer = DB.Get<Player>(playerId);
 
-                    Dialog.StartConversation(user, user, nameof(PerkRefundDialog));
+                    dbPlayer.NumberPerkResetsAvailable++;
+
+                    DB.Set(dbPlayer);
+
+                    SendMessageToPC(user, $"You gain a reset token. (Total: {dbPlayer.NumberPerkResetsAvailable})");
+                    DestroyObject(item);
+                    Gui.PublishRefreshEvent(user, new PerkResetAcquiredRefreshEvent());
                 });
         }
         

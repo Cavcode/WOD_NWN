@@ -1,6 +1,5 @@
 ﻿using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature
 {

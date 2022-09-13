@@ -4,10 +4,11 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Item;
+using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.CombatService;
+using WOD.Game.Server.Service.SkillService;
 using ItemProperty = WOD.Game.Server.Core.ItemProperty;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature
 {
@@ -24,9 +25,17 @@ namespace WOD.Game.Server.Feature
         {
             _statChangeActions[ItemPropertyType.HPBonus] = ApplyHPBonus;
             _statChangeActions[ItemPropertyType.FPBonus] = ApplyFPBonus;
+            _statChangeActions[ItemPropertyType.FPRegen] = ApplyFPRegenBonus;
             _statChangeActions[ItemPropertyType.STMBonus] = ApplySTMBonus;
+            _statChangeActions[ItemPropertyType.STMRegen] = ApplySTMRegenBonus;
             _statChangeActions[ItemPropertyType.AbilityRecastReduction] = ApplyAbilityRecastReduction;
+            _statChangeActions[ItemPropertyType.Attack] = ApplyAttack;
+            _statChangeActions[ItemPropertyType.ForceAttack] = ApplyForceAttack;
             _statChangeActions[ItemPropertyType.Defense] = ApplyDefense;
+            _statChangeActions[ItemPropertyType.Evasion] = ApplyEvasion;
+            _statChangeActions[ItemPropertyType.Control] = ApplyControl;
+            _statChangeActions[ItemPropertyType.Craftsmanship] = ApplyCraftsmanship;
+            _statChangeActions[ItemPropertyType.CPBonus] = ApplyCPBonus;
         }
 
         /// <summary>
@@ -37,7 +46,7 @@ namespace WOD.Game.Server.Feature
         public static void ApplyStats()
         {
             var player = OBJECT_SELF;
-            if (!GetIsPC(player) || GetIsDM(player)) return;
+            if (!GetIsPC(player) || GetIsDM(player) || GetIsDMPossessed(player)) return;
 
             var item = StringToObject(EventsPlugin.GetEventData("ITEM"));
             var slot = (InventorySlot)Convert.ToInt32(EventsPlugin.GetEventData("SLOT"));
@@ -70,7 +79,7 @@ namespace WOD.Game.Server.Feature
         public static void RemoveStats()
         {
             var player = OBJECT_SELF;
-            if (!GetIsPC(player) || GetIsDM(player)) return;
+            if (!GetIsPC(player) || GetIsDM(player) || GetIsDMPossessed(player)) return;
 
             var item = StringToObject(EventsPlugin.GetEventData("ITEM"));
 
@@ -91,9 +100,12 @@ namespace WOD.Game.Server.Feature
         /// <param name="isAdding">If true, we're adding the HP, if false we're removing it</param>
         private static void ApplyHPBonus(uint player, uint item, ItemProperty ip, bool isAdding)
         {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
             var amount = GetItemPropertyCostTableValue(ip);
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Entity.Player>(playerId);
+            var dbPlayer = DB.Get<Player>(playerId);
 
             if (isAdding)
             {
@@ -104,7 +116,7 @@ namespace WOD.Game.Server.Feature
                 Stat.AdjustPlayerMaxHP(dbPlayer, player, -amount);
             }
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
         /// <summary>
@@ -116,20 +128,51 @@ namespace WOD.Game.Server.Feature
         /// <param name="isAdding">If true, we're adding the FP, if false we're removing it</param>
         private static void ApplyFPBonus(uint player, uint item, ItemProperty ip, bool isAdding)
         {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
             var amount = GetItemPropertyCostTableValue(ip);
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Entity.Player>(playerId);
+            var dbPlayer = DB.Get<Player>(playerId);
 
             if (isAdding)
             {
-                Stat.AdjustPlayerMaxFP(dbPlayer, amount);
+                Stat.AdjustPlayerMaxFP(dbPlayer, amount, player);
             }
             else
             {
-                Stat.AdjustPlayerMaxFP(dbPlayer, -amount);
+                Stat.AdjustPlayerMaxFP(dbPlayer, -amount, player);
             }
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
+        }
+
+        /// <summary>
+        /// Applies or removes an FP Regen bonus on a player.
+        /// </summary>
+        /// <param name="player">The player to adjust</param>
+        /// <param name="item">The item being equipped or unequipped</param>
+        /// <param name="ip">The item property associated with this change</param>
+        /// <param name="isAdding">If true, we're adding the FP Regen, if false we're removing it</param>
+        private static void ApplyFPRegenBonus(uint player, uint item, ItemProperty ip, bool isAdding)
+        {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
+            var amount = GetItemPropertyCostTableValue(ip);
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+
+            if (isAdding)
+            {
+                Stat.AdjustFPRegen(dbPlayer, amount);
+            }
+            else
+            {
+                Stat.AdjustFPRegen(dbPlayer, -amount);
+            }
+
+            DB.Set(dbPlayer);
         }
 
         /// <summary>
@@ -141,20 +184,51 @@ namespace WOD.Game.Server.Feature
         /// <param name="isAdding">If true, we're adding the FP, if false we're removing it</param>
         private static void ApplySTMBonus(uint player, uint item, ItemProperty ip, bool isAdding)
         {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
             var amount = GetItemPropertyCostTableValue(ip);
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Entity.Player>(playerId);
+            var dbPlayer = DB.Get<Player>(playerId);
 
             if (isAdding)
             {
-                Stat.AdjustPlayerMaxSTM(dbPlayer, amount);
+                Stat.AdjustPlayerMaxSTM(dbPlayer, amount, player);
             }
             else
             {
-                Stat.AdjustPlayerMaxSTM(dbPlayer, -amount);
+                Stat.AdjustPlayerMaxSTM(dbPlayer, -amount, player);
             }
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
+        }
+
+        /// <summary>
+        /// Applies or removes a STM Regen bonus on a player.
+        /// </summary>
+        /// <param name="player">The player to adjust</param>
+        /// <param name="item">The item being equipped or unequipped</param>
+        /// <param name="ip">The item property associated with this change</param>
+        /// <param name="isAdding">If true, we're adding the FP Regen, if false we're removing it</param>
+        private static void ApplySTMRegenBonus(uint player, uint item, ItemProperty ip, bool isAdding)
+        {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
+            var amount = GetItemPropertyCostTableValue(ip);
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+
+            if (isAdding)
+            {
+                Stat.AdjustSTMRegen(dbPlayer, amount);
+            }
+            else
+            {
+                Stat.AdjustSTMRegen(dbPlayer, -amount);
+            }
+
+            DB.Set(dbPlayer);
         }
 
         /// <summary>
@@ -166,9 +240,12 @@ namespace WOD.Game.Server.Feature
         /// <param name="isAdding">If true, we're adding the reduction, if false we're removing it.</param>
         private static void ApplyAbilityRecastReduction(uint player, uint item, ItemProperty ip, bool isAdding)
         {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
             var amount = GetItemPropertyCostTableValue(ip);
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Entity.Player>(playerId);
+            var dbPlayer = DB.Get<Player>(playerId);
 
             if (isAdding)
             {
@@ -179,7 +256,63 @@ namespace WOD.Game.Server.Feature
                 Stat.AdjustPlayerRecastReduction(dbPlayer, -amount);
             }
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
+        }
+
+        /// <summary>
+        /// Applies or removes attack bonuses. This affects the end result of the damage calculation (not to be confused with NWN's Attack Bonus property which is unused).
+        /// </summary>
+        /// <param name="player">The player to adjust</param>
+        /// <param name="item">The item being equipped or unequipped</param>
+        /// <param name="ip">The item property associated with this change</param>
+        /// <param name="isAdding">If true, we're adding the attack, if false we're removing it.</param>
+        private static void ApplyAttack(uint player, uint item, ItemProperty ip, bool isAdding)
+        {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
+            var amount = GetItemPropertyCostTableValue(ip);
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+
+            if (isAdding)
+            {
+                Stat.AdjustAttack(dbPlayer, amount);
+            }
+            else
+            {
+                Stat.AdjustAttack(dbPlayer, -amount);
+            }
+
+            DB.Set(dbPlayer);
+        }
+
+        /// <summary>
+        /// Applies or removes force attack bonuses. This affects the end result of the damage calculation (not to be confused with NWN's Attack Bonus property which is unused).
+        /// </summary>
+        /// <param name="player">The player to adjust</param>
+        /// <param name="item">The item being equipped or unequipped</param>
+        /// <param name="ip">The item property associated with this change</param>
+        /// <param name="isAdding">If true, we're adding the force attack, if false we're removing it.</param>
+        private static void ApplyForceAttack(uint player, uint item, ItemProperty ip, bool isAdding)
+        {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
+            var amount = GetItemPropertyCostTableValue(ip);
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+
+            if (isAdding)
+            {
+                Stat.AdjustForceAttack(dbPlayer, amount);
+            }
+            else
+            {
+                Stat.AdjustForceAttack(dbPlayer, -amount);
+            }
+
+            DB.Set(dbPlayer);
         }
 
         /// <summary>
@@ -191,10 +324,13 @@ namespace WOD.Game.Server.Feature
         /// <param name="isAdding">If true, we're adding the defense, if false we're removing it.</param>
         private static void ApplyDefense(uint player, uint item, ItemProperty ip, bool isAdding)
         {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
             var amount = GetItemPropertyCostTableValue(ip);
             var damageType = (CombatDamageType)GetItemPropertySubType(ip);
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Entity.Player>(playerId);
+            var dbPlayer = DB.Get<Player>(playerId);
 
             if (isAdding)
             {
@@ -205,7 +341,178 @@ namespace WOD.Game.Server.Feature
                 Stat.AdjustDefense(dbPlayer, damageType, -amount);
             }
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
+        }
+
+        /// <summary>
+        /// Applies or removes evasion on a player.
+        /// </summary>
+        /// <param name="player">The player to adjust</param>
+        /// <param name="item">The item being equipped or unequipped</param>
+        /// <param name="ip">The item property associated with this change</param>
+        /// <param name="isAdding">If true, we're adding the evasion, if false we're removing it.</param>
+        private static void ApplyEvasion(uint player, uint item, ItemProperty ip, bool isAdding)
+        {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
+            var amount = GetItemPropertyCostTableValue(ip);
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+
+            if (isAdding)
+            {
+                Stat.AdjustEvasion(dbPlayer, amount);
+            }
+            else
+            {
+                Stat.AdjustEvasion(dbPlayer, -amount);
+            }
+
+            DB.Set(dbPlayer);
+        }
+
+        /// <summary>
+        /// Applies or removes control on a player.
+        /// </summary>
+        /// <param name="player">The player to adjust</param>
+        /// <param name="item">The item being equipped or unequipped</param>
+        /// <param name="ip">The item property associated with this change</param>
+        /// <param name="isAdding">If true, we're adding control, if false we're removing it.</param>
+        private static void ApplyControl(uint player, uint item, ItemProperty ip, bool isAdding)
+        {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
+            var amount = GetItemPropertyCostTableValue(ip);
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+            var subType = GetItemPropertySubType(ip);
+            var skillType = SkillType.Invalid;
+
+            // Types are defined in iprp_crafttype.2da
+            switch (subType)
+            {
+                case 1:
+                    skillType = SkillType.Smithery;
+                    break;
+                case 2:
+                    skillType = SkillType.Engineering;
+                    break;
+                case 3:
+                    skillType = SkillType.Fabrication;
+                    break;
+                case 4:
+                    skillType = SkillType.Agriculture;
+                    break;
+            }
+
+            if (skillType == SkillType.Invalid)
+            {
+                throw new Exception($"Unable to determine skill type for {nameof(ApplyControl)}");
+            }
+
+            if (isAdding)
+            {
+                Stat.AdjustControl(dbPlayer, skillType, amount);
+            }
+            else
+            {
+                Stat.AdjustControl(dbPlayer, skillType, -amount);
+            }
+
+            DB.Set(dbPlayer);
+        }
+
+        /// <summary>
+        /// Applies or removes craftsmanship on a player.
+        /// </summary>
+        /// <param name="player">The player to adjust</param>
+        /// <param name="item">The item being equipped or unequipped</param>
+        /// <param name="ip">The item property associated with this change</param>
+        /// <param name="isAdding">If true, we're adding craftsmanship, if false we're removing it.</param>
+        private static void ApplyCraftsmanship(uint player, uint item, ItemProperty ip, bool isAdding)
+        {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
+            var amount = GetItemPropertyCostTableValue(ip);
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+            var subType = GetItemPropertySubType(ip);
+            var skillType = SkillType.Invalid;
+
+            // Types are defined in iprp_crafttype.2da
+            switch (subType)
+            {
+                case 1:
+                    skillType = SkillType.Smithery;
+                    break;
+                case 2:
+                    skillType = SkillType.Engineering;
+                    break;
+                case 3:
+                    skillType = SkillType.Fabrication;
+                    break;
+                case 4:
+                    skillType = SkillType.Agriculture;
+                    break;
+            }
+            if (isAdding)
+            {
+                Stat.AdjustCraftsmanship(dbPlayer, skillType, amount);
+            }
+            else
+            {
+                Stat.AdjustCraftsmanship(dbPlayer, skillType, -amount);
+            }
+
+            DB.Set(dbPlayer);
+        }
+        /// <summary>
+        /// Applies or removes CP bonuses on a player.
+        /// </summary>
+        /// <param name="player">The player to adjust</param>
+        /// <param name="item">The item being equipped or unequipped</param>
+        /// <param name="ip">The item property associated with this change</param>
+        /// <param name="isAdding">If true, we're adding the CP bonus, if false we're removing it.</param>
+        private static void ApplyCPBonus(uint player, uint item, ItemProperty ip, bool isAdding)
+        {
+            if (GetIsDM(player) || GetIsDMPossessed(player))
+                return;
+
+            var amount = GetItemPropertyCostTableValue(ip);
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+            var subType = GetItemPropertySubType(ip);
+            var skillType = SkillType.Invalid;
+
+            // Types are defined in iprp_crafttype.2da
+            switch (subType)
+            {
+                case 1:
+                    skillType = SkillType.Smithery;
+                    break;
+                case 2:
+                    skillType = SkillType.Engineering;
+                    break;
+                case 3:
+                    skillType = SkillType.Fabrication;
+                    break;
+                case 4:
+                    skillType = SkillType.Agriculture;
+                    break;
+            }
+            if (isAdding)
+            {
+                Stat.AdjustCPBonus(dbPlayer, skillType, amount);
+            }
+            else
+            {
+                Stat.AdjustCPBonus(dbPlayer, skillType, -amount);
+            }
+
+            DB.Set(dbPlayer);
         }
     }
 }

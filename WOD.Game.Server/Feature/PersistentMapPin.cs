@@ -6,7 +6,6 @@ using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
 using Player = WOD.Game.Server.Entity.Player;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature
 {
@@ -48,7 +47,7 @@ namespace WOD.Game.Server.Feature
             mapPin.Id = GetNumberOfMapPins(player) + 1;
 
             var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Player>(playerId) ?? new Player();
+            var dbPlayer = DB.Get<Player>(playerId) ?? new Player(playerId);
             var area = GetArea(player);
             var areaResref = GetResRef(area);
 
@@ -57,7 +56,7 @@ namespace WOD.Game.Server.Feature
 
             dbPlayer.MapPins[areaResref].Add(mapPin);
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
         /// <summary>
@@ -89,7 +88,7 @@ namespace WOD.Game.Server.Feature
                 }
             }
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
         /// <summary>
@@ -123,7 +122,7 @@ namespace WOD.Game.Server.Feature
                 }
             }
 
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
         /// <summary>
@@ -146,7 +145,7 @@ namespace WOD.Game.Server.Feature
             int pinsAdded = 0;
             foreach (var (areaResref, mapPin) in mapPinTuple)
             {
-                var area = Cache.GetAreaByResref(areaResref);
+                var area = Area.GetAreaByResref(areaResref);
                 SetMapPin(player, mapPin.Note, mapPin.X, mapPin.Y, area);
 
                 // Increment the count and update the ID.
@@ -158,7 +157,7 @@ namespace WOD.Game.Server.Feature
             SetLocalBool(player, "MAP_PINS_LOADED", true);
 
             // Save any changes to the IDs.
-            DB.Set(playerId, dbPlayer);
+            DB.Set(dbPlayer);
         }
 
         /// <summary>

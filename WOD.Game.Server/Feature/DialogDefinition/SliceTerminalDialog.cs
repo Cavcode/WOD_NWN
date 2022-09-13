@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WOD.Game.Server.Core.NWNX.Enum;
-using WOD.Game.Server.Enumeration;
+﻿using WOD.Game.Server.Core.NWNX.Enum;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.DialogService;
 using WOD.Game.Server.Service.KeyItemService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.DialogDefinition
 {

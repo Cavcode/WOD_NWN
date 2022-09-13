@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Entity;
@@ -9,8 +8,8 @@ using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.DBService;
 using WOD.Game.Server.Service.GuiService;
 using WOD.Game.Server.Service.GuiService.Component;
+using WOD.Game.Server.Service.LogService;
 using WOD.Game.Server.Service.PlayerMarketService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 
 namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 {
@@ -147,9 +146,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 
         private void Search()
         {
-            var sw = new Stopwatch();
-            sw.Start();
-
             var marketDetail = PlayerMarket.GetMarketRegion(_regionType);
             var query = new DBQuery<MarketItem>()
                 .AddFieldSearch(nameof(MarketItem.IsListed), true)
@@ -181,7 +177,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 
             foreach (var record in results)
             {
-                _itemIds.Add(record.ItemId);
+                _itemIds.Add(record.Id);
                 _itemPrices.Add(record.Price);
                 itemIconResrefs.Add(record.IconResref);
                 itemNames.Add($"{record.Quantity}x {record.Name}");
@@ -195,9 +191,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             ItemPriceNames = itemPriceNames;
             ItemSellerNames = itemSellerNames;
             ItemBuyEnabled = itemBuyEnabled;
-
-            sw.Stop();
-            Console.WriteLine($"Market search: {sw.ElapsedMilliseconds}ms");
         }
 
         private void UpdatePagination(long totalRecordCount)
@@ -264,8 +257,9 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             var dbItem = DB.Get<MarketItem>(itemId);
 
             var item = ObjectPlugin.Deserialize(dbItem.Data);
-            SetLocalObject(Player, "EXAMINE_ITEM_WINDOW_TARGET", item);
-            Gui.TogglePlayerWindow(Player, GuiWindowType.ExamineItem);
+            var payload = new ExamineItemPayload(GetName(item), GetDescription(item), Item.BuildItemPropertyString(item));
+            Gui.TogglePlayerWindow(Player, GuiWindowType.ExamineItem, payload);
+            DestroyObject(item);
         };
 
         public Action OnClickBuy() => () =>
@@ -311,6 +305,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                     TakeGoldFromCreature(price, Player, true);
                 });
                 var item = ObjectPlugin.Deserialize(dbItem.Data);
+                Log.Write(LogGroup.PlayerMarket, $"{GetName(Player)} [{GetObjectUUID(Player)}] bought {GetItemStackSize(item)}x {GetName(item)} from {dbItem.SellerName} for {price} credits.");
                 ObjectPlugin.AcquireItem(Player, item);
 
                 // Remove this item from the client's search results.
@@ -331,7 +326,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 var dbSeller = DB.Get<Player>(sellerPlayerId);
                 var proceeds = (int)(price - (price * market.TaxRate));
                 dbSeller.MarketTill += proceeds;
-                DB.Set(sellerPlayerId, dbSeller);
+                DB.Set(dbSeller);
             });
         };
 

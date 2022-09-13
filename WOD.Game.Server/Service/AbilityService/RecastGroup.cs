@@ -23,8 +23,8 @@ namespace WOD.Game.Server.Service.AbilityService
         ComprehendSpeech = 7,
         [RecastGroup("Mind Trick", "Mind Trick")]
         MindTrick = 8,
-        [RecastGroup("Force Breach", "Force Breach")]
-        ForceBreach = 9,
+        [RecastGroup("Force Burst", "Force Burst")]
+        ForceBurst = 9,
         [RecastGroup("Force Body", "Force Body")]
         ForceBody = 10,
         [RecastGroup("Force Drain", "Force Drain")]
@@ -109,8 +109,8 @@ namespace WOD.Game.Server.Service.AbilityService
         Talon = 50,
         [RecastGroup("Med Kit", "Med Kit")]
         MedKit = 51,
-        [RecastGroup("Bacta Recovery", "B. Recovery")]
-        BactaRecovery = 52,
+        [RecastGroup("Kolto Recovery", "K. Recovery")]
+        KoltoRecovery = 52,
         [RecastGroup("Resuscitation", "Resuscitation")]
         Resuscitation = 53,
         [RecastGroup("Treatment Kit", "Treatment Kit")]
@@ -121,8 +121,44 @@ namespace WOD.Game.Server.Service.AbilityService
         CombatEnhancement = 56,
         [RecastGroup("Shielding", "Shielding")]
         Shielding = 57,
-        [RecastGroup("Awe", "Awe")]
-        Awe = 58,
+        [RecastGroup("Chi", "Chi")]
+        Chi = 58,
+        [RecastGroup("Bombs", "Bombs")]
+        Bombs = 59,
+        [RecastGroup("Stealth Generator", "Stealth Gen.")]
+        StealthGenerator = 60,
+        [RecastGroup("Flamethrower", "Flamethrower")]
+        Flamethrower = 61,
+        [RecastGroup("Wrist Rocket", "W. Rocket")]
+        WristRocket = 62,
+        [RecastGroup("Deflector Shield", "D. Shield")]
+        DeflectorShield = 63,
+        [RecastGroup("Provoke", "Provoke")]
+        Provoke = 64,
+        [RecastGroup("Provoke II", "Provoke II")]
+        Provoke2 = 65,
+        [RecastGroup("Premonition", "Premonition")]
+        Premonition = 66,
+        [RecastGroup("Disturbance", "Disturbance")]
+        Disturbance = 67,
+        [RecastGroup("Benevolence", "Benevolence")]
+        Benevolence = 68,
+        [RecastGroup("Force Valor", "F. Valor")]
+        ForceValor = 69,
+        [RecastGroup("Force Spark", "F. Spark")]
+        ForceSpark = 70,
+        [RecastGroup("Creeping Terror", "C. Terror")]
+        CreepingTerror = 71,
+        [RecastGroup("Force Rage", "F. Rage")]
+        ForceRage = 72,
+        [RecastGroup("Furor", "Furor")]
+        Furor = 73,
+        [RecastGroup("Throw Rock", "Throw Rock")]
+        ThrowRock = 74,
+        [RecastGroup("Force Inspiration", "F. Inspiration")]
+        ForceInspiration = 75,
+        [RecastGroup("Shield Bash", "Shield Bash")]
+        ShieldBash = 76,
     }
 
     public class RecastGroupAttribute: Attribute

@@ -1,4 +1,5 @@
 ﻿using WOD.Game.Server.Core;
+using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Enumeration;
 
 namespace WOD.Game.Server.Service.ChatCommandService
@@ -27,6 +28,10 @@ namespace WOD.Game.Server.Service.ChatCommandService
         public ExecuteChatCommandDelegate DoAction { get; set; }
         public ValidateArgumentsDelegate ValidateArguments { get; set; }
         public bool RequiresTarget { get; set; }
+        public ObjectType ValidTargetTypes { get; set; }
+        public bool IsEmote { get; set; }
+        public Animation EmoteAnimation { get; set; }
+        public bool IsEmoteLooping { get; set; }
 
     }
 }

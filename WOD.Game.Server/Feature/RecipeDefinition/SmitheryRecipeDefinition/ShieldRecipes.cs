@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.CraftService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
@@ -26,9 +25,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(6)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 1)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("ref_veldite", 7)
-                .Component("wood", 4);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 1)
+                .Component("ref_veldite", 4)
+                .Component("wood", 2);
 
             // Titan Shield
             _builder.Create(RecipeType.TitanShield, SkillType.Smithery)
@@ -37,9 +36,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(16)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 2)
-                .ModSlots(RecipeModType.Armor, 1)
-                .Component("ref_scordspar", 7)
-                .Component("fine_wood", 4);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_scordspar", 4)
+                .Component("fine_wood", 2);
 
             // Quark Shield
             _builder.Create(RecipeType.QuarkShield, SkillType.Smithery)
@@ -48,9 +47,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(26)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 3)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_plagionite", 7)
-                .Component("ancient_wood", 4);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_plagionite", 4)
+                .Component("ancient_wood", 2);
 
             // Argos Shield
             _builder.Create(RecipeType.ArgosShield, SkillType.Smithery)
@@ -59,9 +58,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(36)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 4)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_keromber", 7)
-                .Component("aracia_wood", 4);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_keromber", 4)
+                .Component("aracia_wood", 2);
 
             // Eclipse Shield
             _builder.Create(RecipeType.EclipseShield, SkillType.Smithery)
@@ -70,9 +69,9 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.SmitheryRecipeDefinition
                 .Level(46)
                 .Quantity(1)
                 .RequirementPerk(PerkType.ArmorBlueprints, 5)
-                .ModSlots(RecipeModType.Armor, 2)
-                .Component("ref_jasioclase", 7)
-                .Component("hyphae_wood", 4);
+                .EnhancementSlots(RecipeEnhancementType.Armor, 2)
+                .Component("ref_jasioclase", 4)
+                .Component("hyphae_wood", 2);
         }
 
     }

@@ -2,7 +2,7 @@
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWNX.Enum;
 using WOD.Game.Server.Service;
-using static WOD.Game.Server.Core.NWScript.NWScript;
+using WOD.Game.Server.Service.LogService;
 
 namespace WOD.Game.Server.Feature
 {
@@ -30,7 +30,7 @@ namespace WOD.Game.Server.Feature
         [NWNEventHandler("mod_exit")]
         public static void AuditClientDisconnection()
         {
-            var player = GetEnteringObject();
+            var player = GetExitingObject();
             var ipAddress = GetPCIPAddress(player);
             var cdKey = GetPCPublicCDKey(player);
             var account = GetPCPlayerName(player);

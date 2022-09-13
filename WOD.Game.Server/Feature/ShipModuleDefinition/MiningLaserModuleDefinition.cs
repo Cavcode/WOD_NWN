@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
-using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Entity;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.PerkService;
+using WOD.Game.Server.Service.SkillService;
 using WOD.Game.Server.Service.SpaceService;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 using Random = WOD.Game.Server.Service.Random;
 
 namespace WOD.Game.Server.Feature.ShipModuleDefinition
@@ -32,17 +32,18 @@ namespace WOD.Game.Server.Feature.ShipModuleDefinition
                 .ShortName(shortName)
                 .Texture("iit_ess_084")
                 .Type(ShipModuleType.MiningLaser)
+                .MaxDistance(20f)
                 .ValidTargetType(ObjectType.Placeable)
                 .Description($"Mines targets up to tier {requiredLevel}.")
                 .PowerType(ShipModulePowerType.High)
                 .RequirePerk(PerkType.MiningModules, requiredLevel)
                 .Capacitor(capacitor)
                 .Recast(recast)
-                .ValidationAction((activator, status, target, shipStatus) =>
+                .ValidationAction((activator, status, target, shipStatus, moduleBonus) =>
                 {
                     // Ensure an asteroid ore type has been specified by the builder.
-                    var oreResref = GetLocalString(target, "ASTEROID_ORE_RESREF");
-                    if (string.IsNullOrWhiteSpace(oreResref))
+                    var lootTableId = GetLocalString(target, "LOOT_TABLE_ID");
+                    if (string.IsNullOrWhiteSpace(lootTableId))
                     {
                         return "Only asteroids may be targeted with this module.";
                     }
@@ -56,7 +57,7 @@ namespace WOD.Game.Server.Feature.ShipModuleDefinition
 
                     return string.Empty;
                 })
-                .ActivatedAction((activator, status, target, shipStatus) =>
+                .ActivatedAction((activator, status, target, shipStatus, moduleBonus) =>
                 {
                     // Remaining units aren't set - pick a random number to assign.
                     var remainingUnits = GetLocalInt(target, "ASTEROID_REMAINING_UNITS");
@@ -84,20 +85,25 @@ namespace WOD.Game.Server.Feature.ShipModuleDefinition
 
                         remainingUnits = GetLocalInt(target, "ASTEROID_REMAINING_UNITS");
 
-                        // Perk bonuses
-                        var amountToMine = 1 + Perk.GetEffectivePerkLevel(activator, PerkType.StarshipMining);
+                        // Perk & module bonuses
+                        var amountToMine = 1 + Perk.GetEffectivePerkLevel(activator, PerkType.StarshipMining) + (int)(moduleBonus * 0.4f);
                         if (amountToMine > remainingUnits)
                             amountToMine = remainingUnits;
 
                         remainingUnits -= amountToMine;
 
                         // Refresh remaining units (could have changed since the start)
-                        var oreResref = GetLocalString(target, "ASTEROID_ORE_RESREF");
+                        var lootTableId = GetLocalString(target, "LOOT_TABLE_ID");
+                        var lootTable = Loot.GetLootTableByName(lootTableId);
 
                         // Fully deplete the rock - destroy it.
                         if (remainingUnits <= 0)
                         {
-                            DestroyObject(target);
+                            // DestroyObject bypasses the OnDeath event, and removes the object so we can't send events.
+                            // Use EffectDeath to ensure that we trigger death processing.
+                            SetPlotFlag(target, false);
+                            ApplyEffectToObject(DurationType.Instant, EffectDeath(), target);
+
                             SendMessageToPC(activator, $"{GetName(target)} has been fully mined.");
                         }
                         // Update remaining units.
@@ -109,7 +115,20 @@ namespace WOD.Game.Server.Feature.ShipModuleDefinition
                         // Spawn the units.
                         for (var count = 1; count <= amountToMine; count++)
                         {
-                            CreateItemOnObject(oreResref, activator);
+                            var item = lootTable.GetRandomItem();
+                            CreateItemOnObject(item.Resref, activator);
+                        }
+
+                        if (GetIsPC(activator) && !GetIsDM(activator) && !GetIsDMPossessed(activator))
+                        {
+                            var playerId = GetObjectUUID(activator);
+                            var dbPlayer = DB.Get<Player>(playerId);
+                            var rank = dbPlayer.Skills[SkillType.Piloting].Rank;
+                            var asteroidLevel = GetLocalInt(target, "ASTEROID_TIER") * 10;
+                            var delta = asteroidLevel - rank;
+                            var xp = Skill.GetDeltaXP(delta);
+
+                            Skill.GiveSkillXP(activator, SkillType.Piloting, xp);
                         }
                     });
                 });

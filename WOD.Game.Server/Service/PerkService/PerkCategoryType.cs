@@ -88,12 +88,29 @@ namespace WOD.Game.Server.Service.PerkService
         [PerkCategory("Gathering", true)]
         Gathering = 27,
 
-        [PerkCategory("Diplomacy", true)]
-        Diplomacy = 28,
+        [PerkCategory("Leadership", true)]
+        Leadership = 28,
 
-        [PerkCategory("Presence", true)]
-        Presence = 29
+        [PerkCategory("Force - Light", true)]
+        ForceLight = 29,
 
+        [PerkCategory("Force - Dark", true)]
+        ForceDark = 30,
+
+        [PerkCategory("General Perks", true)]
+        General = 31,
+
+        [PerkCategory("Agriculture", true)]
+        Agriculture = 32,
+
+        [PerkCategory("Engineering", true)]
+        Engineering = 33,
+
+        [PerkCategory("Devices", true)]
+        Devices = 34,
+
+        [PerkCategory("One Handed - Shield", true)]
+        OneHandedShield = 35,
     }
 
     public class PerkCategoryAttribute : Attribute

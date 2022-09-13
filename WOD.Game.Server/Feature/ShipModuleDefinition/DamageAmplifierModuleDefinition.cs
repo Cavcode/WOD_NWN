@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SpaceService;
 
@@ -41,13 +40,13 @@ namespace WOD.Game.Server.Feature.ShipModuleDefinition
                 .Description($"Improves a ship's EM damage by {emDamageBonus}.")
                 .PowerType(ShipModulePowerType.Low)
                 .RequirePerk(PerkType.OffensiveModules, requiredLevel)
-                .EquippedAction((creature, shipStatus) =>
+                .EquippedAction((creature, shipStatus, moduleBonus) =>
                 {
-                    shipStatus.EMDamage += emDamageBonus;
+                    shipStatus.EMDamage += emDamageBonus + moduleBonus;
                 })
-                .UnequippedAction((creature, shipStatus) =>
+                .UnequippedAction((creature, shipStatus, moduleBonus) =>
                 {
-                    shipStatus.EMDamage -= emDamageBonus;
+                    shipStatus.EMDamage -= emDamageBonus + moduleBonus;
                 });
         }
 
@@ -60,13 +59,13 @@ namespace WOD.Game.Server.Feature.ShipModuleDefinition
                 .Description($"Improves a ship's thermal damage by {thermalDamageBonus}.")
                 .PowerType(ShipModulePowerType.Low)
                 .RequirePerk(PerkType.OffensiveModules, requiredLevel)
-                .EquippedAction((creature, shipStatus) =>
+                .EquippedAction((creature, shipStatus, moduleBonus) =>
                 {
-                    shipStatus.ThermalDamage += thermalDamageBonus;
+                    shipStatus.ThermalDamage += thermalDamageBonus + moduleBonus;
                 })
-                .UnequippedAction((creature, shipStatus) =>
+                .UnequippedAction((creature, shipStatus, moduleBonus) =>
                 {
-                    shipStatus.ThermalDamage -= thermalDamageBonus;
+                    shipStatus.ThermalDamage -= thermalDamageBonus + moduleBonus;
                 });
         }
 
@@ -79,13 +78,13 @@ namespace WOD.Game.Server.Feature.ShipModuleDefinition
                 .Description($"Improves a ship's explosive damage by {explosiveDamageBonus}.")
                 .PowerType(ShipModulePowerType.Low)
                 .RequirePerk(PerkType.OffensiveModules, requiredLevel)
-                .EquippedAction((creature, shipStatus) =>
+                .EquippedAction((creature, shipStatus, moduleBonus) =>
                 {
-                    shipStatus.ExplosiveDamage += explosiveDamageBonus;
+                    shipStatus.ExplosiveDamage += explosiveDamageBonus + moduleBonus;
                 })
-                .UnequippedAction((creature, shipStatus) =>
+                .UnequippedAction((creature, shipStatus, moduleBonus) =>
                 {
-                    shipStatus.ExplosiveDamage -= explosiveDamageBonus;
+                    shipStatus.ExplosiveDamage -= explosiveDamageBonus + moduleBonus;
                 });
         }
     }

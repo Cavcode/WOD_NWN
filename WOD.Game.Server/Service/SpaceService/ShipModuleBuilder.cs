@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Service.LogService;
 using WOD.Game.Server.Service.PerkService;
 
 namespace WOD.Game.Server.Service.SpaceService
@@ -118,7 +117,7 @@ namespace WOD.Game.Server.Service.SpaceService
         /// <returns>A ship module builder with the configured options.</returns>
         public ShipModuleBuilder Recast(float seconds)
         {
-            _activeShipModule.CalculateRecastAction = (activator, shipStatus) => seconds;
+            _activeShipModule.CalculateRecastAction = (activator, shipStatus, moduleBonus) => seconds;
 
             return this;
         }
@@ -142,7 +141,7 @@ namespace WOD.Game.Server.Service.SpaceService
         /// <returns>A ship module builder with the configured options.</returns>
         public ShipModuleBuilder Capacitor(int capacitor)
         {
-            _activeShipModule.CalculateCapacitorAction = (activator, shipStatus) => capacitor;
+            _activeShipModule.CalculateCapacitorAction = (activator, shipStatus, moduleBonus) => capacitor;
 
             return this;
         }
@@ -239,6 +238,30 @@ namespace WOD.Game.Server.Service.SpaceService
             }
 
             _activeShipModule.RequiredPerks[perkType] = requiredLevel;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Runs an action to determine the maximum distance the ship module can be used.
+        /// </summary>
+        /// <param name="action">The action to run when max distance is calculated.</param>
+        /// <returns>A ship module builder with the configured options.</returns>
+        public ShipModuleBuilder MaxDistance(ShipModuleCalculateMaxDistanceDelegate action)
+        {
+            _activeShipModule.ModuleMaxDistanceAction = action;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a static maximum distance the module can be used.
+        /// </summary>
+        /// <param name="distance">The maximum distance in meters the module can be used.</param>
+        /// <returns>A ship module builder with the configured options.</returns>
+        public ShipModuleBuilder MaxDistance(float distance)
+        {
+            _activeShipModule.ModuleMaxDistanceAction = (activator, status, target, shipStatus, bonus) => distance;
 
             return this;
         }

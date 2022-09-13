@@ -7,8 +7,8 @@ namespace WOD.Game.Server.Service.GuiService.Component
     public class GuiGroup<T> : GuiExpandableComponent<T>
         where T: IGuiViewModel
     {
-        public bool ShowBorder { get; private set; }
-        public NuiScrollbars Scrollbars { get; private set; }
+        private bool ShowBorder { get; set; }
+        private NuiScrollbars Scrollbars { get; set; }
 
         public GuiGroup()
         {
@@ -26,13 +26,17 @@ namespace WOD.Game.Server.Service.GuiService.Component
         public GuiGroup<T> SetScrollbars(NuiScrollbars scrollBars)
         {
             Scrollbars = scrollBars;
-
             return this;
         }
 
 
         public override Json BuildElement()
         {
+            if (Elements.Count <= 0)
+            {
+                Elements.Add(new GuiSpacer<T>());
+            }
+
             var child = Elements.ElementAt(0).ToJson();
             return Nui.Group(child, ShowBorder, Scrollbars);
         }

@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using static WOD.Game.Server.Core.NWScript.NWScript;
 using static System.Math;
 
 namespace WOD.Game.Server.Core.Bioware

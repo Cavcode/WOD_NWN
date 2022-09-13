@@ -14,6 +14,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition
 
             _builder.CreateWindow(GuiWindowType.Skills)
                 .SetIsResizable(true)
+                .SetIsCollapsible(true)
                 .SetInitialGeometry(0, 0, 545f, 295.5f)
                 .SetTitle("Skills")
                 .AddColumn(column =>
@@ -31,6 +32,24 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                         }
 
                         row.AddSpacer();
+                    });
+
+                    column.AddRow(row =>
+                    {
+                        row.AddLabel()
+                            .BindText(model => model.AvailableXP)
+                            .SetHeight(20f)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetVerticalAlign(NuiVerticalAlign.Top);
+                    });
+
+                    column.AddRow(row =>
+                    {
+                        row.AddLabel()
+                            .BindText(model => model.XPDebt)
+                            .SetHeight(20f)
+                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
+                            .SetVerticalAlign(NuiVerticalAlign.Top);
                     });
 
                     column.AddRow(row =>
@@ -60,6 +79,10 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetHorizontalAlign(NuiHorizontalAlign.Center)
                             .SetVerticalAlign(NuiVerticalAlign.Top);
 
+                        row.AddLabel()
+                            .SetText("")
+                            .SetWidth(32f);
+
                         row.SetHeight(20f);
                     });
 
@@ -70,7 +93,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             template.AddCell(cell =>
                             {
                                 cell.AddLabel()
-                                    .BindText(model => model.SkillNames);
+                                    .BindText(model => model.SkillNames)
+                                    .BindTooltip(model => model.Descriptions);
                             });
                             template.AddCell(cell =>
                             {
@@ -85,7 +109,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             template.AddCell(cell =>
                             {
                                 cell.AddProgressBar()
-                                    .BindValue(model => model.Progresses);
+                                    .BindValue(model => model.Progresses)
+                                    .BindTooltip(model => model.RawXPAmounts);
                             });
                             template.AddCell(cell =>
                             {
@@ -94,6 +119,17 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                                     .BindColor(model => model.DecayLockColors)
                                     .BindOnClicked(model => model.ToggleDecayLock())
                                     .BindIsEnabled(model => model.DecayLockButtonEnabled);
+                            });
+
+                            template.AddCell(cell =>
+                            {
+                                cell.SetIsVariable(false);
+                                cell.SetWidth(32f);
+                                cell.AddButton()
+                                    .SetText("+")
+                                    .BindOnClicked(model => model.OnClickDistributeRPXP())
+                                    .BindIsEnabled(model => model.DistributeRPXPButtonEnabled)
+                                    .BindTooltip(model => model.DistributeRPXPButtonTooltips);
                             });
                         })
                             .BindRowCount(model => model.SkillNames);

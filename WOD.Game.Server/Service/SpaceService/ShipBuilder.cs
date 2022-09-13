@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Enumeration;
+using WOD.Game.Server.Service.LogService;
 using WOD.Game.Server.Service.PerkService;
+using WOD.Game.Server.Service.PropertyService;
 
 namespace WOD.Game.Server.Service.SpaceService
 {
@@ -135,17 +136,6 @@ namespace WOD.Game.Server.Service.SpaceService
         }
 
         /// <summary>
-        /// Indicates the ship has a bay in which a droid can be installed.
-        /// </summary>
-        /// <returns>A ship builder with the configured options.</returns>
-        public ShipBuilder HasDroidBay()
-        {
-            _activeShip.HasDroidBay = true;
-
-            return this;
-        }
-
-        /// <summary>
         /// Indicates a player must have the perk at a specific level in order to use the ship.
         /// </summary>
         /// <param name="perkType">The type of perk to require</param>
@@ -166,6 +156,17 @@ namespace WOD.Game.Server.Service.SpaceService
 
             _activeShip.RequiredPerks[perkType] = requiredLevel;
 
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the interior layout type used by the associated property on this ship.
+        /// </summary>
+        /// <param name="layout">The layout to assign.</param>
+        /// <returns>A ship builder with the configured options.</returns>
+        public ShipBuilder InteriorLayout(PropertyLayoutType layout)
+        {
+            _activeShip.Layout = layout;
             return this;
         }
 
