@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WOD.CLI": {
+      "commandName": "Project",
+      "commandLineArgs": "-r"
+    }
+  }
+}

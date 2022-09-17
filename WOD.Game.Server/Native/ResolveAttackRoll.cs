@@ -71,7 +71,7 @@ namespace WOD.Game.Server.Native
             Log.Write(LogGroup.Attack, "Attacker: " + attacker.GetFirstName().GetSimple(0) + ", defender " + targetObject.GetFirstName().GetSimple(0));
 
             var pAttackData = pCombatRound.GetAttack(pCombatRound.m_nCurrentAttack);
-            
+
             if (targetObject.m_nObjectType != (int)ObjectType.Creature)
             {
                 // Automatically hit non-creature targets.  Do not apply criticals.
@@ -84,7 +84,7 @@ namespace WOD.Game.Server.Native
             // If we get to this point, we are fighting a creature.  Pull the target's stats.
             var defender = CNWSCreature.FromPointer(pTarget);
 
-            var attackType = (uint)AttackType.Melee; 
+            var attackType = (uint)AttackType.Melee;
             var weapon = pCombatRound.GetCurrentAttackWeapon();
 
             // Check whether this is a ranged weapon. 
@@ -93,13 +93,13 @@ namespace WOD.Game.Server.Native
                 attackType = (uint)AttackType.Ranged;
             }
 
-            Log.Write(LogGroup.Attack, "Selected attack type " + attackType + ", weapon " + (weapon == null ? "none":weapon.GetFirstName().GetSimple(0)) );
-            
+            Log.Write(LogGroup.Attack, "Selected attack type " + attackType + ", weapon " + (weapon == null ? "none" : weapon.GetFirstName().GetSimple(0)));
+
             var weaponStyleAbilityOverride = GetWeaponStyleAbilityType(weapon, attacker);
             var zenMarksmanshipAbilityOverride = GetZenMarksmanshipAbilityType(weapon, attacker);
-            var attackerAccuracy = Stat.GetAccuracyNative(attacker, weapon, 
-                weaponStyleAbilityOverride == AbilityType.Invalid 
-                    ? zenMarksmanshipAbilityOverride 
+            var attackerAccuracy = Stat.GetAccuracyNative(attacker, weapon,
+                weaponStyleAbilityOverride == AbilityType.Invalid
+                    ? zenMarksmanshipAbilityOverride
                     : weaponStyleAbilityOverride);
             var defenderEvasion = Stat.GetEvasionNative(defender);
 
@@ -113,23 +113,23 @@ namespace WOD.Game.Server.Native
             // Dev note: the GetItem method always creates a new instance of CNWActionNode so there should be no NPEs.
             // Note: this always returns object invalid for NPCs (2130706432) as their actions aren't represented the same way.
             var oidTarget = defender.m_pActionQueue.GetItem(0).oidTarget;
-            
+
             if (oidTarget == NWScript.OBJECT_INVALID)
             {
-                oidTarget = (uint) defender.m_ScriptVars.GetInt(new CExoString("I_LAST_ATTACKED"));
+                oidTarget = (uint)defender.m_ScriptVars.GetInt(new CExoString("I_LAST_ATTACKED"));
             }
 
             // If this is an NPC attacking, Store the attack on the NPC. 
             if (attacker.m_pActionQueue.GetItem(0).oidTarget == 2130706432)
             {
-                Log.Write(LogGroup.Attack, "NPC attacking - storing target "+ defender.m_idSelf);
+                Log.Write(LogGroup.Attack, "NPC attacking - storing target " + defender.m_idSelf);
                 attacker.m_ScriptVars.SetInt(new CExoString("I_LAST_ATTACKED"), (int)defender.m_idSelf);
             }
 
             // oidTarget will be 0 for a newly spawned NPC who hasn't been attacked yet.  Don't let them get taken by surprise in round 1. 
             if (oidTarget != 0 && oidTarget != attacker.m_idSelf)
             {
-                Log.Write(LogGroup.Attack, "Defender current target ("+oidTarget +") is not attacker ("+attacker.m_idSelf+"). Assign circumstance bonus");
+                Log.Write(LogGroup.Attack, "Defender current target (" + oidTarget + ") is not attacker (" + attacker.m_idSelf + "). Assign circumstance bonus");
                 accuracyModifiers += 5;
             }
 
@@ -144,8 +144,8 @@ namespace WOD.Game.Server.Native
                 var defenderPos = defender.m_vPosition;
 
                 // Note - calculating distance solely via X/Y co-ordinates.  NWN doesn't have a true Z.
-                var range = Math.Pow(Math.Pow((attackerPos.x - defenderPos.x), 2) + Math.Pow((attackerPos.y - defenderPos.y),2), 0.5);
-                     
+                var range = Math.Pow(Math.Pow((attackerPos.x - defenderPos.x), 2) + Math.Pow((attackerPos.y - defenderPos.y), 2), 0.5);
+
                 Log.Write(LogGroup.Attack, "Ranged attack at range " + range);
                 if (range < 5.0f)
                 {
@@ -185,7 +185,7 @@ namespace WOD.Game.Server.Native
                 {
                     accuracyModifiers = -5;
                 }
-                
+
             }
 
             // Attacking from behind.  Does not apply to Force attacks.
@@ -219,7 +219,7 @@ namespace WOD.Game.Server.Native
 
             if (delta <= 0.5)
             {
-                Log.Write(LogGroup.Attack, "Backstab!  Attacker angle (radians): " + Math.Atan2(attY, attX) + 
+                Log.Write(LogGroup.Attack, "Backstab!  Attacker angle (radians): " + Math.Atan2(attY, attX) +
                                            ", Defender angle (radians): " + Math.Atan2(defY, defX));
                 accuracyModifiers += 30;
             }
@@ -240,7 +240,7 @@ namespace WOD.Game.Server.Native
                  offhand.m_nBaseItem != (uint)BaseItem.TowerShield))
             {
                 // Apply the base two weapon fighting penalty.
-                if(hasITWF == 0 || weapon == offhand) // Main-hand ITWF has no penalty.
+                if (hasITWF == 0 || weapon == offhand) // Main-hand ITWF has no penalty.
                     percentageModifier -= 10;
 
                 var logMessage = "Applying dual wield penalty.  Offhand weapon: " + (offhand == null ? weapon.GetFirstName().GetSimple() : offhand.GetFirstName().GetSimple() + ": " + percentageModifier);
@@ -262,7 +262,7 @@ namespace WOD.Game.Server.Native
                 }
 
                 // Duelist - (+5% TH)
-                if(attackerStats.HasFeat((ushort)FeatType.Duelist) == 1)
+                if (attackerStats.HasFeat((ushort)FeatType.Duelist) == 1)
                     if (Item.OneHandedMeleeItemTypes.Contains((BaseItem)weapon.m_nBaseItem) ||
                         Item.ThrowingWeaponBaseItemTypes.Contains((BaseItem)weapon.m_nBaseItem))
                     {
@@ -308,7 +308,7 @@ namespace WOD.Game.Server.Native
             var defenderPER = defender.m_pStats.GetDEXStat();
             var defenderVIT = defender.m_pStats.GetCONStat();
 
-            if(defenderWeapon != null && (
+            if (defenderWeapon != null && (
                 (BaseItem)defenderWeapon.m_nBaseItem == BaseItem.Lightsaber ||
                 (BaseItem)defenderWeapon.m_nBaseItem == BaseItem.Saberstaff))
             {
@@ -321,6 +321,7 @@ namespace WOD.Game.Server.Native
                     Item.ShieldBaseItemTypes.Contains((BaseItem)defenderOffhand.m_nBaseItem);
 
             // Deflect Ranged Attacks
+            var deflected = false;
 
             if (attackType == (uint)AttackType.Ranged &&            // Ranged Attacks only
                 isHit && defender.GetFlatFooted() == 0 &&           // Only triggers on hits and the defender isn't incapacitated
@@ -335,14 +336,23 @@ namespace WOD.Game.Server.Native
 
                 var deflectRoll = Random.Next(1, 100);
                 var baseItemType = weapon == null ? BaseItem.Invalid : (BaseItem)weapon.m_nBaseItem;
-                var attackerStat = weaponStyleAbilityOverride == AbilityType.Invalid 
-                    ? Item.GetWeaponAccuracyAbilityType(baseItemType) 
+                var attackerStat = weaponStyleAbilityOverride == AbilityType.Invalid
+                    ? Item.GetWeaponAccuracyAbilityType(baseItemType)
                     : weaponStyleAbilityOverride;
                 var attackerStatValue = Stat.GetStatValueNative(attacker, attackerStat);
 
                 var statDelta = Math.Clamp((defenderStat - attackerStatValue) * 5, -50, 75);
 
                 isHit = deflectRoll + statDelta < attackRoll;
+                deflected = !isHit;
+
+                var feedbackString = deflected ? "*success*" : "*failure*";
+                var attackerName = ColorToken.GetNameColorNative(attacker);
+                var defenderName = ColorToken.GetNameColorNative(defender);
+                feedbackString = $"{defenderName} attempts to deflect {attackerName}'s ranged attack: {feedbackString}";
+
+                attacker.SendFeedbackString(new CExoString(feedbackString));
+                defender.SendFeedbackString(new CExoString(feedbackString));
                 Log.Write(LogGroup.Attack, $"Deflect roll: {deflectRoll}, statDelta: {statDelta}, attackRoll: {attackRoll} -- Hit: {isHit}");
             }
 
@@ -361,12 +371,12 @@ namespace WOD.Game.Server.Native
                 else if (attackerStats.HasFeat((ushort)FeatType.PrecisionAim1) == 1)
                     criticalBonus += 2;
 
-                if(weapon != null && Item.StaffBaseItemTypes.Contains((BaseItem)weapon.m_nBaseItem))
+                if (weapon != null && Item.StaffBaseItemTypes.Contains((BaseItem)weapon.m_nBaseItem))
                 {
-                    if(attacker.m_pStats.HasFeat((ushort)FeatType.CrushingMastery) == 1)
+                    if (attacker.m_pStats.HasFeat((ushort)FeatType.CrushingMastery) == 1)
                     {
                         criticalBonus += 15;
-                    } 
+                    }
                     if (attacker.m_pStats.HasFeat((ushort)FeatType.CrushingStyle) == 1)
                     {
                         criticalBonus += 15;
@@ -388,10 +398,8 @@ namespace WOD.Game.Server.Native
                     {
                         Log.Write(LogGroup.Attack, $"Immune to critical hits");
                         // Immune!
-                        var pData = new CNWCCMessageData();
-                        pData.SetObjectID(0, defender.m_idSelf);
-                        pData.SetInteger(0, 126); //Critical Hit Immunity Feedback
-                        pAttackData.m_alstPendingFeedback.Add(pData);
+                        var defenderName = (defender.GetFirstName().GetSimple() + " " + defender.GetLastName().GetSimple()).Trim();
+                        attacker.SendFeedbackString(new CExoString($"{defenderName} is immune to critical hits!"));
                         pAttackData.m_nAttackResult = 1;
                     }
                     else
@@ -410,8 +418,16 @@ namespace WOD.Game.Server.Native
             // Miss
             else
             {
-                Log.Write(LogGroup.Attack, $"Miss - setting attack result to 4, missed by 0");
-                pAttackData.m_nAttackResult = 4;
+                if (deflected)
+                {
+                    Log.Write(LogGroup.Attack, $"Deflected - setting attack result to 2");
+                    pAttackData.m_nAttackResult = 2;
+                }
+                else
+                {
+                    Log.Write(LogGroup.Attack, $"Miss - setting attack result to 4, missed by 0");
+                    pAttackData.m_nAttackResult = 4;
+                }
                 pAttackData.m_nMissedBy = 1; // Dunno if this is needed by anything, but filling it out in case.
             }
 
@@ -692,7 +708,7 @@ namespace WOD.Game.Server.Native
             {
                 if (Ability.IsAbilityToggled(playerId, AbilityToggleType.StrongStyleSaberstaff))
                     return AbilityType.Perception;
-            } 
+            }
             else if (Item.StaffBaseItemTypes.Contains((BaseItem)weapon.m_nBaseItem))
             {
                 if (attacker.m_pStats.HasFeat((ushort)FeatType.FlurryStyle) == 1)
