@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using WOD.Game.Server.Enumeration;
 
 namespace WOD.Game.Server.Service.SkillService
@@ -18,7 +19,7 @@ namespace WOD.Game.Server.Service.SkillService
             "One-Handed",
             50,
             true,
-            "Ability to use one-handed weapons like vibroblades, finesse vibroblades, and lightsabers.",
+            "Ability to use one-handed weapons like swords and knives.",
             true,
             false,
             CombatPointCategoryType.Weapon)]
@@ -28,16 +29,16 @@ namespace WOD.Game.Server.Service.SkillService
             "Two-Handed",
             50,
             true,
-            "Ability to use heavy weapons like heavy vibroblades, polearms, and saberstaffs in combat.",
+            "Ability to use heavy weapons such as greatswords, polearms, and staves.",
             true,
             false,
             CombatPointCategoryType.Weapon)]
         TwoHanded = 2,
 
         [Skill(SkillCategoryType.Combat,
-            "Martial Arts", 50,
+            "Brawling", 50,
             true,
-            "Ability to fight using katars and staves in combat.",
+            "Ability to fight hand-to-hand, use brass knuckles, or claws.",
             true,
             false,
             CombatPointCategoryType.Weapon)]
@@ -47,22 +48,11 @@ namespace WOD.Game.Server.Service.SkillService
             "Ranged",
             50,
             true,
-            "Ability to use ranged weapons like pistols, shurikens, and rifles in combat.",
+            "Ability to use ranged weapons like pistols, throwing weapons, and rifles in combat.",
             true,
             false,
             CombatPointCategoryType.Weapon)]
         Ranged = 4,
-
-        [Skill(SkillCategoryType.Combat,
-            "Force",
-            50,
-            true,
-            "Ability to use Force abilities.",
-            true,
-            false,
-            CombatPointCategoryType.Utility,
-            CharacterType.ForceSensitive)]
-        Force = 5,
 
         [Skill(SkillCategoryType.Combat,
             "Armor",
@@ -71,243 +61,321 @@ namespace WOD.Game.Server.Service.SkillService
             "Ability to effectively wear and defend against attacks with armor.",
             true,
             false)]
-        Armor = 6,
-
-        [Skill(SkillCategoryType.Utility,
-            "Piloting",
-            50,
-            true,
-            "Ability to pilot starships, follow navigation charts, and control starship systems.",
-            true,
-            false)]
-        Piloting = 7,
-
-        [Skill(SkillCategoryType.Utility,
-            "First Aid",
-            50,
-            true,
-            "Ability to treat bodily injuries in the field with healing kits and stim packs.",
-            true,
-            false)]
-        FirstAid = 8,
+        Armor = 5,
 
         [Skill(SkillCategoryType.Crafting,
             "Smithery",
             50,
             true,
-            "Ability to create weapons and armor like vibroblades, blasters, and helmets.",
+            "Ability to create melee weapons and armor.",
             true,
             true)]
-        Smithery = 9,
+        Smithery = 6,
 
         [Skill(SkillCategoryType.Crafting,
-            "Fabrication",
+            "Gunsmithing",
             50,
             true,
-            "Ability to create base structures and furniture.",
+            "Ability to create guns.",
             true,
             true)]
-        Fabrication = 10,
-
-        [Skill(SkillCategoryType.Crafting,
-            "Gathering",
-            50,
-            true,
-            "Ability to harvest raw materials and scavenge for supplies.",
-            true,
-            false)]
-        Gathering = 11,
-
-        [Skill(SkillCategoryType.Utility,
-            "Leadership",
-            20,
-            true,
-            "Ability to handle people, negotiate, and manage relations.",
-            true,
-            false)]
-        Leadership = 12,
+        Gunsmithing = 7,
 
         [Skill(SkillCategoryType.Languages,
-            "Mirialan",
+            "Hindi",
             20,
             true,
-            "Ability to speak the Mirialan language.",
+            "Ability to speak the Hindi language.",
             false,
             false)]
-        Mirialan = 14,
+        Hindi = 8,
 
         [Skill(SkillCategoryType.Languages,
-            "Bothese",
+            "Mandarin",
             20,
             true,
-            "Ability to speak the Bothese language.",
+            "Ability to speak the Mandarin language.",
             false,
             false)]
-        Bothese = 15,
+        Mandarin = 9,
 
         [Skill(SkillCategoryType.Languages,
-            "Cheunh",
+            "Spanish",
             20,
             true,
-            "Ability to speak the Cheunh language.",
+            "Ability to speak the Spanish language.",
             false,
             false)]
-        Cheunh = 16,
+        Spanish = 10,
 
 
         [Skill(SkillCategoryType.Languages,
-            "Zabraki",
+            "French",
             20,
             true,
-            "Ability to speak the Zabraki language.",
+            "Ability to speak the French language.",
             false,
             false)]
-        Zabraki = 17,
+        French = 11,
 
         [Skill(SkillCategoryType.Languages,
-            "Twi'leki (Ryl)",
+            "Arabic",
             20,
             true,
-            "Ability to speak the Twi'leki (Ryl) language.",
+            "Ability to speak the Arabic language.",
             false,
             false)]
-        Twileki = 18,
+        Arabic = 12,
 
         [Skill(SkillCategoryType.Languages,
-            "Catharese", 20,
+            "Russian", 20,
             true,
-            "Ability to speak the Catharese language.",
+            "Ability to speak the Russian language.",
             false,
             false)]
-        Catharese = 19,
+        Russian = 13,
 
         [Skill(SkillCategoryType.Languages,
-            "Dosh",
+            "Portuguese",
             20,
             true,
-            "Ability to speak the Dosh language.",
+            "Ability to speak the Portuguese language.",
             false,
             false)]
-        Dosh = 20,
+        Portuguese = 14,
 
         [Skill(SkillCategoryType.Languages,
-            "Shyriiwook",
+            "Swedish",
             20,
             true,
-            "Ability to speak the Shyriiwook (Wookieespeak) language.",
+            "Ability to speak the Swedish language.",
             false,
             false)]
-        Shyriiwook = 21,
+        Swedish = 15,
 
         [Skill(SkillCategoryType.Languages,
-            "Droidspeak",
+            "Dutch",
             20,
             true,
-            "Ability to speak the Droidspeak language.",
+            "Ability to speak the Dutch language.",
             false,
             false)]
-        Droidspeak = 22,
+        Dutch = 16,
 
         [Skill(SkillCategoryType.Languages,
-            "Basic",
+            "German",
             20,
             true,
-            "Ability to speak the Galactic Basic language.",
+            "Ability to speak the German language.",
             false,
             false)]
-        Basic = 23,
+        German = 17,
 
         [Skill(SkillCategoryType.Languages,
-            "Mandoa",
+            "Greek",
             20,
             true,
-            "Ability to speak the Mandoa language.",
+            "Ability to speak the Greek language.",
             false,
             false)]
-        Mandoa = 24,
+        Greek = 18,
 
         [Skill(SkillCategoryType.Languages,
-            "Huttese",
+            "Finnish",
             20,
             true,
-            "Ability to speak the Huttese language.",
+            "Ability to speak the Finnish language.",
             false,
             false)]
-        Huttese = 25,
+        Finnish = 19,
 
         [Skill(SkillCategoryType.Languages,
-            "Mon Calamarian",
+            "Italian",
             20,
             true,
-            "Ability to speak the Mon Calamarian language.",
+            "Ability to speak the Italian language.",
             false,
             false)]
-        MonCalamarian = 26,
+        Italian = 20,
 
         [Skill(SkillCategoryType.Languages,
-            "Ugnaught",
+            "Romanian",
             20,
             true,
-            "Ability to speak the Ugnaught language.",
+            "Ability to speak the Romanian language.",
             false,
             false)]
-        Ugnaught = 27,
+        Romanian = 21,
 
         [Skill(SkillCategoryType.Languages,
-            "Rodese",
+            "Polish",
             20,
             true,
-            "Ability to speak the Rodese language.",
+            "Ability to speak the Polish language.",
             false,
             false)]
-        Rodese = 28,
+        Polish = 22,
 
         [Skill(SkillCategoryType.Languages,
-            "Togruti",
+            "Danish",
             20,
             true,
-            "Ability to speak the Togruti language.",
+            "Ability to speak the Danish language.",
             false,
             false)]
-        Togruti = 29,
+        Danish = 23,
 
         [Skill(SkillCategoryType.Languages,
-            "Kel Dor",
+            "Czech",
             20,
             true,
-            "Ability to speak the Kel Dor language.",
+            "Ability to speak the Czech language.",
             false,
             false)]
-        KelDor = 30,
-
-        [Skill(SkillCategoryType.Crafting,
-            "Agriculture",
-            50,
-            true,
-            "Ability to farm, fish, and cook.",
-            true,
-            true)]
-        Agriculture = 31,
-
-        [Skill(SkillCategoryType.Crafting,
-            "Engineering",
-            50,
-            true,
-            "Ability to create starships, modules, droids, and other electronic & mechanical items.",
-            true,
-            true)]
-        Engineering = 32,
+        Czech = 24,
 
         [Skill(SkillCategoryType.Combat,
-            "Devices",
+            "Explosives",
             50,
             true,
-            "Ability to use grenades, bombs, and other electronics.",
+            "Ability to use grenades, bombs, and other ordinance.",
+            true,
+            false,
+            CombatPointCategoryType.Utility)]
+        Devices = 25,
+
+        [Skill(SkillCategoryType.Discipline,
+            "Celerity",
+            50,
+            true,
+            "Celerity is a Discipline that grants vampires supernatural quickness and reflexes.",
             true,
             false,
             CombatPointCategoryType.Utility,
-            CharacterType.Standard)]
-        Devices = 33,
+            CharacterType.Kindred,
+            new CharacterSubType[] { CharacterSubType.Brujah, CharacterSubType.Toreador })]
+        Celerity = 26,
+
+        [Skill(SkillCategoryType.Discipline,
+            "Potence",
+            50,
+            true,
+            "Potence is the Discipline that endows vampires with physical vigor and preternatural strength. Vampires with the Potence Discipline possess physical prowess beyond mortal bounds.",
+            true,
+            false,
+            CombatPointCategoryType.Utility,
+            CharacterType.Kindred,
+            new CharacterSubType[] { CharacterSubType.Brujah, CharacterSubType.Nosferatu })]
+        Potence = 27,
+
+        [Skill(SkillCategoryType.Discipline,
+            "Presence",
+            50,
+            true,
+            "Presence is the Discipline of supernatural allure and emotional manipulation which allows Kindred to attract, sway, and control crowds.",
+            true,
+            false,
+            CombatPointCategoryType.Utility,
+            CharacterType.Kindred,
+            new CharacterSubType[] { CharacterSubType.Brujah, CharacterSubType.Toreador, CharacterSubType.Ventrue })]
+        Presence = 28,
+
+        [Skill(SkillCategoryType.Discipline,
+            "Animalism",
+            50,
+            true,
+            "Animalism is a Discipline that brings the vampire closer to their animalistic nature. This not only allows them to communicate with and gain dominance over creatures of nature, but gives them influence over the Beast itself.",
+            true,
+            false,
+            CombatPointCategoryType.Utility,
+            CharacterType.Kindred,
+            new CharacterSubType[] { CharacterSubType.Gangrel, CharacterSubType.Nosferatu})]
+        Animalism = 29,
+
+        [Skill(SkillCategoryType.Discipline,
+            "Fortitude",
+            50,
+            true,
+            "Fortitude is a Discipline that grants Kindred unearthly toughness, even to the point of resisting fire and sunlight.",
+            true,
+            false,
+            CombatPointCategoryType.Utility,
+            CharacterType.Kindred,
+            new CharacterSubType[] { CharacterSubType.Gangrel, CharacterSubType.Ventrue })]
+        Fortitude = 30,
+
+        [Skill(SkillCategoryType.Discipline,
+            "Protean",
+            50,
+            true,
+            "Protean is a Discipline that gives vampires the ability to change form, from growing feral claws to evaporating into a cloud of mist.",
+            true,
+            false,
+            CombatPointCategoryType.Utility,
+            CharacterType.Kindred,
+            new CharacterSubType[] { CharacterSubType.Gangrel })]
+        Protean = 31,
+
+        [Skill(SkillCategoryType.Discipline,
+            "Obfuscate",
+            50,
+            true,
+            "Obfuscate is a Discipline that allows vampires to conceal themselves, deceive the mind of others, or make them ignore what the user does not want to be seen.",
+            true,
+            false,
+            CombatPointCategoryType.Utility,
+            CharacterType.Kindred,
+            new CharacterSubType[] { CharacterSubType.Nosferatu, CharacterSubType.Malkavian })]
+        Obfuscate = 32,
+
+        [Skill(SkillCategoryType.Discipline,
+            "Dominate",
+            50,
+            true,
+            "Dominate is a Discipline that overwhelms another person's mind with the vampire's will, forcing victims to think or act according to the vampire's decree.",
+            true,
+            false,
+            CombatPointCategoryType.Utility,
+            CharacterType.Kindred,
+            new CharacterSubType[] { CharacterSubType.Tremere, CharacterSubType.Ventrue })]
+        Dominate = 33,
+
+        [Skill(SkillCategoryType.Discipline,
+            "Auspex",
+            50,
+            true,
+            "Auspex is a Discipline that grants vampires supernatural senses.",
+            true,
+            false,
+            CombatPointCategoryType.Utility,
+            CharacterType.Kindred,
+            new CharacterSubType[] { CharacterSubType.Tremere, CharacterSubType.Malkavian, CharacterSubType.Toreador })]
+        Auspex = 34,
+
+
+        [Skill(SkillCategoryType.Discipline,
+            "Dementation",
+            50,
+            true,
+            "Dementation is a Discipline that draws on the vampire's own insanity and uses it to achieve profound insights or inflict madness upon others.",
+            true,
+            false,
+            CombatPointCategoryType.Utility,
+            CharacterType.Kindred,
+            new CharacterSubType[] { CharacterSubType.Malkavian})]
+        Dementation = 35,
+
+        [Skill(SkillCategoryType.Discipline,
+            "Thaumaturgy",
+            50,
+            true,
+            "Thaumaturgy is the closely guarded form of blood magic practiced by the vampiric clan Tremere.",
+            true,
+            false,
+            CombatPointCategoryType.Utility,
+            CharacterType.Kindred,
+            new CharacterSubType[] { CharacterSubType.Tremere })]
+        Thaumaturgy = 36,
     }
 
     public class SkillAttribute : Attribute
@@ -320,19 +388,20 @@ namespace WOD.Game.Server.Service.SkillService
         public bool ContributesToSkillCap { get; set; }
         public bool IsShownInCraftMenu { get; set; }
         public CharacterType CharacterTypeRestriction { get; set; }
-
-        public CombatPointCategoryType CombatPointCategory { get; set; } 
+        public CombatPointCategoryType CombatPointCategory { get; set; }
+        public CharacterSubType[] CharacterSubTypeRestrictions { get; set; }
 
         public SkillAttribute(
-            SkillCategoryType category,
-            string name,
-            int maxRank,
-            bool isActive,
-            string description,
-            bool contributesToSkillCap,
-            bool isShownInCraftMenu,
-            CombatPointCategoryType combatPointCategory = CombatPointCategoryType.Exempt,
-            CharacterType characterTypeRestriction = CharacterType.Invalid)
+                SkillCategoryType category,
+                string name,
+                int maxRank,
+                bool isActive,
+                string description,
+                bool contributesToSkillCap,
+                bool isShownInCraftMenu,
+                CombatPointCategoryType combatPointCategory = CombatPointCategoryType.Exempt,
+                CharacterType characterTypeRestriction = CharacterType.Invalid,
+                params CharacterSubType[] characterSubTypeRestrictions)
         {
             Category = category;
             Name = name;
@@ -343,6 +412,7 @@ namespace WOD.Game.Server.Service.SkillService
             IsShownInCraftMenu = isShownInCraftMenu;
             CharacterTypeRestriction = characterTypeRestriction;
             CombatPointCategory = combatPointCategory;
+            CharacterSubTypeRestrictions = characterSubTypeRestrictions;
         }
     }
 }
