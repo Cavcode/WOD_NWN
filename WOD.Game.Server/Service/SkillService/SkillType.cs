@@ -376,6 +376,177 @@ namespace WOD.Game.Server.Service.SkillService
             CharacterType.Kindred,
             new CharacterSubType[] { CharacterSubType.Tremere })]
         Thaumaturgy = 36,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Atheletics",
+            50,
+            true,
+            "Athletics covers difficult situations you encounter while climbing, jumping, or swimming.",
+            true,
+            false)]
+        Atheletics = 37,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Stealth",
+            50,
+            true,
+            "Stealth covers when you attempt to conceal yourself from enemies, slink past guards, slip away without being noticed, or sneak up on someone without being seen or heard..",
+            true,
+            false)]
+        Stealth = 38,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Acrobatics",
+            50,
+            true,
+            "Your Acrobatics covers your attempt to stay on your feet in a tricky situation, such as when you're trying to run across a sheet of ice, balance on a tightrope, or stay upright on a rocking ship's deck. The GM might also call for a Dexterity (Acrobatics) check to see if you can perform acrobatic stunts, including dives, rolls, somersaults, and flips.",
+            true,
+            false)]
+        Acrobatics = 39,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Larceny",
+            50,
+            true,
+            "Your ability to pick locks, commit buglary, bypass security, sleight of hand, etc.",
+            true,
+            false)]
+        Larceny = 40,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Occult",
+            50,
+            true,
+            "You are knowledgeable in occult areas such as mysticism, curses, magic, and folklore. Unlike most other knowledges, Occult does not imply a command of hard, factual information; much of what you know may well be rumor, myth, speculation or hearsay.",
+            true,
+            false)]
+        Occult = 41,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "History",
+            50,
+            true,
+            "Your History measures your ability to recall lore about historical events, legendary people, ancient kingdoms, past disputes, recent wars, and lost civilizations.",
+            true,
+            false)]
+        History = 42,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Investigation",
+            50,
+            true,
+            "When you look around for clues and make deductions based on those clues, you make an Investigation check. You might deduce the location of a hidden object, discern from the appearance of a wound what kind of weapon dealt it, or determine the weakest point in a tunnel that could cause it to collapse. Poring through ancient scrolls in search of a hidden fragment of knowledge might also call for an Investigation check.",
+            true,
+            false)]
+        Investigation = 43,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Nature",
+            50,
+            true,
+            "Your Nature check measures your ability to recall lore about terrain, plants and animals, the weather, and natural cycles.",
+            true,
+            false)]
+        Nature = 44,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Religion",
+            50,
+            true,
+            "Your Religion measures your ability to recall lore about deities, rites and prayers, religious hierarchies, holy symbols, and the practices of secret cults.",
+            true,
+            false)]
+        Religion = 45,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Animal Handling",
+            50,
+            true,
+            "When there is any question whether you can calm down a domesticated animal, keep a mount from getting spooked, or intuit an animal's intentions, the GM might call for a Animal Handling check. ",
+            true,
+            false)]
+        AnimalHandling = 46,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Insight",
+            50,
+            true,
+            "Your Insight decides whether you can determine the true intentions of a creature, such as when searching out a lie or predicting someone's next move. Doing so involves gleaning clues from body language, speech habits, and changes in mannerisms.",
+            true,
+            false)]
+        Insight = 47,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Medicine",
+            50,
+            true,
+            "A Medicine check is your knowledge of physiology, anatomy, and medical treatments.",
+            true,
+            false)]
+        Medicine = 48,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Perception",
+            50,
+            true,
+            "Your Perception check lets you spot, hear, or otherwise detect the presence of something. It measures your general awareness of your surroundings and the keenness of your senses.",
+            true,
+            false)]
+        Perception = 49,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Survival",
+            50,
+            true,
+            "The GM might ask you to make a Survival check to follow tracks, hunt wild game, guide your group through frozen wastelands, identify signs that owlbears live nearby, predict the weather, or avoid quicksand and other natural hazards.",
+            true,
+            false)]
+        Survival = 50,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Deception",
+            50,
+            true,
+            "Your Deception check determines whether you can convincingly hide the truth, either verbally or through your actions. This deception can encompass everything from misleading others through ambiguity to telling outright lies.",
+            true,
+            false)]
+        Deception = 51,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Intimidation",
+            50,
+            true,
+            "When you attempt to influence someone through overt threats, hostile actions, and physical violence, the GM might ask you to make a Intimidation check.",
+            true,
+            false)]
+        Intimidation = 52,
+
+        [Skill(SkillCategoryType.Roleplay,
+            "Performance",
+            50,
+            true,
+            "Your Performance check determines how well you can delight an audience with music, dance, acting, storytelling, or some other form of entertainment.",
+            true,
+            false)]
+        Performance = 53,
+
+        [Skill(SkillCategoryType.Roleplay,
+             "Persuasion",
+             50,
+             true,
+             "When you attempt to influence someone or a group of people with tact, social graces, or good nature, the GM might ask you to make a Persuasion check. Typically, you use persuasion when acting in good faith, to foster friendships, make cordial requests, or exhibit proper etiquette.",
+             true,
+             false)]
+        Persuasion = 54,
+
+        [Skill(SkillCategoryType.Roleplay,
+             "Hacking",
+             50,
+             true,
+             "Hacking allows the computer user to break the rules. Hacking represents an imaginative faculty above and beyond the use of the programming codes. In the binary computer world of yes/no, hacking represents the little bit of genius that says, “Well, maybe.”",
+             true,
+             false)]
+        Hacking = 55,
     }
 
     public class SkillAttribute : Attribute
