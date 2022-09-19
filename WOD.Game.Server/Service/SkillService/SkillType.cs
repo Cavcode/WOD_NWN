@@ -547,6 +547,33 @@ namespace WOD.Game.Server.Service.SkillService
              true,
              false)]
         Hacking = 55,
+
+        [Skill(SkillCategoryType.Utility,
+             "Leadership",
+             50,
+             true,
+             "Ability to handle people, negotiate, motivate others, and manage relations.",
+             true,
+             false)]
+        Leadership = 56,
+
+        [Skill(SkillCategoryType.Utility,
+             "Production",
+             50,
+             true,
+             "How to produce, research, or procure goods, services, and items for your turf using your followers.",
+             true,
+             false)]
+        Production = 57,
+
+        [Skill(SkillCategoryType.Utility,
+             "Construction",
+             50,
+             true,
+             "How to build and design buildings and upgrade them.",
+             true,
+             false)]
+        Construction = 58,
     }
 
     public class SkillAttribute : Attribute
