@@ -6,10 +6,10 @@ namespace WOD.Game.Server.Enumeration
     {
         [CharacterType("Invalid")]
         Invalid = 0,
-        [CharacterType("Standard")]
-        Standard = 1,
-        [CharacterType("Force Sensitive")]
-        ForceSensitive = 2
+        [CharacterType("Kine")]
+        Kine = 1,
+        [CharacterType("Kindred")]
+        Kindred = 2,
     }
 
     public class CharacterTypeAttribute : Attribute

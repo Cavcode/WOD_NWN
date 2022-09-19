@@ -14,6 +14,10 @@ namespace WOD.Game.Server.Service.SkillService
         Utility = 3,
         [SkillCategory("Languages", true, 8)]
         Languages = 4,
+        [SkillCategory("Discipline", true, 8)]
+        Discipline = 5,
+        [SkillCategory("Roleplay", true, 8)]
+        Roleplay = 5,
     }
 
     public class SkillCategoryAttribute : Attribute
