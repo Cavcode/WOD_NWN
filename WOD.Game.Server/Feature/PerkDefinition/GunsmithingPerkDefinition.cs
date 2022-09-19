@@ -5,7 +5,7 @@ using WOD.Game.Server.Service.SkillService;
 
 namespace WOD.Game.Server.Feature.PerkDefinition
 {
-    public class EngineeringPerkDefinition : IPerkListDefinition
+    public class GunsmithingPerkDefinition : IPerkListDefinition
     {
         private readonly PerkBuilder _builder = new();
 

@@ -6,7 +6,7 @@ using WOD.Game.Server.Service.SkillService;
 
 namespace WOD.Game.Server.Feature.PerkDefinition
 {
-    public class DevicesPerkDefinition: IPerkListDefinition
+    public class ExplosivesPerkDefinition: IPerkListDefinition
     {
         private readonly PerkBuilder _builder = new();
 
