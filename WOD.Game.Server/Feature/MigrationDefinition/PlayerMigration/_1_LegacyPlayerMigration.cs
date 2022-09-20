@@ -12,7 +12,6 @@ namespace WOD.Game.Server.Feature.MigrationDefinition.PlayerMigration
 {
     public class _1_LegacyPlayerMigration: LegacyMigrationBase, IPlayerMigration
     {
-        private static readonly CatharRacialAppearanceDefinition _catharAppearance = new();
 
         public int Version => 1;
         public void Migrate(uint player)
@@ -31,7 +30,6 @@ namespace WOD.Game.Server.Feature.MigrationDefinition.PlayerMigration
 
             MigrateItems(player);
             MigrateCyborgsToHuman(player);
-            AdjustCatharParts(player);
 
             DB.Set(dbPlayer);
         }
@@ -51,8 +49,8 @@ namespace WOD.Game.Server.Feature.MigrationDefinition.PlayerMigration
 
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Might, 10);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Vitality, 10);
-            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Perception, 10);
-            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Agility, 10);
+            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Dexterity, 10);
+            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Intellect, 10);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Willpower, 10);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Social, 10);
         }
@@ -77,18 +75,16 @@ namespace WOD.Game.Server.Feature.MigrationDefinition.PlayerMigration
         {
             dbPlayer.BAB = 1;
             Stat.AdjustPlayerMaxHP(dbPlayer, player, 70);
-            Stat.AdjustPlayerMaxFP(dbPlayer, 10, player);
-            Stat.AdjustPlayerMaxSTM(dbPlayer, 10, player);
+            Stat.AdjustPlayerMaxResource(dbPlayer, 10, player);
             CreaturePlugin.SetBaseAttackBonus(player, 1);
             dbPlayer.HP = GetCurrentHitPoints(player);
-            dbPlayer.FP = Stat.GetMaxFP(player, dbPlayer);
-            dbPlayer.Stamina = Stat.GetMaxStamina(player, dbPlayer);
+            dbPlayer.Resource = Stat.GetMaxResource(player, dbPlayer);
 
             dbPlayer.BaseStats[AbilityType.Might] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Might);
-            dbPlayer.BaseStats[AbilityType.Perception] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Perception);
+            dbPlayer.BaseStats[AbilityType.Dexterity] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Dexterity);
             dbPlayer.BaseStats[AbilityType.Vitality] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Vitality);
             dbPlayer.BaseStats[AbilityType.Willpower] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Willpower);
-            dbPlayer.BaseStats[AbilityType.Agility] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Agility);
+            dbPlayer.BaseStats[AbilityType.Intellect] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Intellect);
             dbPlayer.BaseStats[AbilityType.Social] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Social);
         }
 
@@ -182,40 +178,6 @@ namespace WOD.Game.Server.Feature.MigrationDefinition.PlayerMigration
             if (GetRacialType(player) == RacialType.Cyborg)
             {
                 CreaturePlugin.SetRacialType(player, RacialType.Human);
-            }
-        }
-
-        private void AdjustCatharParts(uint player)
-        {
-            if (GetRacialType(player) == RacialType.Cathar)
-            {
-                DelayCommand(10f, () =>
-                {
-                    if (GetGender(player) == Gender.Female)
-                    {
-
-                        SetCreatureBodyPart(CreaturePart.Head, _catharAppearance.FemaleHeads.First(), player);
-                    }
-                    else
-                    {
-                        SetCreatureBodyPart(CreaturePart.Head, _catharAppearance.MaleHeads.First(), player);
-                    }
-
-                    SetCreatureBodyPart(CreaturePart.Torso, _catharAppearance.Torsos.First(), player);
-                    SetCreatureBodyPart(CreaturePart.Pelvis, _catharAppearance.Pelvis.First(), player);
-                    SetCreatureBodyPart(CreaturePart.RightBicep, _catharAppearance.RightBicep.First(), player);
-                    SetCreatureBodyPart(CreaturePart.RightForearm, _catharAppearance.RightForearm.First(), player);
-                    SetCreatureBodyPart(CreaturePart.RightHand, _catharAppearance.RightHand.First(), player);
-                    SetCreatureBodyPart(CreaturePart.RightThigh, _catharAppearance.RightThigh.First(), player);
-                    SetCreatureBodyPart(CreaturePart.RightShin, _catharAppearance.RightShin.First(), player);
-                    SetCreatureBodyPart(CreaturePart.RightFoot, _catharAppearance.RightFoot.First(), player);
-                    SetCreatureBodyPart(CreaturePart.LeftBicep, _catharAppearance.LeftBicep.First(), player);
-                    SetCreatureBodyPart(CreaturePart.LeftForearm, _catharAppearance.LeftForearm.First(), player);
-                    SetCreatureBodyPart(CreaturePart.LeftHand, _catharAppearance.LeftHand.First(), player);
-                    SetCreatureBodyPart(CreaturePart.LeftThigh, _catharAppearance.LeftThigh.First(), player);
-                    SetCreatureBodyPart(CreaturePart.LeftShin, _catharAppearance.LeftShin.First(), player);
-                    SetCreatureBodyPart(CreaturePart.LeftFoot, _catharAppearance.LeftFoot.First(), player);
-                });
             }
         }
     }

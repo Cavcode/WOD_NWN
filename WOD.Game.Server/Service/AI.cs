@@ -403,8 +403,7 @@ namespace WOD.Game.Server.Service
                 ObjectPlugin.SetCurrentHitPoints(self, maxHP);
             }
 
-            SetLocalInt(self, "FP", Stat.GetMaxFP(self));
-            SetLocalInt(self, "STAMINA", Stat.GetMaxStamina(self));
+            SetLocalInt(self, "FP", Stat.GetMaxResource(self));
         }
 
         /// <summary>
@@ -442,18 +441,14 @@ namespace WOD.Game.Server.Service
         private static void RestoreCreatureStats()
         {
             var self = OBJECT_SELF;
-            var maxFP = Stat.GetMaxFP(self);
-            var maxSTM = Stat.GetMaxStamina(self);
+            var maxResource = Stat.GetMaxResource(self);
             var fp = GetLocalInt(self, "FP") + 1;
-            var stm = GetLocalInt(self, "STAMINA") + 1;
 
-            if (fp > maxFP)
-                fp = maxFP;
-            if (stm > maxSTM)
-                stm = maxSTM;
+            if (fp > maxResource)
+                fp = maxResource;
+  
 
             SetLocalInt(self, "FP", fp);
-            SetLocalInt(self, "STAMINA", stm);
 
             // If out of combat - restore HP at 10% per tick.
             if (!GetIsInCombat(self) &&

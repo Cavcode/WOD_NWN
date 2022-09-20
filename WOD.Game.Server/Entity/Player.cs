@@ -61,7 +61,6 @@ namespace WOD.Game.Server.Entity
                 Defenses[type] = 0;
             }
 
-            ActiveShipId = Guid.Empty.ToString();
             IsUsingDualPistolMode = false;
             EmoteStyle = EmoteStyle.Regular;
             MovementRate = 1.0f;
