@@ -24,8 +24,7 @@ namespace WOD.Game.Server.Service
         private static readonly Dictionary<uint, Dictionary<CombatDamageType, int>> _npcDefenses = new();
 
         public const int BaseHP = 70;
-        public const int BaseFP = 10;
-        public const int BaseSTM = 10;
+        public const int BaseResource = 10;
 
         /// <summary>
         /// When a player enters the server, reapply HP and temporary stats.
@@ -48,16 +47,16 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// Retrieves the maximum FP on a creature.
+        /// Retrieves the maximum Resource on a creature.
         /// For players:
-        /// Each Vitality modifier grants +2 to max FP.
+        /// Each Vitality modifier grants +2 to max Resource.
         /// For NPCs:
-        /// FP is read from their skin.
+        /// Resource is read from their skin.
         /// </summary>
         /// <param name="creature">The creature object</param>
         /// <param name="dbPlayer">The player entity. If this is not set, a call to the DB will be made. Leave null for NPCs.</param>
-        /// <returns>The max amount of FP</returns>
-        public static int GetMaxFP(uint creature, Player dbPlayer = null)
+        /// <returns>The max amount of Resource</returns>
+        public static int GetMaxResource(uint creature, Player dbPlayer = null)
         {
             // Players
             if (GetIsPC(creature) && !GetIsDM(creature))
@@ -67,17 +66,18 @@ namespace WOD.Game.Server.Service
                     var playerId = GetObjectUUID(creature);
                     dbPlayer = DB.Get<Player>(playerId);
                 }
-                var baseFP = dbPlayer.MaxFP;
+                var baseResource = dbPlayer.MaxResource;
                 var modifier = GetAbilityModifier(AbilityType.Willpower, creature);
                 var foodEffect = StatusEffect.GetEffectData<FoodEffectData>(creature, StatusEffectType.Food);
                 var foodBonus = 0;
 
-                if (foodEffect != null)
-                {
-                    foodBonus = foodEffect.FP;
-                }
+                // TODO: Possibly add a bonus for type of blood consumed.
+                //if (foodEffect != null)
+                //{
+                //    foodBonus = foodEffect.Resource;
+                //}
 
-                return baseFP + modifier * 10 + foodBonus;
+                return baseResource + modifier * 10 + foodBonus;
             }
             // NPCs
             else
@@ -98,12 +98,12 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// Retrieves the current FP on a creature.
+        /// Retrieves the current Resource on a creature.
         /// </summary>
-        /// <param name="creature">The creature to retrieve FP from.</param>
+        /// <param name="creature">The creature to retrieve Resource from.</param>
         /// <param name="dbPlayer">The player entity. If this is not set, a call to the DB will be made. Leave null for NPCs.</param>
-        /// <returns>The current amount of FP.</returns>
-        public static int GetCurrentFP(uint creature, Player dbPlayer = null)
+        /// <returns>The current amount of Resource.</returns>
+        public static int GetCurrentResource(uint creature, Player dbPlayer = null)
         {
             // Players
             if (GetIsPC(creature) && !GetIsDM(creature))
@@ -114,100 +114,26 @@ namespace WOD.Game.Server.Service
                     dbPlayer = DB.Get<Player>(playerId);
                 }
 
-                return dbPlayer.FP;
+                return dbPlayer.Resource;
             }
             // NPCs
             else
             {
-                return GetLocalInt(creature, "FP");
+                return GetLocalInt(creature, "Resource");
             }
         }
 
         /// <summary>
-        /// Retrieves the maximum STM on a creature.
-        /// CON modifier will be checked. Each modifier grants +2 to max STM.
-        /// </summary>
-        /// <param name="creature">The creature object</param>
-        /// <param name="dbPlayer">The player entity. If this is not set, a call to the DB will be made. Leave null for NPCs.</param>
-        /// <returns>The max amount of STM</returns>
-        public static int GetMaxStamina(uint creature, Player dbPlayer = null)
-        {
-            // Players
-            if (GetIsPC(creature) && !GetIsDM(creature))
-            {
-                if (dbPlayer == null)
-                {
-                    var playerId = GetObjectUUID(creature);
-                    dbPlayer = DB.Get<Player>(playerId);
-                }
-
-                var baseStamina = dbPlayer.MaxStamina;
-                var modifier = GetAbilityModifier(AbilityType.Agility, creature);
-                var foodEffect = StatusEffect.GetEffectData<FoodEffectData>(creature, StatusEffectType.Food);
-                var foodBonus = 0;
-
-                if (foodEffect != null)
-                {
-                    foodBonus = foodEffect.STM;
-                }
-
-                return baseStamina + modifier * 5 + foodBonus;
-            }
-            // NPCs
-            else
-            {
-                var skin = GetItemInSlot(InventorySlot.CreatureArmor, creature);
-
-                var stm = 0;
-                for (var ip = GetFirstItemProperty(skin); GetIsItemPropertyValid(ip); ip = GetNextItemProperty(skin))
-                {
-                    if (GetItemPropertyType(ip) == ItemPropertyType.NPCSTM)
-                    {
-                        stm += GetItemPropertyCostTableValue(ip);
-                    }
-                }
-
-                return stm;
-            }
-        }
-
-        /// <summary>
-        /// Retrieves the current STM on a creature.
-        /// </summary>
-        /// <param name="creature">The creature to retrieve STM from.</param>
-        /// <param name="dbPlayer">The player entity. If this is not set, a call to the DB will be made. Leave null for NPCs.</param>
-        /// <returns>The current amount of STM.</returns>
-        public static int GetCurrentStamina(uint creature, Player dbPlayer = null)
-        {
-            // Players
-            if (GetIsPC(creature) && !GetIsDM(creature))
-            {
-                if (dbPlayer == null)
-                {
-                    var playerId = GetObjectUUID(creature);
-                    dbPlayer = DB.Get<Player>(playerId);
-                }
-
-                return dbPlayer.Stamina;
-            }
-            // NPCs
-            else
-            {
-                return GetLocalInt(creature, "STAMINA");
-            }
-        }
-
-        /// <summary>
-        /// Restores a creature's FP by a specified amount.
+        /// Restores a creature's Resource by a specified amount.
         /// </summary>
         /// <param name="creature">The creature to modify.</param>
-        /// <param name="amount">The amount of FP to restore.</param>
+        /// <param name="amount">The amount of Resource to restore.</param>
         /// <param name="dbPlayer">The player entity to modify. If this is not set, a call to the DB will be made. Leave null for NPCs.</param>
-        public static void RestoreFP(uint creature, int amount, Player dbPlayer = null)
+        public static void RestoreResource(uint creature, int amount, Player dbPlayer = null)
         {
             if (amount <= 0) return;
 
-            var maxFP = GetMaxFP(creature);
+            var maxResource = GetMaxResource(creature);
             
             // Players
             if (GetIsPC(creature) && !GetIsDM(creature))
@@ -218,36 +144,36 @@ namespace WOD.Game.Server.Service
                     dbPlayer = DB.Get<Player>(playerId);
                 }
                 
-                dbPlayer.FP += amount;
+                dbPlayer.Resource += amount;
 
-                if (dbPlayer.FP > maxFP)
-                    dbPlayer.FP = maxFP;
+                if (dbPlayer.Resource > maxResource)
+                    dbPlayer.Resource = maxResource;
                 
                 DB.Set(dbPlayer);
             }
             // NPCs
             else
             {
-                var fp = GetLocalInt(creature, "FP");
-                fp += amount;
+                var Resource = GetLocalInt(creature, "Resource");
+                Resource += amount;
 
-                if (fp > maxFP)
-                    fp = maxFP;
+                if (Resource > maxResource)
+                    Resource = maxResource;
 
-                SetLocalInt(creature, "FP", fp);
+                SetLocalInt(creature, "Resource", Resource);
             }
             
-            ExecuteScript("pc_fp_adjusted", creature);
+            ExecuteScript("pc_Resource_adjusted", creature);
         }
 
         /// <summary>
-        /// Reduces a creature's FP by a specified amount.
-        /// If creature would fall below 0 FP, they will be reduced to 0 instead.
+        /// Reduces a creature's Resource by a specified amount.
+        /// If creature would fall below 0 Resource, they will be reduced to 0 instead.
         /// </summary>
-        /// <param name="creature">The creature whose FP will be reduced.</param>
-        /// <param name="reduceBy">The amount of FP to reduce by.</param>
+        /// <param name="creature">The creature whose Resource will be reduced.</param>
+        /// <param name="reduceBy">The amount of Resource to reduce by.</param>
         /// <param name="dbPlayer">The player entity to modify. If this is not set, a DB call will be made. Leave null for NPCs.</param>
-        public static void ReduceFP(uint creature, int reduceBy, Player dbPlayer = null)
+        public static void ReduceResource(uint creature, int reduceBy, Player dbPlayer = null)
         {
             if (reduceBy <= 0) return;
 
@@ -259,130 +185,24 @@ namespace WOD.Game.Server.Service
                     dbPlayer = DB.Get<Player>(playerId);
                 }
 
-                dbPlayer.FP -= reduceBy;
+                dbPlayer.Resource -= reduceBy;
 
-                if (dbPlayer.FP < 0)
-                    dbPlayer.FP = 0;
+                if (dbPlayer.Resource < 0)
+                    dbPlayer.Resource = 0;
                 
                 DB.Set(dbPlayer);
             }
             else
             {
-                var fp = GetLocalInt(creature, "FP");
-                fp -= reduceBy;
-                if (fp < 0)
-                    fp = 0;
+                var Resource = GetLocalInt(creature, "Resource");
+                Resource -= reduceBy;
+                if (Resource < 0)
+                    Resource = 0;
                 
-                SetLocalInt(creature, "FP", fp);
+                SetLocalInt(creature, "Resource", Resource);
             }
 
-            ExecuteScript("pc_fp_adjusted", creature);
-        }
-
-        /// <summary>
-        /// Restores an entity's Stamina by a specified amount.
-        /// </summary>
-        /// <param name="creature">The creature to modify.</param>
-        /// <param name="amount">The amount of Stamina to restore.</param>
-        /// <param name="dbPlayer">The player entity to modify. If this is not set, a DB call will be made. Leave null for NPCs.</param>
-        public static void RestoreStamina(uint creature, int amount, Player dbPlayer = null)
-        {
-            if (amount <= 0) return;
-
-            var maxSTM = GetMaxStamina(creature);
-
-            // Players
-            if (GetIsPC(creature) && !GetIsDM(creature))
-            {
-                var playerId = GetObjectUUID(creature);
-                if (dbPlayer == null)
-                {
-                    dbPlayer = DB.Get<Player>(playerId);
-                }
-
-                dbPlayer.Stamina += amount;
-
-                if (dbPlayer.Stamina > maxSTM)
-                    dbPlayer.Stamina = maxSTM;
-
-                DB.Set(dbPlayer);
-            }
-            // NPCs
-            else
-            {
-                var fp = GetLocalInt(creature, "STAMINA");
-                fp += amount;
-
-                if (fp > maxSTM)
-                    fp = maxSTM;
-
-                SetLocalInt(creature, "STAMINA", fp);
-            }
-
-            ExecuteScript("pc_stm_adjusted", creature);
-        }
-
-        /// <summary>
-        /// Reduces an entity's Stamina by a specified amount.
-        /// If creature would fall below 0 stamina, they will be reduced to 0 instead.
-        /// </summary>
-        /// <param name="creature">The creature to modify.</param>
-        /// <param name="reduceBy">The amount of Stamina to reduce by.</param>
-        /// <param name="dbPlayer">The entity to modify</param>
-        public static void ReduceStamina(uint creature, int reduceBy, Player dbPlayer = null)
-        {
-            if (reduceBy <= 0) return;
-
-            if (GetIsPC(creature) && !GetIsDM(creature))
-            {
-                var playerId = GetObjectUUID(creature);
-                if (dbPlayer == null)
-                {
-                    dbPlayer = DB.Get<Player>(playerId);
-                }
-
-                dbPlayer.Stamina -= reduceBy;
-
-                if (dbPlayer.Stamina < 0)
-                    dbPlayer.Stamina = 0;
-
-                DB.Set(dbPlayer);
-            }
-            else
-            {
-                var stamina = GetLocalInt(creature, "STAMINA");
-                stamina -= reduceBy;
-                if (stamina < 0)
-                    stamina = 0;
-
-                SetLocalInt(creature, "STAMINA", stamina);
-            }
-
-            ExecuteScript("pc_stm_adjusted", creature);
-        }
-
-        /// <summary>
-        /// After a player's status effects are reassociated,
-        /// adjust any food HP if necessary.
-        /// </summary>
-        [NWNEventHandler("assoc_stateffect")]
-        public static void ReapplyFoodHP()
-        {
-            var player = OBJECT_SELF;
-            if (!GetIsPC(player) || GetIsDM(player))
-                return;
-
-            var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Player>(playerId);
-
-            // Player returned after the server restarted. They no longer have the food status effect.
-            // Reduce their HP by the amount tracked in the DB.
-            if (dbPlayer.TemporaryFoodHP > 0 && !StatusEffect.HasStatusEffect(player, StatusEffectType.Food))
-            {
-                Stat.AdjustPlayerMaxHP(dbPlayer, player, -dbPlayer.TemporaryFoodHP);
-                dbPlayer.TemporaryFoodHP = 0;
-                DB.Set(dbPlayer);
-            }
+            ExecuteScript("pc_Resource_adjusted", creature);
         }
 
         /// <summary>
@@ -442,47 +262,26 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// Modifies a player's maximum FP by a certain amount.
+        /// Modifies a player's maximum Resource by a certain amount.
         /// This method will not persist the changes so be sure you call DB.Set after calling this.
         /// </summary>
         /// <param name="entity">The entity to modify</param>
         /// <param name="adjustBy">The amount to adjust by</param>
-        public static void AdjustPlayerMaxFP(Player entity, int adjustBy, uint player)
+        public static void AdjustPlayerMaxResource(Player entity, int adjustBy, uint player)
         {
-            // Note: It's possible for Max FP to drop to a negative number. This is expected to ensure calculations stay in sync.
+            // Note: It's possible for Max Resource to drop to a negative number. This is expected to ensure calculations stay in sync.
             // If there are any visual indicators (GUI elements for example) be sure to account for this scenario.
-            entity.MaxFP += adjustBy;
+            entity.MaxResource += adjustBy;
 
-            // Note - must call GetMaxFP here to account for ability-based increase to FP cap. 
-            if (entity.FP > GetMaxFP(player))
-                entity.FP = GetMaxFP(player);
+            // Note - must call GetMaxResource here to account for ability-based increase to Resource cap. 
+            if (entity.Resource > GetMaxResource(player))
+                entity.Resource = GetMaxResource(player);
 
-            // Current FP, however, should never drop below zero.
-            if (entity.FP < 0)
-                entity.FP = 0;
+            // Current Resource, however, should never drop below zero.
+            if (entity.Resource < 0)
+                entity.Resource = 0;
         }
 
-        /// <summary>
-        /// Modifies a player's maximum STM by a certain amount.
-        /// This method will not persist the changes so be sure you call DB.Set after calling this.
-        /// </summary>
-        /// <param name="entity">The entity to modify</param>
-        /// <param name="adjustBy">The amount to adjust by</param>
-        public static void AdjustPlayerMaxSTM(Player entity, int adjustBy, uint player)
-        {
-            // Note: It's possible for Max STM to drop to a negative number. This is expected to ensure calculations stay in sync.
-            // If there are any visual indicators (GUI elements for example) be sure to account for this scenario.
-            entity.MaxStamina += adjustBy;
-
-            // Note - must call GetMaxFP here to account for ability-based increase to STM cap. 
-            if (entity.Stamina > GetMaxStamina(player))
-                entity.Stamina = GetMaxStamina(player);
-
-            // Current STM, however, should never drop below zero.
-            if (entity.Stamina < 0)
-                entity.Stamina = 0;
-        }
-        
         public static void ApplyPlayerMovementRate(uint player)
         {
             var movementRate = 1.0f;
@@ -559,29 +358,16 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// Modifies a player's FP Regen by a certain amount.
+        /// Modifies a player's Resource Regen by a certain amount.
         /// This method will not persist the changes so be sure you call DB.Set after calling this.
         /// </summary>
         /// <param name="entity">The entity to modify</param>
         /// <param name="adjustBy">The amount to adjust by</param>
-        public static void AdjustFPRegen(Player entity, int adjustBy)
+        public static void AdjustResourceRegen(Player entity, int adjustBy)
         {
-            // Note: It's possible for FP Regen to drop to a negative number. This is expected to ensure calculations stay in sync.
+            // Note: It's possible for Resource Regen to drop to a negative number. This is expected to ensure calculations stay in sync.
             // If there are any visual indicators (GUI elements for example) be sure to account for this scenario.
-            entity.FPRegen += adjustBy;
-        }
-
-        /// <summary>
-        /// Modifies a player's STM Regen by a certain amount.
-        /// This method will not persist the changes so be sure you call DB.Set after calling this.
-        /// </summary>
-        /// <param name="entity">The entity to modify</param>
-        /// <param name="adjustBy">The amount to adjust by</param>
-        public static void AdjustSTMRegen(Player entity, int adjustBy)
-        {
-            // Note: It's possible for STM Regen to drop to a negative number. This is expected to ensure calculations stay in sync.
-            // If there are any visual indicators (GUI elements for example) be sure to account for this scenario.
-            entity.STMRegen += adjustBy;
+            entity.ResourceRegen += adjustBy;
         }
 
         /// <summary>
@@ -779,9 +565,6 @@ namespace WOD.Game.Server.Service
 
                 if (attackBonusOverride <= 0)
                 {
-                    if (skillType == SkillType.Force)
-                        attackBonus += dbPlayer.ForceAttack;
-                    else
                         attackBonus += dbPlayer.Attack;
                 }
             }
@@ -814,10 +597,7 @@ namespace WOD.Game.Server.Service
                     if(skillType != SkillType.Invalid)
                         skillLevel = dbPlayer.Skills[skillType].Rank;
 
-                    if (skillType == SkillType.Force)
-                        attackBonus += dbPlayer.ForceAttack;
-                    else
-                        attackBonus += dbPlayer.Attack;
+                    attackBonus += dbPlayer.Attack;
                 }
             }
             else
@@ -918,7 +698,7 @@ namespace WOD.Game.Server.Service
                 case AbilityType.Might:
                     stat = creature.m_pStats.GetSTRStat();
                     break;
-                case AbilityType.Perception:
+                case AbilityType.Dexterity:
                     stat = creature.m_pStats.GetDEXStat();
                     break;
                 case AbilityType.Vitality:
@@ -927,7 +707,7 @@ namespace WOD.Game.Server.Service
                 case AbilityType.Willpower:
                     stat = creature.m_pStats.GetWISStat();
                     break;
-                case AbilityType.Agility:
+                case AbilityType.Intellect:
                     stat = creature.m_pStats.GetINTStat();
                     break;
                 case AbilityType.Social:
@@ -1164,13 +944,13 @@ namespace WOD.Game.Server.Service
         /// <returns>The evasion rating of a creature.</returns>
         public static int GetEvasion(uint creature, SkillType skillOverride)
         {
-            var stat = GetAbilityScore(creature, AbilityType.Agility);
+            var stat = GetAbilityModifier(AbilityType.Dexterity, creature);
             int skillLevel;
             var evasionBonus = 0;
 
             // Base NWN applies an AC bonus based on the DEX stat. The Perception stat is based upon this.
             // Perception should not increase AC in WOD, so this is subtracted from the AC.
-            var dexOffset = GetAbilityModifier(AbilityType.Perception, creature);
+            var dexOffset = GetAbilityModifier(AbilityType.Dexterity, creature);
             var ac = GetAC(creature) - dexOffset - 10; // Offset by natural 10 AC granted to all characters.
             var skillType = skillOverride == SkillType.Invalid ? SkillType.Armor : skillOverride;
 
@@ -1202,7 +982,7 @@ namespace WOD.Game.Server.Service
         /// <returns>The evasion rating of a creature.</returns>
         public static int GetEvasionNative(CNWSCreature creature)
         {
-            var stat = GetStatValueNative(creature, AbilityType.Agility);
+            var stat = GetStatValueNative(creature, AbilityType.Dexterity);
             var skillLevel = 0;
             var evasionBonus = 0;
 

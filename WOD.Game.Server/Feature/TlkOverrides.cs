@@ -20,23 +20,23 @@ namespace WOD.Game.Server.Feature
         {
             SetTlkOverride(131, "Social"); // Charisma
             SetTlkOverride(132, "Vitality"); // Constitution
-            SetTlkOverride(133, "Perception"); // Dexterity
-            SetTlkOverride(134, "Agility"); // Intelligence
+            SetTlkOverride(133, "Dexterity"); // Dexterity
+            SetTlkOverride(134, "Intellect"); // Intelligence
             SetTlkOverride(135, "Might"); // Strength
             SetTlkOverride(136, "Willpower"); // Wisdom
 
             SetTlkOverride(328, "Increased Might By"); // Strength
-            SetTlkOverride(329, "Increased Perception By"); // Dexterity
-            SetTlkOverride(330, "Agility"); // Intelligence
+            SetTlkOverride(329, "Increased Dexterity By"); // Dexterity
+            SetTlkOverride(330, "Intellect"); // Intelligence
             SetTlkOverride(331, "Increased Vitality By"); // Constitution
             SetTlkOverride(332, "Increased Willpower By"); // Wisdom
             SetTlkOverride(333, "Increased Social By"); // Charisma
 
             SetTlkOverride(473, "Might Information"); // Strength
-            SetTlkOverride(474, "Perception Information"); // Dexterity
+            SetTlkOverride(474, "Dexterity Information"); // Dexterity
             SetTlkOverride(475, "Vitality Information"); // Constitution
             SetTlkOverride(476, "Willpower Information"); // Wisdom
-            SetTlkOverride(477, "Agility"); // Intelligence
+            SetTlkOverride(477, "Intellect"); // Intelligence
             SetTlkOverride(479, "Social Information"); // Charisma
 
             SetTlkOverride(457, BuildRecommendedButtonText());
@@ -62,13 +62,13 @@ namespace WOD.Game.Server.Feature
                 "Other Notes:\n\n" +
                 "Increases maximum HP.\n" +
                 "Improves physical defense (reducing damage taken).\n" +
-                "Improves natural HP/FP/STM regen.\n" +
+                "Improves natural HP/res/STM regen.\n" +
                 "Improves rest recovery.");
             SetTlkOverride(462,
                 "Willpower improves your force attack, force defense, max force points, and first aid capabilities.\n\n" +
                 "Primary Skills: Force, Fabrication, Agriculture, First Aid\n\n" +
                 "Other Notes:\n\n" +
-                "Increases maximum FP.\n" + 
+                "Increases maximum res.\n" + 
                 "Improves force defense (reducing damage taken).\n" +
                 "Improves effectiveness of First Aid abilities.\n" +
                 "Improves effectiveness of Force abilities.");
@@ -138,19 +138,19 @@ namespace WOD.Game.Server.Feature
 
         private static string BuildRecommendedButtonText()
         {
-            return "Your character is guided by six core attributes: Might, Vitality, Perception, Willpower, Agility, and Social.\n\n" +
-                   "Might: Improves damage dealt by melee weapons and increases carrying capacity.\n" +
+            return "Your character is guided by six core attributes: Might, Vitality, Dexterity, Willpower, Intellect, and Social.\n\n" +
+                   "Might: Improves damage dealt by melee weapons, increases melee accuracy and increases carrying capacity.\n" +
                    "Vitality: Improves your max hit points and reduces damage received.\n" +
-                   "Perception: Improves damage dealt by ranged and finesse weapons and increases physical accuracy.\n" +
-                   "Willpower: Improves your force attack, force defense, and max force points.\n" +
-                   "Agility: Improves ranged accuracy, evasion, and max stamina.\n" +
+                   "Intellect: Improves damage dealt by subtype abilities.\n" +
+                   "Willpower: Improves subtype ability defense.\n" +
+                   "Agility: Improves ranged accuracy and evasion.\n" +
                    "Social: Improves your XP gain and leadership capabilities.\n\n";
         }
 
         private static void OverrideMenuNames()
         {
             // Journal - List as Quests
-            SetTlkOverride(7037, "Quests");
+            SetTlkOverride(7037, "Jobs");
 
             // Spell Book - List as Player Guide
             SetTlkOverride(7038, "Player Guide");
@@ -159,8 +159,7 @@ namespace WOD.Game.Server.Feature
         private static void OverrideFeatDescriptions()
         {
             var template = "Name: {0}\n" +
-                           "FP: {1}\n" +
-                           "STM: {2}\n" +
+                           "Resource: {1}\n" +
                            "Recast: {3}s\n" +
                            "Description: {4}\n";
 
@@ -190,28 +189,21 @@ namespace WOD.Game.Server.Feature
                         }
 
                         var abilityDetail = Ability.GetAbilityDetail(feat);
-                        var fp = 0;
-                        var stm = 0;
+                        var res = 0;
                         var recast = abilityDetail.RecastDelay?.Invoke(OBJECT_INVALID) ?? 0f;
 
                         foreach (var requirement in abilityDetail.Requirements)
                         {
-                            if (requirement.GetType() == typeof(AbilityRequirementFP))
+                            if (requirement.GetType() == typeof(AbilityRequirementResource))
                             {
-                                var req = (AbilityRequirementFP)requirement;
-                                fp = req.RequiredFP;
-                            }
-                            else if (requirement.GetType() == typeof(AbilityRequirementStamina))
-                            {
-                                var req = (AbilityRequirementStamina)requirement;
-                                stm = req.RequiredSTM;
+                                var req = (AbilityRequirementResource)requirement;
+                                res = req.RequiredResource;
                             }
                         }
 
                         var description = string.Format(template,
                             abilityDetail.Name,
-                            fp,
-                            stm,
+                            res,
                             recast,
                             perkLevel.Description);
 

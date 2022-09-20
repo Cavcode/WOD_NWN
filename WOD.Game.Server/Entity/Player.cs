@@ -40,8 +40,8 @@ namespace WOD.Game.Server.Entity
                 {AbilityType.Vitality, 0},
                 {AbilityType.Might, 0},
                 {AbilityType.Social, 0},
-                {AbilityType.Perception, 0},
-                {AbilityType.Agility, 0},
+                {AbilityType.Dexterity, 0},
+                {AbilityType.Intellect, 0},
                 {AbilityType.Willpower, 0}
             };
             UpgradedStats = new Dictionary<AbilityType, int>
@@ -49,8 +49,8 @@ namespace WOD.Game.Server.Entity
                 {AbilityType.Vitality, 0},
                 {AbilityType.Might, 0},
                 {AbilityType.Social, 0},
-                {AbilityType.Perception, 0},
-                {AbilityType.Agility, 0},
+                {AbilityType.Dexterity, 0},
+                {AbilityType.Intellect, 0},
                 {AbilityType.Willpower, 0}
             };
 
@@ -95,12 +95,9 @@ namespace WOD.Game.Server.Entity
         [Indexed]
         public string Name { get; set; }
         public int MaxHP { get; set; }
-        public int MaxFP { get; set; }
-        public int MaxStamina { get; set; }
+        public int MaxResource { get; set; }
         public int HP { get; set; }
-        public int FP { get; set; }
-        public int Stamina { get; set; }
-        public int TemporaryFoodHP { get; set; }
+        public int Resource { get; set; }
         public int BAB { get; set; }
 
         [Indexed]
@@ -116,14 +113,16 @@ namespace WOD.Game.Server.Entity
         [Indexed]
         public string RespawnAreaResref { get; set; }
         public int UnallocatedXP { get; set; }
+        public int UnallocatedRPXP { get; set; }
+        public int UnallocatedRPPoints { get; set; }
         public int UnallocatedSP { get; set; }
         public int UnallocatedAP { get; set; }
+        public int TotalRPPointsAcquired { get; set; }
         public int TotalSPAcquired { get; set; }
         public int TotalAPAcquired { get; set; }
         public int RegenerationTick { get; set; }
         public int HPRegen { get; set; }
-        public int FPRegen { get; set; }
-        public int STMRegen { get; set; }
+        public int ResourceRegen { get; set; }
         public int XPDebt { get; set; }
         public int DMXPBonus { get; set; }
         public int NumberPerkResetsAvailable { get; set; }
@@ -136,7 +135,6 @@ namespace WOD.Game.Server.Entity
         public CharacterType CharacterType { get; set; }
         public EmoteStyle EmoteStyle { get; set; }
         public string SerializedHotBar { get; set; }
-        public string ActiveShipId { get; set; }
         public AppearanceType OriginalAppearanceType { get; set; }
         public float MovementRate { get; set; }
         public int AbilityRecastReduction { get; set; }
@@ -213,20 +211,16 @@ namespace WOD.Game.Server.Entity
     {
         public int? BattleThemeId { get; set; }
         public bool DisplayAchievementNotification { get; set; }
-        public bool IsHolonetEnabled { get; set; }
         public bool ShowHelmet { get; set; }
         public bool ShowCloak { get; set; }
         public bool IsSubdualModeEnabled { get; set; }
-        public bool IsLightsaberForceShareEnabled { get; set; }
 
         public PlayerSettings()
         {
             DisplayAchievementNotification = true;
             ShowHelmet = true;
             ShowCloak = true;
-            IsHolonetEnabled = true;
             IsSubdualModeEnabled = false;
-            IsLightsaberForceShareEnabled = true;
         }
     }
 
