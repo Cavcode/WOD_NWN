@@ -7,12 +7,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.RefreshEvent
         internal enum StatType
         {
             HP = 1,
-            FP = 2,
-            STM = 3,
-
-            Shield = 4,
-            Hull = 5,
-            Capacitor = 6,
+            Resource = 2,
         }
 
         public StatType Type { get; set; }
