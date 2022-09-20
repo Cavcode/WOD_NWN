@@ -107,14 +107,6 @@ namespace WOD.Game.Server.Service
         {
             var ability = GetAbilityDetail(abilityType);
 
-            // Cannot use this ability in space.
-            if (Space.IsPlayerInSpaceMode(activator) &&
-                !ability.CanBeUsedInSpace)
-            {
-                SendMessageToPC(activator, "This ability cannot be used in space.");
-                return false;
-            }
-
             // Must have appropriate levels in the perk to use the ability.
             if (effectivePerkLevel <= 0 || ability.AbilityLevel > effectivePerkLevel)
             {
