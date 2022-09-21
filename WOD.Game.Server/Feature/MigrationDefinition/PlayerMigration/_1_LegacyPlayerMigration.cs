@@ -51,7 +51,7 @@ namespace WOD.Game.Server.Feature.MigrationDefinition.PlayerMigration
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Vitality, 10);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Dexterity, 10);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Intellect, 10);
-            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Willpower, 10);
+            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Will, 10);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Social, 10);
         }
 
@@ -83,7 +83,7 @@ namespace WOD.Game.Server.Feature.MigrationDefinition.PlayerMigration
             dbPlayer.BaseStats[AbilityType.Might] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Might);
             dbPlayer.BaseStats[AbilityType.Dexterity] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Dexterity);
             dbPlayer.BaseStats[AbilityType.Vitality] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Vitality);
-            dbPlayer.BaseStats[AbilityType.Willpower] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Willpower);
+            dbPlayer.BaseStats[AbilityType.Will] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Will);
             dbPlayer.BaseStats[AbilityType.Intellect] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Intellect);
             dbPlayer.BaseStats[AbilityType.Social] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Social);
         }

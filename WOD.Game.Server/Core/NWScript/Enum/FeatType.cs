@@ -1761,16 +1761,16 @@ namespace WOD.Game.Server.Core.NWScript.Enum
         SmitheryEquipment3 = 1794,
         SmitheryEquipment4 = 1795,
         SmitheryEquipment5 = 1796,
-        EngineeringEquipment1 = 1797,
-        EngineeringEquipment2 = 1798,
-        EngineeringEquipment3 = 1799,
-        EngineeringEquipment4 = 1800,
-        EngineeringEquipment5 = 1801,
-        FabricationEquipment1 = 1802,
-        FabricationEquipment2 = 1803,
-        FabricationEquipment3 = 1804,
-        FabricationEquipment4 = 1805,
-        FabricationEquipment5 = 1806,
+        GunsmithingEquipment1 = 1797,
+        GunsmithingEquipment2 = 1798,
+        GunsmithingEquipment3 = 1799,
+        GunsmithingEquipment4 = 1800,
+        GunsmithingEquipment5 = 1801,
+        ConstructionEquipment1 = 1802,
+        ConstructionEquipment2 = 1803,
+        ConstructionEquipment3 = 1804,
+        ConstructionEquipment4 = 1805,
+        ConstructionEquipment5 = 1806,
         AgricultureEquipment1 = 1807,
         AgricultureEquipment2 = 1808,
         AgricultureEquipment3 = 1809,
@@ -1834,7 +1834,9 @@ namespace WOD.Game.Server.Core.NWScript.Enum
         ForceInspiration1 = 1866,
         ForceInspiration2 = 1867,
         ForceInspiration3 = 1868,
-        Bulwark = 1869
+        Bulwark = 1869,
+
+        Awe = 1870
 
     }
 }

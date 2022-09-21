@@ -8,12 +8,12 @@ namespace WOD.Game.Server.Enumeration
         Invalid = 0,
         [Guild("Hunter's Guild", true)]
         HuntersGuild = 1,
-        [Guild("Engineering Guild", true)]
-        EngineeringGuild = 2,
+        [Guild("Gunsmithing Guild", true)]
+        GunsmithingGuild = 2,
         [Guild("Smithery Guild", true)]
         SmitheryGuild = 3,
-        [Guild("Fabrication Guild", true)]
-        FabricationGuild = 4,
+        [Guild("Construction Guild", true)]
+        ConstructionGuild = 4,
         [Guild("Agriculture Guild", true)]
         AgricultureGuild = 5,
     }

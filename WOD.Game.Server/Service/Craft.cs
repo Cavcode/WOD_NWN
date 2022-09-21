@@ -370,7 +370,7 @@ namespace WOD.Game.Server.Service
                 case 12: // Social
                     return ItemPropertyAbilityBonus(AbilityType.Social, amount);
                 case 13: // Willpower
-                    return ItemPropertyAbilityBonus(AbilityType.Willpower, amount);
+                    return ItemPropertyAbilityBonus(AbilityType.Will, amount);
                 case 14: // Control - Smithery
                     return ItemPropertyCustom(ItemPropertyType.Control, 1, amount);
                 case 15: // Craftsmanship - Smithery
@@ -420,13 +420,13 @@ namespace WOD.Game.Server.Service
                     return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.FP, amount);
                 case 38: // Food Bonus - STM
                     return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.STM, amount);
-                case 39: // Control - Engineering
+                case 39: // Control - Gunsmithing
                     return ItemPropertyCustom(ItemPropertyType.Control, 2, amount);
-                case 40: // Craftsmanship - Engineering
+                case 40: // Craftsmanship - Gunsmithing
                     return ItemPropertyCustom(ItemPropertyType.Craftsmanship, 2, amount);
-                case 41: // Control - Fabrication
+                case 41: // Control - Construction
                     return ItemPropertyCustom(ItemPropertyType.Control, 3, amount);
-                case 42: // Craftsmanship - Fabrication
+                case 42: // Craftsmanship - Construction
                     return ItemPropertyCustom(ItemPropertyType.Craftsmanship, 3, amount);
                 case 43: // Control - Agriculture
                     return ItemPropertyCustom(ItemPropertyType.Control, 4, amount);

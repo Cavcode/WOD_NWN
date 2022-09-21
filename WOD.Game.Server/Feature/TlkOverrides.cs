@@ -50,7 +50,7 @@ namespace WOD.Game.Server.Feature
                 "Improves damage dealt by throwing weapons.");
             SetTlkOverride(460, 
                 "Dexterity improves damage dealt by ranged and finesse weapons and increases physical accuracy.\n\n" +
-                "Primary Skills: One-Handed, Two-Handed, Martial Arts, Ranged, Fabrication, Devices\n\n" + 
+                "Primary Skills: One-Handed, Two-Handed, Martial Arts, Ranged, Construction, Devices\n\n" + 
                 "Other Notes:\n\n" + 
                 "Improves accuracy of regular melee weapons.\n" + 
                 "Improves accuracy of heavy melee weapons.\n" + 
@@ -58,7 +58,7 @@ namespace WOD.Game.Server.Feature
                 "Improves damage of ranged weapons.");
             SetTlkOverride(461, 
                 "Vitality improves your max hit points and reduces damage received.\n\n" +
-                "Primary Skills: Armor, Smithery, Engineering\n\n" +
+                "Primary Skills: Armor, Smithery, Gunsmithing\n\n" +
                 "Other Notes:\n\n" +
                 "Increases maximum HP.\n" +
                 "Improves physical defense (reducing damage taken).\n" +
@@ -66,7 +66,7 @@ namespace WOD.Game.Server.Feature
                 "Improves rest recovery.");
             SetTlkOverride(462,
                 "Willpower improves your force attack, force defense, max force points, and first aid capabilities.\n\n" +
-                "Primary Skills: Force, Fabrication, Agriculture, First Aid\n\n" +
+                "Primary Skills: Force, Construction, Agriculture, First Aid\n\n" +
                 "Other Notes:\n\n" +
                 "Increases maximum res.\n" + 
                 "Improves force defense (reducing damage taken).\n" +
@@ -74,7 +74,7 @@ namespace WOD.Game.Server.Feature
                 "Improves effectiveness of Force abilities.");
             SetTlkOverride(463,
                 "Agility improves accuracy of ranged and finesse weapons, evasion, and max stamina.\n\n" +
-                "Primary Skills: One-Handed, Martial Arts, Ranged, Engineering\n\n" +
+                "Primary Skills: One-Handed, Martial Arts, Ranged, Gunsmithing\n\n" +
                 "Other Notes:\n\n" + 
                 "Increases maximum stamina.\n" +
                 "Improves evasion.\n" +

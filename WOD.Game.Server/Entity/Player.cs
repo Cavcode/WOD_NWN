@@ -41,8 +41,8 @@ namespace WOD.Game.Server.Entity
                 {AbilityType.Might, 0},
                 {AbilityType.Social, 0},
                 {AbilityType.Dexterity, 0},
-                {AbilityType.Intellect, 0},
-                {AbilityType.Willpower, 0}
+                {AbilityType.Power, 0},
+                {AbilityType.Will, 0}
             };
             UpgradedStats = new Dictionary<AbilityType, int>
             {
@@ -50,8 +50,8 @@ namespace WOD.Game.Server.Entity
                 {AbilityType.Might, 0},
                 {AbilityType.Social, 0},
                 {AbilityType.Dexterity, 0},
-                {AbilityType.Intellect, 0},
-                {AbilityType.Willpower, 0}
+                {AbilityType.Power, 0},
+                {AbilityType.Will, 0}
             };
 
             Defenses = new Dictionary<CombatDamageType, int>();

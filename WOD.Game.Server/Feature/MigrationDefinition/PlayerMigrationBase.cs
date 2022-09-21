@@ -44,14 +44,9 @@ namespace WOD.Game.Server.Feature.MigrationDefinition
                 dbPlayer.HPRegen = 0;
 
                 // FP
-                dbPlayer.MaxFP = Stat.BaseFP;
-                dbPlayer.FP = Stat.GetMaxFP(player, dbPlayer);
-                dbPlayer.FPRegen = 0;
-
-                // STM
-                dbPlayer.MaxStamina = Stat.BaseSTM;
-                dbPlayer.Stamina = Stat.GetMaxStamina(player, dbPlayer);
-                dbPlayer.STMRegen = 0;
+                dbPlayer.MaxResource = Stat.BaseResource;
+                dbPlayer.Resource = Stat.GetMaxResource(player, dbPlayer);
+                dbPlayer.ResourceRegen = 0;
 
                 // Crafting
                 foreach (var (type, _) in Skill.GetActiveCraftingSkills())

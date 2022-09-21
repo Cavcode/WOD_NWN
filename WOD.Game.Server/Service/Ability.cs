@@ -340,8 +340,8 @@ namespace WOD.Game.Server.Service
         /// <param name="actionName">Name of the action or ability to display in the combat log</param>
         public static bool GetAbilityResisted(uint attacker, uint defender, string actionName)
         {
-            var attackerWIL = GetAbilityModifier(AbilityType.Willpower, attacker) * 10;
-            var defenderWIL = GetAbilityModifier(AbilityType.Willpower, defender) * 10;
+            var attackerWIL = GetAbilityModifier(AbilityType.Will, attacker) * 10;
+            var defenderWIL = GetAbilityModifier(AbilityType.Will, defender) * 10;
             var attackerRoll = d100();
             var totalAttack = attackerRoll + attackerWIL;
             var isResisted = totalAttack <= defenderWIL + 50;

@@ -215,13 +215,13 @@ namespace WOD.Game.Server.Service.AbilityService
         }
 
         /// <summary>
-        /// Adds an FP requirement to use the ability at this level.
+        /// Adds an Resource requirement to use the ability at this level.
         /// </summary>
-        /// <param name="requiredFP">The amount of FP needed to use this ability at this level.</param>
+        /// <param name="requiredFP">The amount of Resource needed to use this ability at this level.</param>
         /// <returns>An ability builder with the configured options</returns>
-        public AbilityBuilder RequirementFP(int requiredFP)
+        public AbilityBuilder RequirementResource(int requiredResource)
         {
-            var requirement = new AbilityRequirementFP(requiredFP);
+            var requirement = new AbilityRequirementResource(requiredResource);
             _activeAbility.Requirements.Add(requirement);
 
             return this;

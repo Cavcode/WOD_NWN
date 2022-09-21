@@ -3,7 +3,7 @@ using WOD.Game.Server.Service.CraftService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
 
-namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
+namespace WOD.Game.Server.Feature.RecipeDefinition.GunsmithingRecipeDefinition
 {
     public class StarshipRecipes: IRecipeListDefinition
     {
@@ -23,7 +23,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
         private void Tier1()
         {
             // Striker
-            _builder.Create(RecipeType.Striker, SkillType.Engineering)
+            _builder.Create(RecipeType.Striker, SkillType.Gunsmithing)
                 .Category(RecipeCategoryType.Starship)
                 .Resref("sdeed_striker")
                 .Level(5)
@@ -36,7 +36,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
                 .Component("elec_ruined", 1);
 
             // Condor
-            _builder.Create(RecipeType.Condor, SkillType.Engineering)
+            _builder.Create(RecipeType.Condor, SkillType.Gunsmithing)
                 .Category(RecipeCategoryType.Starship)
                 .Resref("sdeed_condor")
                 .Level(10)
@@ -52,7 +52,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
         private void Tier2()
         {
             // Hound
-            _builder.Create(RecipeType.Hound, SkillType.Engineering)
+            _builder.Create(RecipeType.Hound, SkillType.Gunsmithing)
                 .Category(RecipeCategoryType.Starship)
                 .Resref("sdeed_hound")
                 .Level(15)
@@ -65,7 +65,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
                 .Component("elec_flawed", 1);
 
             // Panther
-            _builder.Create(RecipeType.Panther, SkillType.Engineering)
+            _builder.Create(RecipeType.Panther, SkillType.Gunsmithing)
                 .Category(RecipeCategoryType.Starship)
                 .Resref("sdeed_panther")
                 .Level(20)
@@ -81,7 +81,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
         private void Tier3()
         {
             // Saber
-            _builder.Create(RecipeType.Saber, SkillType.Engineering)
+            _builder.Create(RecipeType.Saber, SkillType.Gunsmithing)
                 .Category(RecipeCategoryType.Starship)
                 .Resref("sdeed_saber")
                 .Level(25)
@@ -94,7 +94,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
                 .Component("elec_good", 1);
 
             // Falchion
-            _builder.Create(RecipeType.Falchion, SkillType.Engineering)
+            _builder.Create(RecipeType.Falchion, SkillType.Gunsmithing)
                 .Category(RecipeCategoryType.Starship)
                 .Resref("sdeed_falchion")
                 .Level(30)
@@ -110,7 +110,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
         private void Tier4()
         {
             // Mule
-            _builder.Create(RecipeType.Mule, SkillType.Engineering)
+            _builder.Create(RecipeType.Mule, SkillType.Gunsmithing)
                 .Category(RecipeCategoryType.Starship)
                 .Resref("sdeed_mule")
                 .Level(35)
@@ -123,7 +123,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
                 .Component("elec_imperfect", 1);
 
             // Merchant
-            _builder.Create(RecipeType.Merchant, SkillType.Engineering)
+            _builder.Create(RecipeType.Merchant, SkillType.Gunsmithing)
                 .Category(RecipeCategoryType.Starship)
                 .Resref("sdeed_merchant")
                 .Level(40)
@@ -139,7 +139,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
         private void Tier5()
         {
             // Throne
-            _builder.Create(RecipeType.Throne, SkillType.Engineering)
+            _builder.Create(RecipeType.Throne, SkillType.Gunsmithing)
                 .Category(RecipeCategoryType.Starship)
                 .Resref("sdeed_throne")
                 .Level(45)
@@ -152,7 +152,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
                 .Component("elec_high", 1);
 
             // Consular
-            _builder.Create(RecipeType.Consular, SkillType.Engineering)
+            _builder.Create(RecipeType.Consular, SkillType.Gunsmithing)
                 .Category(RecipeCategoryType.Starship)
                 .Resref("sdeed_consular")
                 .Level(50)

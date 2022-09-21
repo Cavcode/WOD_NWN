@@ -3,7 +3,7 @@ using WOD.Game.Server.Service.CraftService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
 
-namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
+namespace WOD.Game.Server.Feature.RecipeDefinition.ConstructionRecipeDefinition
 {
     public class StructureRecipes: IRecipeListDefinition
     {
@@ -18,7 +18,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
 
         private void StructureComponents()
         {
-            _builder.Create(RecipeType.PowerSupplyUnit, SkillType.Fabrication)
+            _builder.Create(RecipeType.PowerSupplyUnit, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("pow_supp_unit")
                 .Level(21)
@@ -28,7 +28,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("ref_scordspar", 4)
                 .Component("elec_good", 4);
 
-            _builder.Create(RecipeType.ConstructionParts, SkillType.Fabrication)
+            _builder.Create(RecipeType.ConstructionParts, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("const_parts")
                 .Level(23)
@@ -38,7 +38,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("ref_scordspar", 3)
                 .Component("elec_good", 3);
 
-            _builder.Create(RecipeType.ReinforcedConstructionParts, SkillType.Fabrication)
+            _builder.Create(RecipeType.ReinforcedConstructionParts, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("r_const_parts")
                 .Level(31)
@@ -48,7 +48,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("ref_keromber", 4)
                 .Component("elec_imperfect", 3);
 
-            _builder.Create(RecipeType.ReinforcedPowerSupplyUnit, SkillType.Fabrication)
+            _builder.Create(RecipeType.ReinforcedPowerSupplyUnit, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("r_pow_supp_unit")
                 .Level(32)
@@ -62,7 +62,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
         private void Structures()
         {
             // City Hall
-            _builder.Create(RecipeType.CityHallStyle1, SkillType.Fabrication)
+            _builder.Create(RecipeType.CityHallStyle1, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5000")
                 .Level(25)
@@ -72,7 +72,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("pow_supp_unit", 2);
 
             // Small House - Style 1
-            _builder.Create(RecipeType.SmallHouseStyle1, SkillType.Fabrication)
+            _builder.Create(RecipeType.SmallHouseStyle1, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5005")
                 .Level(26)
@@ -82,7 +82,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("pow_supp_unit", 1);
 
             // Small House - Style 2
-            _builder.Create(RecipeType.SmallHouseStyle2, SkillType.Fabrication)
+            _builder.Create(RecipeType.SmallHouseStyle2, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5006")
                 .Level(27)
@@ -92,7 +92,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("pow_supp_unit", 1);
 
             // Small House - Style 3
-            _builder.Create(RecipeType.SmallHouseStyle3, SkillType.Fabrication)
+            _builder.Create(RecipeType.SmallHouseStyle3, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5007")
                 .Level(29)
@@ -102,7 +102,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("pow_supp_unit", 1);
 
             // Small House - Style 4
-            _builder.Create(RecipeType.SmallHouseStyle4, SkillType.Fabrication)
+            _builder.Create(RecipeType.SmallHouseStyle4, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5008")
                 .Level(30)
@@ -112,7 +112,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("pow_supp_unit", 1);
 
             // Medium House - Style 1
-            _builder.Create(RecipeType.MediumHouseStyle1, SkillType.Fabrication)
+            _builder.Create(RecipeType.MediumHouseStyle1, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5009")
                 .Level(33)
@@ -122,7 +122,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("r_pow_supp_unit", 1);
 
             // Medium House - Style 2
-            _builder.Create(RecipeType.MediumHouseStyle2, SkillType.Fabrication)
+            _builder.Create(RecipeType.MediumHouseStyle2, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5010")
                 .Level(34)
@@ -132,7 +132,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("r_pow_supp_unit", 1);
 
             // Medium House - Style 3
-            _builder.Create(RecipeType.MediumHouseStyle3, SkillType.Fabrication)
+            _builder.Create(RecipeType.MediumHouseStyle3, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5011")
                 .Level(35)
@@ -142,7 +142,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("r_pow_supp_unit", 1);
 
             // Medium House - Style 4
-            _builder.Create(RecipeType.MediumHouseStyle4, SkillType.Fabrication)
+            _builder.Create(RecipeType.MediumHouseStyle4, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5012")
                 .Level(36)
@@ -152,7 +152,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("r_pow_supp_unit", 1);
 
             // Cantina - Style 1
-            _builder.Create(RecipeType.CantinaStyle1, SkillType.Fabrication)
+            _builder.Create(RecipeType.CantinaStyle1, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5004")
                 .Level(40)
@@ -162,7 +162,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("r_pow_supp_unit", 1);
 
             // Bank - Style 1
-            _builder.Create(RecipeType.BankStyle1, SkillType.Fabrication)
+            _builder.Create(RecipeType.BankStyle1, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5001")
                 .Level(41)
@@ -172,7 +172,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("r_pow_supp_unit", 2);
 
             // Medical Center - Style 1
-            _builder.Create(RecipeType.MedicalCenterStyle1, SkillType.Fabrication)
+            _builder.Create(RecipeType.MedicalCenterStyle1, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5002")
                 .Level(43)
@@ -182,7 +182,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("r_pow_supp_unit", 2);
 
             // Large House - Style 1
-            _builder.Create(RecipeType.LargeHouseStyle1, SkillType.Fabrication)
+            _builder.Create(RecipeType.LargeHouseStyle1, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5013")
                 .Level(45)
@@ -192,7 +192,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("r_pow_supp_unit", 2);
 
             // Large House - Style 2
-            _builder.Create(RecipeType.LargeHouseStyle2, SkillType.Fabrication)
+            _builder.Create(RecipeType.LargeHouseStyle2, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5014")
                 .Level(46)
@@ -202,7 +202,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("r_pow_supp_unit", 2);
 
             // Large House - Style 3
-            _builder.Create(RecipeType.LargeHouseStyle3, SkillType.Fabrication)
+            _builder.Create(RecipeType.LargeHouseStyle3, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5015")
                 .Level(47)
@@ -212,7 +212,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("r_pow_supp_unit", 2);
 
             // Large House - Style 4
-            _builder.Create(RecipeType.LargeHouseStyle4, SkillType.Fabrication)
+            _builder.Create(RecipeType.LargeHouseStyle4, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5016")
                 .Level(48)
@@ -222,7 +222,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.FabricationRecipeDefinition
                 .Component("r_pow_supp_unit", 2);
 
             // Starport - Style 1
-            _builder.Create(RecipeType.StarportStyle1, SkillType.Fabrication)
+            _builder.Create(RecipeType.StarportStyle1, SkillType.Construction)
                 .Category(RecipeCategoryType.Structure)
                 .Resref("structure_5003")
                 .Level(50)

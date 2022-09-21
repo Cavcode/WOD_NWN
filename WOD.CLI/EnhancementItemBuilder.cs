@@ -31,12 +31,12 @@ namespace WOD.CLI
         private readonly Dictionary<string, int> _subTypeToId = new()
         {
             { "Control - Smithery", 14},
-            { "Control - Engineering", 39 },
-            { "Control - Fabrication", 41 },
+            { "Control - Gunsmithing", 39 },
+            { "Control - Construction", 41 },
             { "Control - Agriculture", 43 },
             { "Craftsmanship - Smithery", 15 },
-            { "Craftsmanship - Engineering", 40 },
-            { "Craftsmanship - Fabrication", 42 },
+            { "Craftsmanship - Gunsmithing", 40 },
+            { "Craftsmanship - Construction", 42 },
             { "Craftsmanship - Agriculture", 44 },
             { "Defense - Physical", 1 },
             { "Defense - Force", 2 },

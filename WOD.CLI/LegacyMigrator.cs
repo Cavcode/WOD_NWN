@@ -156,9 +156,9 @@ namespace WOD.CLI
 
                 // GP Mapping:
                 // Hunter's Guild -> Hunter's Guild
-                // Engineering Guild -> Engineering Guild
+                // Gunsmithing Guild -> Gunsmithing Guild
                 // Weaponsmith/Armorsmith Guild -> Highest one will go to Smithery Guild
-                // Fabrication Guild doesn't exist on Legacy
+                // Construction Guild doesn't exist on Legacy
                 // Cooking Guild doesn't exist on Legacy
 
                 var type = oldGuildPoint.GuildId;
@@ -170,9 +170,9 @@ namespace WOD.CLI
                         Rank = oldGuildPoint.Rank
                     };
                 }
-                else if (type == 2) // Engineering Guild
+                else if (type == 2) // Gunsmithing Guild
                 {
-                    dbPlayer.Guilds[GuildType.EngineeringGuild] = new PlayerGuild
+                    dbPlayer.Guilds[GuildType.GunsmithingGuild] = new PlayerGuild
                     {
                         Points = oldGuildPoint.Points,
                         Rank = oldGuildPoint.Rank
@@ -263,11 +263,11 @@ namespace WOD.CLI
                     case 3: // cz220_armorsmith
                         questId = "cz220_smithery";
                         break;
-                    case 4: // cz220_engineering
+                    case 4: // cz220_Gunsmithing
                         questId = "cz220_smithery";
                         break;
-                    case 5: // cz220_fabrication
-                        questId = "cz220_fabrication";
+                    case 5: // cz220_Construction
+                        questId = "cz220_Construction";
                         break;
                     case 6: // cz220_scavenging
                         questId = "cz220_scavenging";

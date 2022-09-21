@@ -167,32 +167,6 @@ namespace WOD.Game.Server.Service.PropertyService
                 var interiorId = property.ChildPropertyIds[PropertyChildType.Interior].SingleOrDefault();
                 if (string.IsNullOrWhiteSpace(interiorId))
                     return;
-
-                var dbInterior = DB.Get<WorldProperty>(interiorId);
-                if (dbInterior.ChildPropertyIds.ContainsKey(PropertyChildType.Starship))
-                {
-                    foreach (var starshipId in dbInterior.ChildPropertyIds[PropertyChildType.Starship])
-                    {
-                        var dbStarship = DB.Get<WorldProperty>(starshipId);
-
-                        if (dbStarship.ChildPropertyIds.ContainsKey(PropertyChildType.RegisteredStarport))
-                            dbStarship.ChildPropertyIds[PropertyChildType.RegisteredStarport].Clear();
-
-                        dbStarship.Positions[PropertyLocationType.DockPosition] = dbStarship.Positions[PropertyLocationType.LastNPCDockPosition];
-
-                        DB.Set(dbStarship);
-                        Log.Write(LogGroup.Property, $"Starship '{dbStarship.CustomName}' ({dbStarship.Id}) has been relocated to the last NPC dock it visited because the starport '{dbInterior.CustomName}' ({dbInterior.Id}) has been retrieved.");
-                    }
-                }
-
-                // The dock point needs to be unregistered from the space service so it no longer displays in the list
-                // of docking points.
-                var dbCity = DB.Get<WorldProperty>(property.ParentPropertyId);
-                var cityArea = Area.GetAreaByResref(dbCity.ParentPropertyId);
-                var instance = Property.GetRegisteredInstance(interiorId);
-                var dockPoint = GetLandingWaypoint(instance.Area);
-
-                Space.RemoveLandingPoint(dockPoint, cityArea);
             };
         }
 

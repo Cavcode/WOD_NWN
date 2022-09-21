@@ -348,27 +348,27 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                     _venerationPerk = PerkType.VenerationSmithery;
                     _wasteNotPerk = PerkType.WasteNotSmithery;
                     break;
-                case SkillType.Fabrication:
+                case SkillType.Construction:
                     _primaryAbility = AbilityType.Dexterity;
-                    _secondaryAbility = AbilityType.Willpower;
+                    _secondaryAbility = AbilityType.Will;
 
-                    _rapidSynthesisPerk = PerkType.RapidSynthesisFabrication;
-                    _carefulSynthesisPerk = PerkType.CarefulSynthesisFabrication;
+                    _rapidSynthesisPerk = PerkType.RapidSynthesisConstruction;
+                    _carefulSynthesisPerk = PerkType.CarefulSynthesisConstruction;
 
-                    _basicTouchPerk = PerkType.BasicTouchFabrication;
-                    _standardTouchPerk = PerkType.StandardTouchFabrication;
-                    _preciseTouchPerk = PerkType.PreciseTouchFabrication;
+                    _basicTouchPerk = PerkType.BasicTouchConstruction;
+                    _standardTouchPerk = PerkType.StandardTouchConstruction;
+                    _preciseTouchPerk = PerkType.PreciseTouchConstruction;
 
-                    _mastersMendPerk = PerkType.MastersMendFabrication;
-                    _steadyHandPerk = PerkType.SteadyHandFabrication;
-                    _muscleMemoryPerk = PerkType.MuscleMemoryFabrication;
+                    _mastersMendPerk = PerkType.MastersMendConstruction;
+                    _steadyHandPerk = PerkType.SteadyHandConstruction;
+                    _muscleMemoryPerk = PerkType.MuscleMemoryConstruction;
 
-                    _venerationPerk = PerkType.VenerationFabrication;
-                    _wasteNotPerk = PerkType.WasteNotFabrication;
+                    _venerationPerk = PerkType.VenerationConstruction;
+                    _wasteNotPerk = PerkType.WasteNotConstruction;
                     break;
                 case SkillType.Agriculture:
                     _primaryAbility = AbilityType.Social;
-                    _secondaryAbility = AbilityType.Willpower;
+                    _secondaryAbility = AbilityType.Will;
 
                     _rapidSynthesisPerk = PerkType.RapidSynthesisCooking;
                     _carefulSynthesisPerk = PerkType.CarefulSynthesisCooking;
@@ -384,23 +384,23 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                     _venerationPerk = PerkType.VenerationCooking;
                     _wasteNotPerk = PerkType.WasteNotCooking;
                     break;
-                case SkillType.Engineering:
+                case SkillType.Gunsmithing:
                     _primaryAbility = AbilityType.Vitality;
                     _secondaryAbility = AbilityType.Agility;
 
-                    _rapidSynthesisPerk = PerkType.RapidSynthesisEngineering;
-                    _carefulSynthesisPerk = PerkType.CarefulSynthesisEngineering;
+                    _rapidSynthesisPerk = PerkType.RapidSynthesisGunsmithing;
+                    _carefulSynthesisPerk = PerkType.CarefulSynthesisGunsmithing;
 
-                    _basicTouchPerk = PerkType.BasicTouchEngineering;
-                    _standardTouchPerk = PerkType.StandardTouchEngineering;
-                    _preciseTouchPerk = PerkType.PreciseTouchEngineering;
+                    _basicTouchPerk = PerkType.BasicTouchGunsmithing;
+                    _standardTouchPerk = PerkType.StandardTouchGunsmithing;
+                    _preciseTouchPerk = PerkType.PreciseTouchGunsmithing;
 
-                    _mastersMendPerk = PerkType.MastersMendEngineering;
-                    _steadyHandPerk = PerkType.SteadyHandEngineering;
-                    _muscleMemoryPerk = PerkType.MuscleMemoryEngineering;
+                    _mastersMendPerk = PerkType.MastersMendGunsmithing;
+                    _steadyHandPerk = PerkType.SteadyHandGunsmithing;
+                    _muscleMemoryPerk = PerkType.MuscleMemoryGunsmithing;
 
-                    _venerationPerk = PerkType.VenerationEngineering;
-                    _wasteNotPerk = PerkType.WasteNotEngineering;
+                    _venerationPerk = PerkType.VenerationGunsmithing;
+                    _wasteNotPerk = PerkType.WasteNotGunsmithing;
                     break;
             }
         }

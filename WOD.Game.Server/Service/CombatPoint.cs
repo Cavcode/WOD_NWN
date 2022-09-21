@@ -39,20 +39,10 @@ namespace WOD.Game.Server.Service
             if (skill == SkillType.Invalid) return;
             var playerId = GetObjectUUID(player);
             var dbPlayer = DB.Get<Player>(playerId);
-            var levelDelta = dbPlayer.Skills[SkillType.Force].Rank - dbPlayer.Skills[skill].Rank;
+            //var levelDelta = dbPlayer.Skills[SkillType.Force].Rank - dbPlayer.Skills[skill].Rank;
 
             AddCombatPoint(player, target, skill);
 
-            // Lightsabers and Saberstaffs automatically grant combat points toward Force if player has the setting enabled.
-            // Additionally, a force combat point is only added if the force skill is not 5 more levels above the one-handed or two-handed skill being used.
-            if ((Item.LightsaberBaseItemTypes.Contains(baseItemType) ||
-                Item.SaberstaffBaseItemTypes.Contains(baseItemType)) &&
-                dbPlayer.CharacterType == CharacterType.ForceSensitive &&
-                dbPlayer.Settings.IsLightsaberForceShareEnabled &&
-                levelDelta <= 5)
-            {
-                AddCombatPoint(player, target, SkillType.Force);
-            }
         }
 
         /// <summary>
@@ -149,7 +139,7 @@ namespace WOD.Game.Server.Service
                         {
                             // Skills that are exempt from CP sharing; XP gain is calculated directly on a rank vs NPC level basis
                             // As long as the player is on the ground, we always try to give them Armor XP
-                            if (!Space.IsPlayerInSpaceMode(player)) validSkills.Add(SkillType.Armor, dbPlayer.Skills[SkillType.Armor]);
+                            validSkills.Add(SkillType.Armor, dbPlayer.Skills[SkillType.Armor]);
                             if (!validSkills.Any()) continue;
 
                             foreach (var (skillType, ps) in validSkills)

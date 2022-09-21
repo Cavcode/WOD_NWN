@@ -63,7 +63,7 @@ namespace WOD.Game.Server.Feature
             var con = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Vitality);
             var dex = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Dexterity);
             var @int = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Agility);
-            var wis = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Willpower);
+            var wis = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Will);
             var cha = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Social);
 
             GiveXPToCreature(player, 800000);
@@ -79,7 +79,7 @@ namespace WOD.Game.Server.Feature
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Vitality, con);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Dexterity, dex);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Agility, @int);
-            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Willpower, wis);
+            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Will, wis);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Social, cha);
         }
 
@@ -195,7 +195,7 @@ namespace WOD.Game.Server.Feature
             dbPlayer.BaseStats[AbilityType.Might] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Might);
             dbPlayer.BaseStats[AbilityType.Dexterity] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Dexterity);
             dbPlayer.BaseStats[AbilityType.Vitality] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Vitality);
-            dbPlayer.BaseStats[AbilityType.Willpower] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Willpower);
+            dbPlayer.BaseStats[AbilityType.Will] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Will);
             dbPlayer.BaseStats[AbilityType.Agility] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Agility);
             dbPlayer.BaseStats[AbilityType.Social] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Social);
 

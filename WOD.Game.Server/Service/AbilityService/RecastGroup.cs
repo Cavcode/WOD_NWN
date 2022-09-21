@@ -159,6 +159,9 @@ namespace WOD.Game.Server.Service.AbilityService
         ForceInspiration = 75,
         [RecastGroup("Shield Bash", "Shield Bash")]
         ShieldBash = 76,
+
+        [RecastGroup("Awe", "Awe")]
+        Awe = 77,
     }
 
     public class RecastGroupAttribute: Attribute

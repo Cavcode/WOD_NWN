@@ -5,7 +5,7 @@ using WOD.Game.Server.Service.QuestService;
 
 namespace WOD.Game.Server.Feature.QuestDefinition
 {
-    public class EngineeringGuildQuestDefinition : IQuestListDefinition
+    public class GunsmithingGuildQuestDefinition : IQuestListDefinition
     {
         private class RewardDetails
         {
@@ -138,14 +138,14 @@ namespace WOD.Game.Server.Feature.QuestDefinition
 
             builder.Create(questId, $"{amount}x {itemName}")
                 .IsRepeatable()
-                .IsGuildTask(GuildType.EngineeringGuild, guildRank)
+                .IsGuildTask(GuildType.GunsmithingGuild, guildRank)
 
                 .AddState()
-                .SetStateJournalText($"Collect {amount}x {itemName} and return to the Engineering Guildmaster")
+                .SetStateJournalText($"Collect {amount}x {itemName} and return to the Gunsmithing Guildmaster")
                 .AddCollectItemObjective(resref, amount)
 
                 .AddGoldReward(rewardDetails.Gold)
-                .AddGPReward(GuildType.EngineeringGuild, rewardDetails.GP);
+                .AddGPReward(GuildType.GunsmithingGuild, rewardDetails.GP);
         }
     }
 }

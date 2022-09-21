@@ -371,7 +371,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 
         public Action OnClickUpgradeWillpower() => () =>
         {
-            UpgradeAttribute(AbilityType.Willpower, "Willpower");
+            UpgradeAttribute(AbilityType.Will, "Willpower");
         };
 
         public Action OnClickUpgradeAgility() => () =>
@@ -404,14 +404,14 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             Might = GetAbilityScore(Player, AbilityType.Might);
             Dexterity = GetAbilityScore(Player, AbilityType.Dexterity);
             Vitality = GetAbilityScore(Player, AbilityType.Vitality);
-            Willpower = GetAbilityScore(Player, AbilityType.Willpower);
+            Willpower = GetAbilityScore(Player, AbilityType.Will);
             Agility = GetAbilityScore(Player, AbilityType.Agility);
             Social = GetAbilityScore(Player, AbilityType.Social);
 
             IsMightUpgradeAvailable = (dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Might] < MaxUpgrades) || isRacialBonusAvailable;
             IsDexterityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Dexterity] < MaxUpgrades || isRacialBonusAvailable;
             IsVitalityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Vitality] < MaxUpgrades || isRacialBonusAvailable;
-            IsWillpowerUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Willpower] < MaxUpgrades || isRacialBonusAvailable;
+            IsWillpowerUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Will] < MaxUpgrades || isRacialBonusAvailable;
             IsAgilityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Agility] < MaxUpgrades || isRacialBonusAvailable;
             IsSocialUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Social] < MaxUpgrades || isRacialBonusAvailable;
         }
@@ -493,7 +493,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             var mainHandSkill = Skill.GetSkillTypeByBaseItem(mainHandType);
             Attack = Stat.GetAttack(Player, damageStat, mainHandSkill);
             DefensePhysical = Stat.GetDefense(Player, CombatDamageType.Physical, AbilityType.Vitality);
-            DefenseForce = Stat.GetDefense(Player, CombatDamageType.Force, AbilityType.Willpower);
+            DefenseForce = Stat.GetDefense(Player, CombatDamageType.Force, AbilityType.Will);
 
             var fireDefense = dbPlayer.Defenses[CombatDamageType.Fire].ToString();
             var poisonDefense = dbPlayer.Defenses[CombatDamageType.Poison].ToString();
@@ -506,31 +506,31 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             var smithery = dbPlayer.Control.ContainsKey(SkillType.Smithery)
                 ? dbPlayer.Control[SkillType.Smithery]
                 : 0;
-            var engineering = dbPlayer.Control.ContainsKey(SkillType.Engineering)
-                ? dbPlayer.Control[SkillType.Engineering]
+            var Gunsmithing = dbPlayer.Control.ContainsKey(SkillType.Gunsmithing)
+                ? dbPlayer.Control[SkillType.Gunsmithing]
                 : 0;
-            var fabrication = dbPlayer.Control.ContainsKey(SkillType.Fabrication)
-                ? dbPlayer.Control[SkillType.Fabrication]
+            var Construction = dbPlayer.Control.ContainsKey(SkillType.Construction)
+                ? dbPlayer.Control[SkillType.Construction]
                 : 0;
             var agriculture = dbPlayer.Control.ContainsKey(SkillType.Agriculture)
                 ? dbPlayer.Control[SkillType.Agriculture]
                 : 0;
 
-            Control = $"{smithery}/{engineering}/{fabrication}/{agriculture}";
+            Control = $"{smithery}/{Gunsmithing}/{Construction}/{agriculture}";
 
             smithery = dbPlayer.Craftsmanship.ContainsKey(SkillType.Smithery)
                 ? dbPlayer.Craftsmanship[SkillType.Smithery]
                 : 0;
-            engineering = dbPlayer.Craftsmanship.ContainsKey(SkillType.Engineering)
-                ? dbPlayer.Craftsmanship[SkillType.Engineering]
+            Gunsmithing = dbPlayer.Craftsmanship.ContainsKey(SkillType.Gunsmithing)
+                ? dbPlayer.Craftsmanship[SkillType.Gunsmithing]
                 : 0;
-            fabrication = dbPlayer.Craftsmanship.ContainsKey(SkillType.Fabrication)
-                ? dbPlayer.Craftsmanship[SkillType.Fabrication]
+            Construction = dbPlayer.Craftsmanship.ContainsKey(SkillType.Construction)
+                ? dbPlayer.Craftsmanship[SkillType.Construction]
                 : 0;
             agriculture = dbPlayer.Craftsmanship.ContainsKey(SkillType.Agriculture)
                 ? dbPlayer.Craftsmanship[SkillType.Agriculture]
                 : 0;
-            Craftsmanship = $"{smithery}/{engineering}/{fabrication}/{agriculture}";
+            Craftsmanship = $"{smithery}/{Gunsmithing}/{Construction}/{agriculture}";
             RebuildTokens = dbPlayer.NumberRebuildsAvailable.ToString();
         }
 

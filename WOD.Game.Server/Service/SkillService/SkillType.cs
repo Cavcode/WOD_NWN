@@ -566,14 +566,23 @@ namespace WOD.Game.Server.Service.SkillService
              false)]
         Production = 57,
 
-        [Skill(SkillCategoryType.Utility,
+        [Skill(SkillCategoryType.Crafting,
              "Construction",
              50,
              true,
              "How to build and design buildings and upgrade them.",
              true,
-             false)]
+             true)]
         Construction = 58,
+
+        [Skill(SkillCategoryType.Languages,
+            "English",
+            20,
+            true,
+            "Ability to speak the English language.",
+            false,
+            false)]
+        English = 59,
     }
 
     public class SkillAttribute : Attribute

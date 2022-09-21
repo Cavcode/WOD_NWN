@@ -737,7 +737,7 @@ namespace WOD.Game.Server.Native
             {
                 case AbilityType.Dexterity when attacker.m_pStats.GetWISStat() > attacker.m_pStats.GetDEXStat():
                 case AbilityType.Agility when attacker.m_pStats.GetWISStat() > attacker.m_pStats.GetINTStat():
-                    return AbilityType.Willpower;
+                    return AbilityType.Will;
                 default:
                     return AbilityType.Invalid;
             }

@@ -137,11 +137,11 @@ namespace WOD.Game.Server.Feature
 
             if (isAdding)
             {
-                Stat.AdjustPlayerMaxFP(dbPlayer, amount, player);
+                Stat.AdjustPlayerMaxResource(dbPlayer, amount, player);
             }
             else
             {
-                Stat.AdjustPlayerMaxFP(dbPlayer, -amount, player);
+                Stat.AdjustPlayerMaxResource(dbPlayer, -amount, player);
             }
 
             DB.Set(dbPlayer);
@@ -165,67 +165,11 @@ namespace WOD.Game.Server.Feature
 
             if (isAdding)
             {
-                Stat.AdjustFPRegen(dbPlayer, amount);
+                Stat.AdjustResourceRegen(dbPlayer, amount);
             }
             else
             {
-                Stat.AdjustFPRegen(dbPlayer, -amount);
-            }
-
-            DB.Set(dbPlayer);
-        }
-
-        /// <summary>
-        /// Applies or removes a STM bonus on a player.
-        /// </summary>
-        /// <param name="player">The player to adjust</param>
-        /// <param name="item">The item being equipped or unequipped</param>
-        /// <param name="ip">The item property associated with this change</param>
-        /// <param name="isAdding">If true, we're adding the FP, if false we're removing it</param>
-        private static void ApplySTMBonus(uint player, uint item, ItemProperty ip, bool isAdding)
-        {
-            if (GetIsDM(player) || GetIsDMPossessed(player))
-                return;
-
-            var amount = GetItemPropertyCostTableValue(ip);
-            var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Player>(playerId);
-
-            if (isAdding)
-            {
-                Stat.AdjustPlayerMaxSTM(dbPlayer, amount, player);
-            }
-            else
-            {
-                Stat.AdjustPlayerMaxSTM(dbPlayer, -amount, player);
-            }
-
-            DB.Set(dbPlayer);
-        }
-
-        /// <summary>
-        /// Applies or removes a STM Regen bonus on a player.
-        /// </summary>
-        /// <param name="player">The player to adjust</param>
-        /// <param name="item">The item being equipped or unequipped</param>
-        /// <param name="ip">The item property associated with this change</param>
-        /// <param name="isAdding">If true, we're adding the FP Regen, if false we're removing it</param>
-        private static void ApplySTMRegenBonus(uint player, uint item, ItemProperty ip, bool isAdding)
-        {
-            if (GetIsDM(player) || GetIsDMPossessed(player))
-                return;
-
-            var amount = GetItemPropertyCostTableValue(ip);
-            var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Player>(playerId);
-
-            if (isAdding)
-            {
-                Stat.AdjustSTMRegen(dbPlayer, amount);
-            }
-            else
-            {
-                Stat.AdjustSTMRegen(dbPlayer, -amount);
+                Stat.AdjustResourceRegen(dbPlayer, -amount);
             }
 
             DB.Set(dbPlayer);
@@ -397,10 +341,10 @@ namespace WOD.Game.Server.Feature
                     skillType = SkillType.Smithery;
                     break;
                 case 2:
-                    skillType = SkillType.Engineering;
+                    skillType = SkillType.Gunsmithing;
                     break;
                 case 3:
-                    skillType = SkillType.Fabrication;
+                    skillType = SkillType.Construction;
                     break;
                 case 4:
                     skillType = SkillType.Agriculture;
@@ -449,10 +393,10 @@ namespace WOD.Game.Server.Feature
                     skillType = SkillType.Smithery;
                     break;
                 case 2:
-                    skillType = SkillType.Engineering;
+                    skillType = SkillType.Gunsmithing;
                     break;
                 case 3:
-                    skillType = SkillType.Fabrication;
+                    skillType = SkillType.Construction;
                     break;
                 case 4:
                     skillType = SkillType.Agriculture;
@@ -494,10 +438,10 @@ namespace WOD.Game.Server.Feature
                     skillType = SkillType.Smithery;
                     break;
                 case 2:
-                    skillType = SkillType.Engineering;
+                    skillType = SkillType.Gunsmithing;
                     break;
                 case 3:
-                    skillType = SkillType.Fabrication;
+                    skillType = SkillType.Construction;
                     break;
                 case 4:
                     skillType = SkillType.Agriculture;

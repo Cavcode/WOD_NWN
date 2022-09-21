@@ -15,7 +15,7 @@ namespace WOD.Game.Server.Feature.QuestDefinition
             SelansRequest(builder);
             SuppliesSmithery(builder);
             SuppliesScavenging(builder);
-            SuppliesFabrication(builder);
+            SuppliesConstruction(builder);
             DatapadRetrieval(builder);
             MynockMayhem(builder);
             OreCollection(builder);
@@ -107,12 +107,12 @@ namespace WOD.Game.Server.Feature.QuestDefinition
                     KeyItem.RemoveKeyItem(player, KeyItemType.CraftingTerminalDroidOperatorsWorkOrder);
                 });
         }
-        private static void SuppliesFabrication(QuestBuilder builder)
+        private static void SuppliesConstruction(QuestBuilder builder)
         {
-            builder.Create("cz220_fabrication", "CZ-220 Supplies - Fabrication")
+            builder.Create("cz220_Construction", "CZ-220 Supplies - Construction")
 
                 .AddState()
-                .SetStateJournalText("The Crafting Terminal Droid operator has requested you create a simple bed roll. You will need to purchase the \"Furniture Blueprints\" perk in order to create this item. You can use any fabrication terminal to make the item. You will find the necessary resources down on the maintenance level of CZ-220.")
+                .SetStateJournalText("The Crafting Terminal Droid operator has requested you create a simple bed roll. You will need to purchase the \"Furniture Blueprints\" perk in order to create this item. You can use any Construction terminal to make the item. You will find the necessary resources down on the maintenance level of CZ-220.")
                 .AddCollectItemObjective("structure_0085", 1)
 
                 .AddState()

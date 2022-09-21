@@ -51,6 +51,8 @@
         ForceValor1 = 50,
         ForceValor2 = 51,
         ForceRage1 = 52,
-        ForceRage2 = 53
+        ForceRage2 = 53,
+
+        Awe = 54
     }
 }

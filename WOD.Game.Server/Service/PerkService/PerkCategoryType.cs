@@ -82,8 +82,8 @@ namespace WOD.Game.Server.Service.PerkService
         [PerkCategory("Cybertech", true)]
         Cybertech = 25,
 
-        [PerkCategory("Fabrication", true)]
-        Fabrication = 26,
+        [PerkCategory("Construction", true)]
+        Construction = 26,
 
         [PerkCategory("Gathering", true)]
         Gathering = 27,
@@ -103,8 +103,8 @@ namespace WOD.Game.Server.Service.PerkService
         [PerkCategory("Agriculture", true)]
         Agriculture = 32,
 
-        [PerkCategory("Engineering", true)]
-        Engineering = 33,
+        [PerkCategory("Gunsmithing", true)]
+        Gunsmithing = 33,
 
         [PerkCategory("Devices", true)]
         Devices = 34,

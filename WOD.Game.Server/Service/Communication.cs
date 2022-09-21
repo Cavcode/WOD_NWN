@@ -63,22 +63,6 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// When a player enters the server, set a local bool on their PC representing
-        /// the current state of their holonet visibility.
-        /// </summary>
-        [NWNEventHandler("mod_enter")]
-        public static void LoadHolonetSetting()
-        {
-            var player = GetEnteringObject();
-            if (!GetIsPC(player) || GetIsDM(player)) return;
-
-            var playerId = GetObjectUUID(player);
-            var dbPlayer = DB.Get<Player>(playerId) ?? new Player(playerId);
-            
-            SetLocalBool(player, "DISPLAY_HOLONET", dbPlayer.Settings.IsHolonetEnabled);
-        }
-
-        /// <summary>
         /// When a player focuses the chatbar, set a typing indicator on the player; when
         /// unfocused, remove the indicator.
         /// </summary>
@@ -220,29 +204,7 @@ namespace WOD.Game.Server.Service
                 !GetIsDM(sender) &&
                 !GetIsDMPossessed(sender))
             {
-                var playerId = GetObjectUUID(sender);
-                var dbPlayer = DB.Get<Player>(playerId);
-
-                if (!dbPlayer.Settings.IsHolonetEnabled)
-                {
-                    SendMessageToPC(sender, "You have disabled the holonet and cannot send this message.");
-                    return;
-                }
-
-                // 5 minute wait in between Holonet messages.
-                var lastHolonet = GetLocalString(sender, "HOLONET_LAST_SEND");
-                var now = DateTime.UtcNow;
-                if (!string.IsNullOrWhiteSpace(lastHolonet))
-                {
-                    var dateTime = DateTime.ParseExact(lastHolonet, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-                    if (now <= dateTime.AddMinutes(HolonetDelayMinutes))
-                    {
-                        SendMessageToPC(sender, $"Holonet messages may only be sent once per {HolonetDelayMinutes} minutes.");
-                        return;
-                    }
-                }
-
-                SetLocalString(sender, "HOLONET_LAST_SEND", now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+                return;
             }
 
 
@@ -387,21 +349,12 @@ namespace WOD.Game.Server.Service
 
                 var language = Language.GetActiveLanguage(sender);
 
-                // Wookiees cannot speak any other language (but they can understand them).
-                // Swap their language if they attempt to speak in any other language.
-                var race = GetRacialType(sender);
-                if (race == RacialType.Wookiee && language != SkillType.Shyriiwook)
-                {
-                    Language.SetActiveLanguage(sender, SkillType.Shyriiwook);
-                    language = SkillType.Shyriiwook;
-                }
-
                 var color = Language.GetColor(language);
                 var r = (byte)(color >> 24 & 0xFF);
                 var g = (byte)(color >> 16 & 0xFF);
                 var b = (byte)(color >> 8 & 0xFF);
 
-                if (language != SkillType.Basic)
+                if (language != SkillType.English)
                 {
                     var languageName = Language.GetName(language);
                     finalMessage.Append(ColorToken.Custom($"[{languageName}] ", r, g, b));
@@ -411,7 +364,7 @@ namespace WOD.Game.Server.Service
                 {
                     var text = component.Text;
 
-                    if (component.IsTranslatable && language != SkillType.Basic)
+                    if (component.IsTranslatable && language != SkillType.English)
                     {
                         text = Language.TranslateSnippetForListener(sender, obj, language, component.Text);
 

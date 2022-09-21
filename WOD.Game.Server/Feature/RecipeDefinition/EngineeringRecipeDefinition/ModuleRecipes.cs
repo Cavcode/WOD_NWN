@@ -3,7 +3,7 @@ using WOD.Game.Server.Service.CraftService;
 using WOD.Game.Server.Service.PerkService;
 using WOD.Game.Server.Service.SkillService;
 
-namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
+namespace WOD.Game.Server.Feature.RecipeDefinition.GunsmithingRecipeDefinition
 {
     public class ModuleRecipes: IRecipeListDefinition
     {
@@ -23,7 +23,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
         private void Tier1()
         {
 			// Basic Capacitor Booster
-			_builder.Create(RecipeType.BasicCapacitorBooster, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicCapacitorBooster, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("cap_boost_b")
 				.Level(5)
@@ -34,7 +34,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 2);
 
 			// Basic Combat Laser
-			_builder.Create(RecipeType.BasicCombatLaser, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicCombatLaser, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("com_laser_b")
 				.Level(2)
@@ -45,7 +45,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 1);
 
 			// Basic EM Amplifier
-			_builder.Create(RecipeType.BasicEMAmplifier, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicEMAmplifier, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("em_amp_b")
 				.Level(7)
@@ -56,7 +56,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 2);
 
 			// Basic Thermal Amplifier
-			_builder.Create(RecipeType.BasicThermalAmplifier, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicThermalAmplifier, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("therm_amp_b")
 				.Level(6)
@@ -67,7 +67,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 2);
 
 			// Basic Explosive Amplifier
-			_builder.Create(RecipeType.BasicExplosiveAmplifier, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicExplosiveAmplifier, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("exp_amp_b")
 				.Level(6)
@@ -78,7 +78,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 2);
 
 			// Basic Evasion Booster
-			_builder.Create(RecipeType.BasicEvasionBooster, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicEvasionBooster, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("eva_boost_b")
 				.Level(8)
@@ -89,7 +89,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 3);
 
 			// Basic Hull Booster
-			_builder.Create(RecipeType.BasicHullBooster, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicHullBooster, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("hull_boost_b")
 				.Level(4)
@@ -100,7 +100,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 2);
 
 			// Basic Hull Repairer
-			_builder.Create(RecipeType.BasicHullRepairer, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicHullRepairer, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("hull_rep_b")
 				.Level(3)
@@ -111,7 +111,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 1);
 
 			// Basic Ion Cannon
-			_builder.Create(RecipeType.BasicIonCannon, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicIonCannon, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("ion_cann_b")
 				.Level(2)
@@ -122,7 +122,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 1);
 
 			// Basic Mining Laser
-			_builder.Create(RecipeType.BasicMiningLaser, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicMiningLaser, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("min_laser_b")
 				.Level(1)
@@ -133,7 +133,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 1);
 
 			// Basic Missile Launcher
-			_builder.Create(RecipeType.BasicMissileLauncher, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicMissileLauncher, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("msl_launch_b")
 				.Level(4)
@@ -144,7 +144,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 2);
 
 			// Basic Shield Booster
-			_builder.Create(RecipeType.BasicShieldBooster, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicShieldBooster, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("shld_boost_b")
 				.Level(3)
@@ -155,7 +155,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 1);
 
 			// Basic Shield Repairer
-			_builder.Create(RecipeType.BasicShieldRepairer, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicShieldRepairer, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("shld_rep_b")
 				.Level(8)
@@ -166,7 +166,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_ruined", 3);
 
 			// Basic Targeting System
-			_builder.Create(RecipeType.BasicTargetingSystem, SkillType.Engineering)
+			_builder.Create(RecipeType.BasicTargetingSystem, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("tgt_sys_b")
 				.Level(9)
@@ -182,7 +182,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
         {
 
 			//  Capacitor Booster I
-			_builder.Create(RecipeType.CapacitorBooster1, SkillType.Engineering)
+			_builder.Create(RecipeType.CapacitorBooster1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("cap_boost_1")
 				.Level(15)
@@ -193,7 +193,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 2);
 
 			//  Combat Laser I
-			_builder.Create(RecipeType.CombatLaser1, SkillType.Engineering)
+			_builder.Create(RecipeType.CombatLaser1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("com_laser_1")
 				.Level(12)
@@ -204,7 +204,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 1);
 
 			//  EM Amplifier I
-			_builder.Create(RecipeType.EMAmplifier1, SkillType.Engineering)
+			_builder.Create(RecipeType.EMAmplifier1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("em_amp_1")
 				.Level(17)
@@ -215,7 +215,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 2);
 
 			//  Thermal Amplifier I
-			_builder.Create(RecipeType.ThermalAmplifier1, SkillType.Engineering)
+			_builder.Create(RecipeType.ThermalAmplifier1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("therm_amp_1")
 				.Level(16)
@@ -226,7 +226,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 2);
 
 			//  Explosive Amplifier I
-			_builder.Create(RecipeType.ExplosiveAmplifier1, SkillType.Engineering)
+			_builder.Create(RecipeType.ExplosiveAmplifier1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("exp_amp_1")
 				.Level(16)
@@ -237,7 +237,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 2);
 
 			//  Evasion Booster I
-			_builder.Create(RecipeType.EvasionBooster1, SkillType.Engineering)
+			_builder.Create(RecipeType.EvasionBooster1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("eva_boost_1")
 				.Level(18)
@@ -248,7 +248,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 3);
 
 			//  Hull Booster I
-			_builder.Create(RecipeType.HullBooster1, SkillType.Engineering)
+			_builder.Create(RecipeType.HullBooster1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("hull_boost_1")
 				.Level(14)
@@ -259,7 +259,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 2);
 
 			//  Hull Repairer I
-			_builder.Create(RecipeType.HullRepairer1, SkillType.Engineering)
+			_builder.Create(RecipeType.HullRepairer1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("hull_rep_1")
 				.Level(13)
@@ -270,7 +270,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 1);
 
 			//  Ion Cannon I
-			_builder.Create(RecipeType.IonCannon1, SkillType.Engineering)
+			_builder.Create(RecipeType.IonCannon1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("ion_cann_1")
 				.Level(12)
@@ -281,7 +281,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 1);
 
 			//  Mining Laser I
-			_builder.Create(RecipeType.MiningLaser1, SkillType.Engineering)
+			_builder.Create(RecipeType.MiningLaser1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("min_laser_1")
 				.Level(11)
@@ -292,7 +292,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 1);
 
 			//  Missile Launcher I
-			_builder.Create(RecipeType.MissileLauncher1, SkillType.Engineering)
+			_builder.Create(RecipeType.MissileLauncher1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("msl_launch_1")
 				.Level(14)
@@ -303,7 +303,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 2);
 
 			//  Shield Booster I
-			_builder.Create(RecipeType.ShieldBooster1, SkillType.Engineering)
+			_builder.Create(RecipeType.ShieldBooster1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("shld_boost_1")
 				.Level(13)
@@ -314,7 +314,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 1);
 
 			//  Shield Repairer I
-			_builder.Create(RecipeType.ShieldRepairer1, SkillType.Engineering)
+			_builder.Create(RecipeType.ShieldRepairer1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("shld_rep_1")
 				.Level(18)
@@ -325,7 +325,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_flawed", 3);
 
 			//  Targeting System I
-			_builder.Create(RecipeType.TargetingSystem1, SkillType.Engineering)
+			_builder.Create(RecipeType.TargetingSystem1, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("tgt_sys_1")
 				.Level(19)
@@ -341,7 +341,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
         {
 
 			//  Capacitor Booster II
-			_builder.Create(RecipeType.CapacitorBooster2, SkillType.Engineering)
+			_builder.Create(RecipeType.CapacitorBooster2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("cap_boost_2")
 				.Level(25)
@@ -352,7 +352,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 2);
 
 			//  Combat Laser II
-			_builder.Create(RecipeType.CombatLaser2, SkillType.Engineering)
+			_builder.Create(RecipeType.CombatLaser2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("com_laser_2")
 				.Level(22)
@@ -363,7 +363,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 1);
 
 			//  EM Amplifier II
-			_builder.Create(RecipeType.EMAmplifier2, SkillType.Engineering)
+			_builder.Create(RecipeType.EMAmplifier2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("em_amp_2")
 				.Level(27)
@@ -374,7 +374,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 2);
 
 			//  Thermal Amplifier II
-			_builder.Create(RecipeType.ThermalAmplifier2, SkillType.Engineering)
+			_builder.Create(RecipeType.ThermalAmplifier2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("therm_amp_2")
 				.Level(26)
@@ -385,7 +385,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 2);
 
 			//  Explosive Amplifier II
-			_builder.Create(RecipeType.ExplosiveAmplifier2, SkillType.Engineering)
+			_builder.Create(RecipeType.ExplosiveAmplifier2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("exp_amp_2")
 				.Level(26)
@@ -396,7 +396,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 2);
 
 			//  Evasion Booster II
-			_builder.Create(RecipeType.EvasionBooster2, SkillType.Engineering)
+			_builder.Create(RecipeType.EvasionBooster2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("eva_boost_2")
 				.Level(28)
@@ -407,7 +407,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 3);
 
 			//  Hull Booster II
-			_builder.Create(RecipeType.HullBooster2, SkillType.Engineering)
+			_builder.Create(RecipeType.HullBooster2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("hull_boost_2")
 				.Level(24)
@@ -418,7 +418,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 2);
 
 			//  Hull Repairer II
-			_builder.Create(RecipeType.HullRepairer2, SkillType.Engineering)
+			_builder.Create(RecipeType.HullRepairer2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("hull_rep_2")
 				.Level(23)
@@ -429,7 +429,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 1);
 
 			//  Ion Cannon II
-			_builder.Create(RecipeType.IonCannon2, SkillType.Engineering)
+			_builder.Create(RecipeType.IonCannon2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("ion_cann_2")
 				.Level(22)
@@ -440,7 +440,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 1);
 
 			//  Mining Laser II
-			_builder.Create(RecipeType.MiningLaser2, SkillType.Engineering)
+			_builder.Create(RecipeType.MiningLaser2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("min_laser_2")
 				.Level(21)
@@ -451,7 +451,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 1);
 
 			//  Missile Launcher II
-			_builder.Create(RecipeType.MissileLauncher2, SkillType.Engineering)
+			_builder.Create(RecipeType.MissileLauncher2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("msl_launch_2")
 				.Level(24)
@@ -462,7 +462,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 2);
 
 			//  Shield Booster II
-			_builder.Create(RecipeType.ShieldBooster2, SkillType.Engineering)
+			_builder.Create(RecipeType.ShieldBooster2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("shld_boost_2")
 				.Level(23)
@@ -473,7 +473,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 1);
 
 			//  Shield Repairer II
-			_builder.Create(RecipeType.ShieldRepairer2, SkillType.Engineering)
+			_builder.Create(RecipeType.ShieldRepairer2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("shld_rep_2")
 				.Level(28)
@@ -484,7 +484,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_good", 3);
 
 			//  Targeting System II
-			_builder.Create(RecipeType.TargetingSystem2, SkillType.Engineering)
+			_builder.Create(RecipeType.TargetingSystem2, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("tgt_sys_2")
 				.Level(29)
@@ -500,7 +500,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
         {
 
 			//  Capacitor Booster III
-			_builder.Create(RecipeType.CapacitorBooster3, SkillType.Engineering)
+			_builder.Create(RecipeType.CapacitorBooster3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("cap_boost_3")
 				.Level(35)
@@ -511,7 +511,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 2);
 
 			//  Combat Laser III
-			_builder.Create(RecipeType.CombatLaser3, SkillType.Engineering)
+			_builder.Create(RecipeType.CombatLaser3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("com_laser_3")
 				.Level(32)
@@ -522,7 +522,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 1);
 
 			//  EM Amplifier III
-			_builder.Create(RecipeType.EMAmplifier3, SkillType.Engineering)
+			_builder.Create(RecipeType.EMAmplifier3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("em_amp_3")
 				.Level(37)
@@ -533,7 +533,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 2);
 
 			//  Thermal Amplifier III
-			_builder.Create(RecipeType.ThermalAmplifier3, SkillType.Engineering)
+			_builder.Create(RecipeType.ThermalAmplifier3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("therm_amp_3")
 				.Level(36)
@@ -544,7 +544,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 2);
 
 			//  Explosive Amplifier III
-			_builder.Create(RecipeType.ExplosiveAmplifier3, SkillType.Engineering)
+			_builder.Create(RecipeType.ExplosiveAmplifier3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("exp_amp_3")
 				.Level(36)
@@ -555,7 +555,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 2);
 
 			//  Evasion Booster III
-			_builder.Create(RecipeType.EvasionBooster3, SkillType.Engineering)
+			_builder.Create(RecipeType.EvasionBooster3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("eva_boost_3")
 				.Level(38)
@@ -566,7 +566,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 3);
 
 			//  Hull Booster III
-			_builder.Create(RecipeType.HullBooster3, SkillType.Engineering)
+			_builder.Create(RecipeType.HullBooster3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("hull_boost_3")
 				.Level(34)
@@ -577,7 +577,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 2);
 
 			//  Hull Repairer III
-			_builder.Create(RecipeType.HullRepairer3, SkillType.Engineering)
+			_builder.Create(RecipeType.HullRepairer3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("hull_rep_3")
 				.Level(33)
@@ -588,7 +588,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 1);
 
 			//  Ion Cannon III
-			_builder.Create(RecipeType.IonCannon3, SkillType.Engineering)
+			_builder.Create(RecipeType.IonCannon3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("ion_cann_3")
 				.Level(32)
@@ -599,7 +599,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 1);
 
 			//  Mining Laser III
-			_builder.Create(RecipeType.MiningLaser3, SkillType.Engineering)
+			_builder.Create(RecipeType.MiningLaser3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("min_laser_3")
 				.Level(31)
@@ -610,7 +610,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 1);
 
 			//  Missile Launcher II
-			_builder.Create(RecipeType.MissileLauncher3, SkillType.Engineering)
+			_builder.Create(RecipeType.MissileLauncher3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("msl_launch_3")
 				.Level(34)
@@ -621,7 +621,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 2);
 
 			//  Shield Booster III
-			_builder.Create(RecipeType.ShieldBooster3, SkillType.Engineering)
+			_builder.Create(RecipeType.ShieldBooster3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("shld_boost_3")
 				.Level(33)
@@ -632,7 +632,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 1);
 
 			//  Shield Repairer III
-			_builder.Create(RecipeType.ShieldRepairer3, SkillType.Engineering)
+			_builder.Create(RecipeType.ShieldRepairer3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("shld_rep_3")
 				.Level(38)
@@ -643,7 +643,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_imperfect", 3);
 
 			//  Targeting System III
-			_builder.Create(RecipeType.TargetingSystem3, SkillType.Engineering)
+			_builder.Create(RecipeType.TargetingSystem3, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("tgt_sys_3")
 				.Level(39)
@@ -659,7 +659,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
         {
 
 			//  Capacitor Booster IV
-			_builder.Create(RecipeType.CapacitorBooster4, SkillType.Engineering)
+			_builder.Create(RecipeType.CapacitorBooster4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("cap_boost_4")
 				.Level(45)
@@ -670,7 +670,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 2);
 
 			//  Combat Laser IV
-			_builder.Create(RecipeType.CombatLaser4, SkillType.Engineering)
+			_builder.Create(RecipeType.CombatLaser4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("com_laser_4")
 				.Level(42)
@@ -681,7 +681,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 1);
 
 			//  EM Amplifier IV
-			_builder.Create(RecipeType.EMAmplifier4, SkillType.Engineering)
+			_builder.Create(RecipeType.EMAmplifier4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("em_amp_4")
 				.Level(47)
@@ -692,7 +692,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 2);
 
 			//  Thermal Amplifier IV
-			_builder.Create(RecipeType.ThermalAmplifier4, SkillType.Engineering)
+			_builder.Create(RecipeType.ThermalAmplifier4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("therm_amp_4")
 				.Level(46)
@@ -703,7 +703,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 2);
 
 			//  Explosive Amplifier IV
-			_builder.Create(RecipeType.ExplosiveAmplifier4, SkillType.Engineering)
+			_builder.Create(RecipeType.ExplosiveAmplifier4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("exp_amp_4")
 				.Level(46)
@@ -714,7 +714,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 2);
 
 			//  Evasion Booster IV
-			_builder.Create(RecipeType.EvasionBooster4, SkillType.Engineering)
+			_builder.Create(RecipeType.EvasionBooster4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("eva_boost_4")
 				.Level(48)
@@ -725,7 +725,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 3);
 
 			//  Hull Booster IV
-			_builder.Create(RecipeType.HullBooster4, SkillType.Engineering)
+			_builder.Create(RecipeType.HullBooster4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("hull_boost_4")
 				.Level(44)
@@ -736,7 +736,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 2);
 
 			//  Hull Repairer IV
-			_builder.Create(RecipeType.HullRepairer4, SkillType.Engineering)
+			_builder.Create(RecipeType.HullRepairer4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("hull_rep_4")
 				.Level(43)
@@ -747,7 +747,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 1);
 
 			//  Ion Cannon IV
-			_builder.Create(RecipeType.IonCannon4, SkillType.Engineering)
+			_builder.Create(RecipeType.IonCannon4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("ion_cann_4")
 				.Level(42)
@@ -758,7 +758,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 1);
 
 			//  Mining Laser IV
-			_builder.Create(RecipeType.MiningLaser4, SkillType.Engineering)
+			_builder.Create(RecipeType.MiningLaser4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("min_laser_4")
 				.Level(41)
@@ -769,7 +769,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 1);
 
 			//  Missile Launcher IV
-			_builder.Create(RecipeType.MissileLauncher4, SkillType.Engineering)
+			_builder.Create(RecipeType.MissileLauncher4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("msl_launch_4")
 				.Level(44)
@@ -780,7 +780,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 2);
 
 			//  Shield Booster IV
-			_builder.Create(RecipeType.ShieldBooster4, SkillType.Engineering)
+			_builder.Create(RecipeType.ShieldBooster4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("shld_boost_4")
 				.Level(43)
@@ -791,7 +791,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 1);
 
 			//  Shield Repairer IV
-			_builder.Create(RecipeType.ShieldRepairer4, SkillType.Engineering)
+			_builder.Create(RecipeType.ShieldRepairer4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("shld_rep_4")
 				.Level(48)
@@ -802,7 +802,7 @@ namespace WOD.Game.Server.Feature.RecipeDefinition.EngineeringRecipeDefinition
 				.Component("elec_high", 3);
 
 			//  Targeting System IV
-			_builder.Create(RecipeType.TargetingSystem4, SkillType.Engineering)
+			_builder.Create(RecipeType.TargetingSystem4, SkillType.Gunsmithing)
 				.Category(RecipeCategoryType.ShipModule)
 				.Resref("tgt_sys_4")
 				.Level(49)

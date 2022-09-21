@@ -51,7 +51,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Disciplines.Presence
         {
             builder.Create(FeatType.Awe, PerkType.Awe)
                 .Name("Awe I")
-                .RequirementFP(5)
+                .RequirementResource(5)
                 .HasImpactAction(ImpactAction)
                 .HasRecastDelay(RecastGroup.Awe,4f);
         }
@@ -59,7 +59,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Disciplines.Presence
         {
             builder.Create(FeatType.Awe, PerkType.Awe)
                 .Name("Awe II")
-                .RequirementFP(5)
+                .RequirementResource(5)
                 .HasImpactAction(ImpactAction)
                 .HasRecastDelay(RecastGroup.Awe, 4f);
         }
@@ -67,7 +67,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Disciplines.Presence
         {
             builder.Create(FeatType.Awe, PerkType.Awe)
                 .Name("Awe III")
-                .RequirementFP(5)
+                .RequirementResource(5)
                 .HasImpactAction(ImpactAction)
                 .HasRecastDelay(RecastGroup.Awe, 4f);
         }
@@ -75,7 +75,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Disciplines.Presence
         {
             builder.Create(FeatType.Awe, PerkType.Awe)
                 .Name("Awe IV")
-                .RequirementFP(5)
+                .RequirementResource(5)
                 .HasImpactAction(ImpactAction)
                 .HasRecastDelay(RecastGroup.Awe, 4f);
         }
@@ -83,7 +83,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Disciplines.Presence
         {
             builder.Create(FeatType.Awe, PerkType.Awe)
                 .Name("Awe V")
-                .RequirementFP(5)
+                .RequirementResource(5)
                 .HasImpactAction(ImpactAction)
                 .HasRecastDelay(RecastGroup.Awe, 4f);
         }

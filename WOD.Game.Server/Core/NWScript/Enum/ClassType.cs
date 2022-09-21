@@ -45,8 +45,8 @@ namespace WOD.Game.Server.Core.NWScript.Enum
         ShouDisciple = 40,
         PDK = 41,
 
-        Standard = 66,
-        ForceSensitive = 67,
+        Kindred = 66,
+        Kine = 67,
 
         Invalid = 255
     }

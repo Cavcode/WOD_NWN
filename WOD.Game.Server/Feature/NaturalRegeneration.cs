@@ -1,9 +1,9 @@
 ﻿using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Entity;
-using WOD.Game.Server.Feature.StatusEffectDefinition.StatusEffectData;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.StatusEffectService;
+using WOD.Game.Server.Enumeration;
 
 namespace WOD.Game.Server.Feature
 {
@@ -17,6 +17,10 @@ namespace WOD.Game.Server.Feature
         {
             var player = OBJECT_SELF;
             if (!GetIsPC(player) || GetIsDM(player)) return;
+            var playerId = GetObjectUUID(player);
+            var dbPlayer = DB.Get<Player>(playerId);
+
+            if (dbPlayer.CharacterType == CharacterType.Kindred) return;
 
             var tick = GetLocalInt(player, "NATURAL_REGENERATION_TICK") + 1;
             if (tick >= 5) // 6 seconds * 5 = 30 seconds
@@ -25,39 +29,23 @@ namespace WOD.Game.Server.Feature
                 if (vitalityBonus < 0)
                     vitalityBonus = 0;
 
-                var playerId = GetObjectUUID(player);
-                var dbPlayer = DB.Get<Player>(playerId);
                 var hpRegen = dbPlayer.HPRegen + vitalityBonus * 4;
-                var fpRegen = 1 + dbPlayer.FPRegen + vitalityBonus / 2;
-                var stmRegen = 1 + dbPlayer.STMRegen + vitalityBonus / 2;
-                var foodEffect = StatusEffect.GetEffectData<FoodEffectData>(player, StatusEffectType.Food);
 
-                if (foodEffect != null)
-                {
-                    hpRegen += foodEffect.HPRegen;
-                    fpRegen += foodEffect.FPRegen;
-                    stmRegen += foodEffect.STMRegen;
-                }
 
                 if (hpRegen > 0 && GetCurrentHitPoints(player) < GetMaxHitPoints(player))
                 {
                     ApplyEffectToObject(DurationType.Instant, EffectHeal(hpRegen), player);
                 }
 
-                if (fpRegen > 0)
-                {
-                    Stat.RestoreFP(player, fpRegen, dbPlayer);
-                }
-
-                if (stmRegen > 0)
-                {
-                    Stat.RestoreStamina(player, stmRegen, dbPlayer);
-                }
+                //if (fpRegen > 0)
+                //{
+                //    Stat.RestoreResource(player, fpRegen, dbPlayer);
+                //}
 
                 tick = 0;
             }
 
-            SetLocalInt(player, "NATURAL_REGENERATION_TICK", tick);
+            //SetLocalInt(player, "NATURAL_REGENERATION_TICK", tick);
         }
     }
 }

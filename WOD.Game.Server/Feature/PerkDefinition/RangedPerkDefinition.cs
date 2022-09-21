@@ -139,14 +139,14 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Improves critical chance by 2%. [Cross Skill]")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.PrecisionAim1)
 
                 .AddPerkLevel()
                 .Description("Improves critical chance by 4%. [Cross Skill]")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.PrecisionAim2);
         }
 
@@ -276,21 +276,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Instantly deals 10 DMG to your target.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 15)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.QuickDraw1)
 
                 .AddPerkLevel()
                 .Description("Instantly deals 20 DMG to your target.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 30)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.QuickDraw2)
 
                 .AddPerkLevel()
                 .Description("Instantly deals 30 DMG to your target.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.QuickDraw3);
         }
 
@@ -303,21 +303,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack deals an additional 8 x 2 DMG.")
                 .Price(2)
                 .RequirementSkill(SkillType.Ranged, 5)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.DoubleShot1)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 18 x 2 DMG.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 20)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.DoubleShot2)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 28 x 2 DMG.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.DoubleShot3);
         }
 
@@ -435,21 +435,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack damages up to 3 creatures within 3 meters of your target for 8 DMG.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 15)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.ExplosiveToss1)
 
                 .AddPerkLevel()
                 .Description("Your next attack damages up to 3 creatures within 3 meters of your target for 16 DMG.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 30)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.ExplosiveToss2)
 
                 .AddPerkLevel()
                 .Description("Your next attack damages up to 3 creatures within 3 meters of your target for 26 DMG.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.ExplosiveToss3);
         }
 
@@ -462,21 +462,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack deals an additional 12 DMG and has a 50% chance to inflict Bleed for 30 seconds.")
                 .Price(2)
                 .RequirementSkill(SkillType.Ranged, 5)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.PiercingToss1)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 21 DMG and has a 75% chance to inflict Bleed for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 20)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.PiercingToss2)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 34 DMG and has a 100% chance to inflict Bleed for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.PiercingToss3);
         }
         
@@ -595,21 +595,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack will tranquilize your target for up to 12 seconds. Damage will break the effect prematurely.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 15)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.TranquilizerShot1)
 
                 .AddPerkLevel()
                 .Description("Your next attack will tranquilize your target for up to 24 seconds. Damage will break the effect prematurely.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 30)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.TranquilizerShot2)
 
                 .AddPerkLevel()
                 .Description("Your next attack will tranquilize up to three creatures in a cone for up to 12 seconds. Damage will break the effect prematurely.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.TranquilizerShot3);
         }
 
@@ -622,21 +622,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack deals an additional 12 DMG and has a 50% chance to inflict Bind for 12 seconds.")
                 .Price(2)
                 .RequirementSkill(SkillType.Ranged, 5)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.CripplingShot1)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 21 DMG and has a 75% chance to inflict Bind for 12 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 20)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.CripplingShot2)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 34 DMG and has a 100% chance to inflict Bind for 12 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.Ranged, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.CripplingShot3);
         }
     }

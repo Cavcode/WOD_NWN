@@ -34,8 +34,8 @@ namespace WOD.Game.Server.Service
             { EffectIconType.AbilityDecreaseCON, AbilityType.Vitality },
             { EffectIconType.AbilityIncreaseINT, AbilityType.Intellect },
             { EffectIconType.AbilityDecreaseINT, AbilityType.Intellect },
-            { EffectIconType.AbilityIncreaseWIS, AbilityType.Willpower },
-            { EffectIconType.AbilityDecreaseWIS, AbilityType.Willpower },
+            { EffectIconType.AbilityIncreaseWIS, AbilityType.Will },
+            { EffectIconType.AbilityDecreaseWIS, AbilityType.Will },
             { EffectIconType.AbilityIncreaseCHA, AbilityType.Social },
             { EffectIconType.AbilityDecreaseCHA, AbilityType.Social },
 

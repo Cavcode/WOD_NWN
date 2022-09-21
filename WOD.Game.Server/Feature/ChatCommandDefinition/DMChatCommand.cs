@@ -130,8 +130,7 @@ namespace WOD.Game.Server.Feature.ChatCommandDefinition
                     }
 
                     ApplyEffectToObject(DurationType.Instant, EffectHeal(999), target);
-                    Stat.RestoreFP(target, Stat.GetMaxFP(target));
-                    Stat.RestoreStamina(target, Stat.GetMaxStamina(target));
+                    Stat.RestoreResource(target, Stat.GetMaxResource(target));
                 });
         }
 

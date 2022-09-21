@@ -44,12 +44,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             var playerId = GetObjectUUID(Player);
             var dbPlayer = DB.Get<Player>(playerId);
 
-            IsForceSensitive = dbPlayer.CharacterType == CharacterType.ForceSensitive;
-
             DisplayAchievementNotification = dbPlayer.Settings.DisplayAchievementNotification;
-            DisplayHolonetChannel = dbPlayer.Settings.IsHolonetEnabled;
             SubdualMode = dbPlayer.Settings.IsSubdualModeEnabled;
-            ShareLightsaberForceXP = dbPlayer.Settings.IsLightsaberForceShareEnabled;
 
             WatchOnClient(model => model.DisplayAchievementNotification);
             WatchOnClient(model => model.DisplayHolonetChannel);
@@ -63,9 +59,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             var dbPlayer = DB.Get<Player>(playerId);
 
             dbPlayer.Settings.DisplayAchievementNotification = DisplayAchievementNotification;
-            dbPlayer.Settings.IsHolonetEnabled = DisplayHolonetChannel;
             dbPlayer.Settings.IsSubdualModeEnabled = SubdualMode;
-            dbPlayer.Settings.IsLightsaberForceShareEnabled = ShareLightsaberForceXP;
 
             DB.Set(dbPlayer);
 

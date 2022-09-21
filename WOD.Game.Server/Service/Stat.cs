@@ -4,7 +4,6 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Item;
-using WOD.Game.Server.Feature.StatusEffectDefinition.StatusEffectData;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.LogService;
@@ -67,7 +66,7 @@ namespace WOD.Game.Server.Service
                     dbPlayer = DB.Get<Player>(playerId);
                 }
                 var baseResource = dbPlayer.MaxResource;
-                var modifier = GetAbilityModifier(AbilityType.Willpower, creature);
+                var modifier = GetAbilityModifier(AbilityType.Will, creature);
                 var foodEffect = StatusEffect.GetEffectData<FoodEffectData>(creature, StatusEffectType.Food);
                 var foodBonus = 0;
 
@@ -704,7 +703,7 @@ namespace WOD.Game.Server.Service
                 case AbilityType.Vitality:
                     stat = creature.m_pStats.GetCONStat();
                     break;
-                case AbilityType.Willpower:
+                case AbilityType.Will:
                     stat = creature.m_pStats.GetWISStat();
                     break;
                 case AbilityType.Intellect:

@@ -41,21 +41,21 @@ namespace WOD.Game.Server.Feature.DialogDefinition
 
             page.Header = $"What would you like to do?";
 
-                page.AddResponse("Exit", () =>
+            page.AddResponse("Exit", () =>
+            {
+                // Building interiors will have a location set identifying where their doors are located.
+                // Jump to this location if it's set.
+                if (GetLocalBool(area, "BUILDING_EXIT_SET"))
                 {
-                    // Building interiors will have a location set identifying where their doors are located.
-                    // Jump to this location if it's set.
-                    if (GetLocalBool(area, "BUILDING_EXIT_SET"))
-                    {
-                        var location = GetLocalLocation(area, "BUILDING_EXIT_LOCATION");
-                        AssignCommand(player, () => ActionJumpToLocation(location));
-                    }
-                    // Otherwise jump the player to their original location.
-                    else
-                    {
-                        Property.JumpToOriginalLocation(player);
-                    }
-                });
+                    var location = GetLocalLocation(area, "BUILDING_EXIT_LOCATION");
+                    AssignCommand(player, () => ActionJumpToLocation(location));
+                }
+                // Otherwise jump the player to their original location.
+                else
+                {
+                    Property.JumpToOriginalLocation(player);
+                }
+            });
 
         }
     }

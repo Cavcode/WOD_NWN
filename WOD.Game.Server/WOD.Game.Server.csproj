@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <Folder Include="Feature\AbilityDefinition\General\" />
+    <Folder Include="Feature\RecipeDefinition\CookingRecipeDefinition\" />
   </ItemGroup>
 
   <Target Name="NWN" AfterTargets="Build">

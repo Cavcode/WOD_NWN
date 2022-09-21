@@ -47,7 +47,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                     eLoop = GetNextEffect(Player);
                 }
 
-                Scheduler.Unschedule(Scheduler.GetSchedule("feedSchedule"));
+                Scheduler.Unschedule("feedSchedule_" + playerId);
             }
 
             if (GetLocalFloat(Player, "targetBloodAmountMax") == 0.0f)

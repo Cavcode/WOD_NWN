@@ -5,7 +5,7 @@ using WOD.Game.Server.Service.QuestService;
 
 namespace WOD.Game.Server.Feature.QuestDefinition
 {
-    public class FabricationGuildQuestDefinition : IQuestListDefinition
+    public class ConstructionGuildQuestDefinition : IQuestListDefinition
     {
         private class RewardDetails
         {
@@ -268,14 +268,14 @@ namespace WOD.Game.Server.Feature.QuestDefinition
 
             builder.Create(questId, $"{amount}x {itemName}")
                 .IsRepeatable()
-                .IsGuildTask(GuildType.FabricationGuild, guildRank)
+                .IsGuildTask(GuildType.ConstructionGuild, guildRank)
 
                 .AddState()
-                .SetStateJournalText($"Collect {amount}x {itemName} and return to the Fabrication Guildmaster")
+                .SetStateJournalText($"Collect {amount}x {itemName} and return to the Construction Guildmaster")
                 .AddCollectItemObjective(resref, amount)
 
                 .AddGoldReward(rewardDetails.Gold)
-                .AddGPReward(GuildType.FabricationGuild, rewardDetails.GP);
+                .AddGPReward(GuildType.ConstructionGuild, rewardDetails.GP);
         }
     }
 }
