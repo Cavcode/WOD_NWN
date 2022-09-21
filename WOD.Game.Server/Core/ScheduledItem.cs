@@ -6,25 +6,28 @@ namespace WOD.Game.Server.Core
     internal class ScheduledItem : IDisposable
     {
         private readonly Action _task;
+        public string ScheduleIdentifier { get; set; }
 
         public double ExecutionTime { get; private set; }
 
         public readonly bool Repeating;
         public readonly double Schedule;
 
-        public ScheduledItem(Action task, double executionTime)
+        public ScheduledItem(Action task, double executionTime, string scheduleIdentifier)
         {
             _task = task;
             ExecutionTime = executionTime;
             Repeating = false;
+            ScheduleIdentifier = scheduleIdentifier;
         }
 
-        public ScheduledItem(Action task, double executionTime, double schedule)
+        public ScheduledItem(Action task, double executionTime, double schedule, string scheduleIdentifier)
         {
             _task = task;
             ExecutionTime = executionTime;
             Schedule = schedule;
             Repeating = true;
+            ScheduleIdentifier = scheduleIdentifier;
         }
 
         public void Reschedule(double newTime)
@@ -64,5 +67,6 @@ namespace WOD.Game.Server.Core
                 return x.ExecutionTime.CompareTo(y.ExecutionTime);
             }
         }
+
     }
 }

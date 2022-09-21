@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using WOD.Game.Server.Core.Extensions;
 
 namespace WOD.Game.Server.Core
@@ -13,8 +14,14 @@ namespace WOD.Game.Server.Core
         private static readonly Stopwatch _stopwatch = new Stopwatch();
         private static readonly List<ScheduledItem> _scheduledItems = new List<ScheduledItem>(1024);
         private static readonly IComparer<ScheduledItem> _comparer = new ScheduledItem.SortedByExecutionTime();
-
-        public static IDisposable Schedule(Action task, TimeSpan delay)
+        private static ScheduledItem GetSchedule(string scheduleIdentifier)
+        {
+            var result = from schedule in _scheduledItems
+                         where schedule.ScheduleIdentifier == scheduleIdentifier
+                         select schedule;
+            return (ScheduledItem)result;
+        }
+        public static IDisposable Schedule(Action task, TimeSpan delay, string scheduleIdentifier)
         {
             if (delay < TimeSpan.Zero)
             {
@@ -26,12 +33,12 @@ namespace WOD.Game.Server.Core
                 throw new ArgumentNullException(nameof(task));
             }
 
-            var item = new ScheduledItem(task, Time + delay.TotalSeconds);
+            var item = new ScheduledItem(task, Time + delay.TotalSeconds, scheduleIdentifier);
             _scheduledItems.InsertOrdered(item, _comparer);
             return item;
         }
 
-        public static IDisposable ScheduleRepeating(Action task, TimeSpan schedule, TimeSpan delay = default)
+        public static IDisposable ScheduleRepeating(Action task, TimeSpan schedule, string scheduleIdenitfier, TimeSpan delay = default)
         {
             if (schedule <= TimeSpan.Zero)
             {
@@ -43,13 +50,14 @@ namespace WOD.Game.Server.Core
                 throw new ArgumentNullException(nameof(task));
             }
 
-            var item = new ScheduledItem(task, Time + delay.TotalSeconds + schedule.TotalSeconds, schedule.TotalSeconds);
+            var item = new ScheduledItem(task, Time + delay.TotalSeconds + schedule.TotalSeconds, schedule.TotalSeconds, scheduleIdenitfier);
             _scheduledItems.InsertOrdered(item, _comparer);
             return item;
         }
 
-        internal static void Unschedule(ScheduledItem scheduledItem)
+        internal static void Unschedule(string scheduleIdentifier)
         {
+            var scheduledItem = GetSchedule(scheduleIdentifier);
             _scheduledItems.Remove(scheduledItem);
         }
 
