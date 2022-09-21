@@ -21,7 +21,7 @@ namespace WOD.Game.Server.Core
                          select schedule;
             return (ScheduledItem)result;
         }
-        public static IDisposable Schedule(Action task, TimeSpan delay, string scheduleIdentifier)
+        public static ScheduledItem Schedule(Action task, TimeSpan delay, string scheduleIdentifier)
         {
             if (delay < TimeSpan.Zero)
             {
@@ -38,7 +38,7 @@ namespace WOD.Game.Server.Core
             return item;
         }
 
-        public static IDisposable ScheduleRepeating(Action task, TimeSpan schedule, string scheduleIdenitfier, TimeSpan delay = default)
+        public static ScheduledItem ScheduleRepeating(Action task, TimeSpan schedule, string scheduleIdenitfier, TimeSpan delay = default)
         {
             if (schedule <= TimeSpan.Zero)
             {

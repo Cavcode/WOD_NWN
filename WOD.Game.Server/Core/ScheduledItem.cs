@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace WOD.Game.Server.Core
 {
-    internal class ScheduledItem : IDisposable
+     public class ScheduledItem
     {
         private readonly Action _task;
         public string ScheduleIdentifier { get; set; }
@@ -38,11 +38,6 @@ namespace WOD.Game.Server.Core
         public void Execute()
         {
             _task();
-        }
-
-        public void Dispose()
-        {
-            Scheduler.Unschedule(this);
         }
 
         public sealed class SortedByExecutionTime : IComparer<ScheduledItem>
