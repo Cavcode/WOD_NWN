@@ -531,9 +531,9 @@ namespace WOD.Game.Server.Service
 
             CreaturePlugin.SetBaseAC(spawn, 100);
             CreaturePlugin.SetRawAbilityScore(spawn, AbilityType.Might, 100);
-            CreaturePlugin.SetRawAbilityScore(spawn, AbilityType.Perception, 100);
+            CreaturePlugin.SetRawAbilityScore(spawn, AbilityType.Dexterity, 100);
             CreaturePlugin.SetRawAbilityScore(spawn, AbilityType.Vitality, 100);
-            CreaturePlugin.SetRawAbilityScore(spawn, AbilityType.Agility, 100);
+            CreaturePlugin.SetRawAbilityScore(spawn, AbilityType.Intellect, 100);
             CreaturePlugin.SetRawAbilityScore(spawn, AbilityType.Willpower, 100);
             CreaturePlugin.SetRawAbilityScore(spawn, AbilityType.Social, 100);
             CreaturePlugin.SetBaseAttackBonus(spawn, 254);

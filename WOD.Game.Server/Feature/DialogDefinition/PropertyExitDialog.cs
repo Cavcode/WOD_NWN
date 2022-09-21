@@ -41,34 +41,6 @@ namespace WOD.Game.Server.Feature.DialogDefinition
 
             page.Header = $"What would you like to do?";
 
-            // The existence of a current position means this is a starship currently in space.
-            // Players should only have the "Emergency Exit" option.
-            if (property != null &&
-                property.Positions.ContainsKey(PropertyLocationType.CurrentPosition))
-            {
-                page.Header += "\nYou may perform an emergency exit to return to the last dock at which this ship landed. If you are the last person on board, the ship will be towed back, damaging the ship's shields and hull.";
-
-                page.AddResponse(ColorToken.Red("Emergency Exit"), () =>
-                {
-                    var propertyLocation = property.Positions[PropertyLocationType.DockPosition];
-                    ReturnToLastDockedPosition(player, propertyLocation);
-
-                    Space.PerformEmergencyExit(area);
-                });
-            }
-            // The existence of a "Last Docked" position means this is a starship currently docked at a starport.
-            else if (property != null && 
-                     property.Positions.ContainsKey(PropertyLocationType.DockPosition))
-            {
-                page.AddResponse("Exit", () =>
-                {
-                    var propertyLocation = property.Positions[PropertyLocationType.DockPosition];
-                    ReturnToLastDockedPosition(player, propertyLocation);
-                });
-            }
-            // For all other scenarios, the player should be jumped to their original location.
-            else
-            {
                 page.AddResponse("Exit", () =>
                 {
                     // Building interiors will have a location set identifying where their doors are located.
@@ -84,7 +56,7 @@ namespace WOD.Game.Server.Feature.DialogDefinition
                         Property.JumpToOriginalLocation(player);
                     }
                 });
-            }
+
         }
     }
 }

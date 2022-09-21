@@ -80,20 +80,20 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                     {
                         row.AddButton()
                             .SetText("-")
-                            .BindOnClicked(model => model.OnClickSubtractPerception())
+                            .BindOnClicked(model => model.OnClickSubtractDexterity())
                             .SetHeight(32f)
                             .SetWidth(32f)
                             .BindIsEnabled(model => model.CanDistribute);
 
                         row.AddLabel()
-                            .BindText(model => model.Perception)
-                            .SetTooltip("Perception - Improves damage dealt by ranged and finesse weapons and increases physical accuracy.")
+                            .BindText(model => model.Dexterity)
+                            .SetTooltip("Dexterity - Improves damage dealt by ranged and finesse weapons and increases physical accuracy.")
                             .SetHeight(32f)
                             .SetWidth(500f);
 
                         row.AddButton()
                             .SetText("+")
-                            .BindOnClicked(model => model.OnClickAddPerception())
+                            .BindOnClicked(model => model.OnClickAddDexterity())
                             .SetHeight(32f)
                             .SetWidth(32f)
                             .BindIsEnabled(model => model.CanDistribute);

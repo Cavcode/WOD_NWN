@@ -349,7 +349,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                     _wasteNotPerk = PerkType.WasteNotSmithery;
                     break;
                 case SkillType.Fabrication:
-                    _primaryAbility = AbilityType.Perception;
+                    _primaryAbility = AbilityType.Dexterity;
                     _secondaryAbility = AbilityType.Willpower;
 
                     _rapidSynthesisPerk = PerkType.RapidSynthesisFabrication;

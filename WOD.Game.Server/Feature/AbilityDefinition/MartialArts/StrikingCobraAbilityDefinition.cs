@@ -70,7 +70,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
 
             CombatPoint.AddCombatPoint(activator, target, SkillType.MartialArts, 3);
 
-            var attackerStat = GetAbilityScore(activator, AbilityType.Perception);
+            var attackerStat = GetAbilityScore(activator, AbilityType.Dexterity);
             var attack = Stat.GetAttack(activator, AbilityType.Might, SkillType.MartialArts);
             var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
             var defenderStat = GetAbilityScore(target, AbilityType.Vitality);

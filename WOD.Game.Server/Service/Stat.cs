@@ -948,8 +948,8 @@ namespace WOD.Game.Server.Service
             int skillLevel;
             var evasionBonus = 0;
 
-            // Base NWN applies an AC bonus based on the DEX stat. The Perception stat is based upon this.
-            // Perception should not increase AC in WOD, so this is subtracted from the AC.
+            // Base NWN applies an AC bonus based on the DEX stat. The Dexterity stat is based upon this.
+            // Dexterity should not increase AC in WOD, so this is subtracted from the AC.
             var dexOffset = GetAbilityModifier(AbilityType.Dexterity, creature);
             var ac = GetAC(creature) - dexOffset - 10; // Offset by natural 10 AC granted to all characters.
             var skillType = skillOverride == SkillType.Invalid ? SkillType.Armor : skillOverride;

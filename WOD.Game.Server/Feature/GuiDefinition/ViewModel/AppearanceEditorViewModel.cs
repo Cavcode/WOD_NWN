@@ -62,49 +62,16 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
         private static void LoadRacialAppearances()
         {
             _racialAppearances[AppearanceType.Human] = new HumanRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Bothan] = new BothanRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Chiss] = new ChissRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Zabrak] = new ZabrakRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Twilek] = new TwilekRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Mirialan] = new MirialanRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Echani] = new EchaniRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.KelDor] = new KelDorRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Cyborg] = new CyborgRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Cathar] = new CatharRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Rodian] = new RodianRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Trandoshan] = new TrandoshanRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Togruta] = new TogrutaRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Wookiee] = new WookieeRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.MonCalamari] = new MonCalamariRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Ugnaught] = new UgnaughtRacialAppearanceDefinition();
-            _racialAppearances[AppearanceType.Droid] = new DroidRacialAppearanceDefinition();
         }
 
         private static void LoadArmorAppearances()
         {
             _armorAppearances[AppearanceType.Human] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Bothan] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Chiss] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Zabrak] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Twilek] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Mirialan] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Echani] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.KelDor] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Cyborg] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Cathar] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Rodian] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Trandoshan] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Togruta] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Wookiee] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.MonCalamari] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Ugnaught] = new GeneralArmorAppearanceDefinition();
-            _armorAppearances[AppearanceType.Droid] = new DroidArmorAppearanceDefinition();
         }
 
         private static void LoadWeaponAppearances()
         {
             _weaponAppearances[BaseItem.Dagger] = new DaggerAppearanceDefinition();
-            _weaponAppearances[BaseItem.Electroblade] = new ElectrobladeAppearanceDefinition();
             _weaponAppearances[BaseItem.GreatSword] = new GreatSwordAppearanceDefinition();
             _weaponAppearances[BaseItem.Katar] = new KatarAppearanceDefinition();
             _weaponAppearances[BaseItem.LargeShield] = new LargeShieldAppearanceDefinition();
@@ -115,7 +82,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             _weaponAppearances[BaseItem.Shuriken] = new ShurikenAppearanceDefinition();
             _weaponAppearances[BaseItem.ShortSpear] = new SpearAppearanceDefinition();
             _weaponAppearances[BaseItem.TwoBladedSword] = new TwinBladeAppearanceDefinition();
-            _weaponAppearances[BaseItem.TwinElectroBlade] = new TwinElectrobladeAppearanceDefinition();
         }
 
         public bool IsAppearanceSelected

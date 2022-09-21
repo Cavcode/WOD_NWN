@@ -77,7 +77,7 @@ namespace WOD.Game.Server.Feature
                 return;
 
             SetEventScript(player, EventScript.Creature_OnHeartbeat, "pc_heartbeat");
-            SetEventScript(player, EventScript.Creature_OnNotice, "pc_perception");
+            SetEventScript(player, EventScript.Creature_OnNotice, "pc_Dexterity");
             SetEventScript(player, EventScript.Creature_OnSpellCastAt, "pc_spellcastat");
             SetEventScript(player, EventScript.Creature_OnMeleeAttacked, "pc_attacked");
             SetEventScript(player, EventScript.Creature_OnDamaged, "pc_damaged");

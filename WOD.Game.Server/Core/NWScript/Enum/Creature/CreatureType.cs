@@ -11,6 +11,6 @@ namespace WOD.Game.Server.Core.NWScript.Enum.Creature
         IsAlive,
         HasSpellEffect,
         DoesNotHaveSpellEffect,
-        Perception
+        Dexterity
     }
 }

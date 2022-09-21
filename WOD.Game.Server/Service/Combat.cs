@@ -155,7 +155,7 @@ namespace WOD.Game.Server.Service
         /// <summary>
         /// Calculates the critical hit rate against a given target.
         /// </summary>
-        /// <param name="attackerStat">The attacker's attack stat (Perception for melee, Agility for ranged)</param>
+        /// <param name="attackerStat">The attacker's attack stat (Dexterity for melee, Agility for ranged)</param>
         /// <param name="defenderAGI">The defender's agility stat.</param>
         /// <param name="criticalModifier">A modifier to the critical rating based on external factors.</param>
         /// <returns>The critical rate, in a percentage</returns>

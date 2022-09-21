@@ -14,7 +14,7 @@
         public string ScaleKey { get { return $"{Value}_scale"; } }
 
         public static AnimationEvent CreatureOnAttacked { get { return new AnimationEvent("crea_attacked_vfx"); } }
-        public static AnimationEvent CreatureOnPerceive { get { return new AnimationEvent("crea_perception_vfx"); } }
+        public static AnimationEvent CreatureOnPerceive { get { return new AnimationEvent("crea_Dexterity_vfx"); } }
         public static AnimationEvent CreatureOnRoundEnd { get { return new AnimationEvent("crea_roundend_vfx"); } }
         public static AnimationEvent CreatureOnDamaged { get { return new AnimationEvent("crea_damaged_vfx"); } }
         public static AnimationEvent CreatureOnDeath { get { return new AnimationEvent("crea_death_vfx");  } }

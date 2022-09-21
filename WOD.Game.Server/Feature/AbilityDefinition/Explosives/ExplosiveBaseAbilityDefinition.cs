@@ -113,8 +113,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Devices
             var activatorLocation = GetLocation(activator);
             var delay = GetDistanceBetweenLocations(activatorLocation, targetLocation) / 18f;
 
-            var attackerStat = GetAbilityScore(activator, AbilityType.Perception);
-            var attack = Stat.GetAttack(activator, AbilityType.Perception, SkillType.Devices);
+            var attackerStat = GetAbilityScore(activator, AbilityType.Dexterity);
+            var attack = Stat.GetAttack(activator, AbilityType.Dexterity, SkillType.Devices);
             var dmgBonus = Combat.GetAbilityDamageBonus(activator, SkillType.Devices);
 
             DelayCommand(delay, () =>

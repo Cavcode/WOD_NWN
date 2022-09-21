@@ -42,7 +42,7 @@ namespace WOD.Game.Server.Feature.ItemDefinition
                             ability = AbilityType.Vitality;
                             break;
                         case 3:
-                            ability = AbilityType.Perception;
+                            ability = AbilityType.Dexterity;
                             break;
                         case 4:
                             ability = AbilityType.Might;

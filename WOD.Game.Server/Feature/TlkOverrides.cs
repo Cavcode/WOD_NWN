@@ -49,7 +49,7 @@ namespace WOD.Game.Server.Feature
                 "Improves damage dealt by heavy melee weapons.\n" + 
                 "Improves damage dealt by throwing weapons.");
             SetTlkOverride(460, 
-                "Perception improves damage dealt by ranged and finesse weapons and increases physical accuracy.\n\n" +
+                "Dexterity improves damage dealt by ranged and finesse weapons and increases physical accuracy.\n\n" +
                 "Primary Skills: One-Handed, Two-Handed, Martial Arts, Ranged, Fabrication, Devices\n\n" + 
                 "Other Notes:\n\n" + 
                 "Improves accuracy of regular melee weapons.\n" + 
@@ -112,8 +112,8 @@ namespace WOD.Game.Server.Feature
 
             SetTlkOverride(58369, "Might Increased");
             SetTlkOverride(58370, "Might Decreased");
-            SetTlkOverride(58371, "Perception Increased");
-            SetTlkOverride(58372, "Perception Decreased");
+            SetTlkOverride(58371, "Dexterity Increased");
+            SetTlkOverride(58372, "Dexterity Decreased");
             SetTlkOverride(58373, "Vitality Increased");
             SetTlkOverride(58374, "Vitality Decreased");
             SetTlkOverride(58375, "Agility Increased");
@@ -143,7 +143,7 @@ namespace WOD.Game.Server.Feature
                    "Vitality: Improves your max hit points and reduces damage received.\n" +
                    "Intellect: Improves damage dealt by subtype abilities.\n" +
                    "Willpower: Improves subtype ability defense.\n" +
-                   "Agility: Improves ranged accuracy and evasion.\n" +
+                   "Dexterity: Improves ranged accuracy and evasion.\n" +
                    "Social: Improves your XP gain and leadership capabilities.\n\n";
         }
 

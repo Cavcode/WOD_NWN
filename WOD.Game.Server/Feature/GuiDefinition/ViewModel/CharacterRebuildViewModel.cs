@@ -125,7 +125,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
         private int _remainingAbilityPoints;
         private int _remainingSkillPoints;
         private int _might;
-        private int _perception;
+        private int _Dexterity;
         private int _vitality;
         private int _willpower;
         private int _agility;
@@ -149,7 +149,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set => Set(value);
         }
 
-        public string Perception
+        public string Dexterity
         {
             get => Get<string>();
             set => Set(value);
@@ -200,14 +200,14 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             var dbPlayer = DB.Get<Player>(playerId);
 
             _might = 0;
-            _perception = 0;
+            _Dexterity = 0;
             _vitality = 0;
             _willpower = 0;
             _agility = 0;
             _social = 0;
             RecalculateAvailableAbilityPoints();
             Might = $"MGT [{_might}]";
-            Perception = $"PER [{_perception}]";
+            Dexterity = $"PER [{_Dexterity}]";
             Vitality = $"VIT [{_vitality}]";
             Willpower = $"WIL [{_willpower}]";
             Agility = $"AGI [{_agility}]";
@@ -215,7 +215,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 
             var racialStat = dbPlayer.RacialStat;
             var might = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Might) ;
-            var perception = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Perception);
+            var Dexterity = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Dexterity);
             var agility = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Agility);
             var vitality = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Vitality);
             var willpower = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Willpower);
@@ -230,7 +230,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                                 })
                                 .Sum(s => s.Value.Rank) == 0
                             && might <= 10 + (racialStat == AbilityType.Might ? 1 : 0)
-                            && perception <= 10 + (racialStat == AbilityType.Perception ? 1 : 0)
+                            && Dexterity <= 10 + (racialStat == AbilityType.Dexterity ? 1 : 0)
                             && agility <= 10 + (racialStat == AbilityType.Agility ? 1 : 0)
                             && vitality <= 10 + (racialStat == AbilityType.Vitality ? 1 : 0)
                             && willpower <= 10 + (racialStat == AbilityType.Willpower ? 1 : 0)
@@ -268,7 +268,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 
         private void RecalculateAvailableAbilityPoints()
         {
-            _remainingAbilityPoints = MaxAbilityIncreases - _might - _perception - _vitality - _willpower - _agility - _social;
+            _remainingAbilityPoints = MaxAbilityIncreases - _might - _Dexterity - _vitality - _willpower - _agility - _social;
             RemainingAbilityPoints = $"Attributes - {_remainingAbilityPoints} Points Remaining";
         }
 
@@ -363,7 +363,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 var dbPlayer = DB.Get<Player>(playerId);
 
                 CreaturePlugin.SetRawAbilityScore(Player, AbilityType.Might, 10);
-                CreaturePlugin.SetRawAbilityScore(Player, AbilityType.Perception, 10);
+                CreaturePlugin.SetRawAbilityScore(Player, AbilityType.Dexterity, 10);
                 CreaturePlugin.SetRawAbilityScore(Player, AbilityType.Vitality, 10);
                 CreaturePlugin.SetRawAbilityScore(Player, AbilityType.Willpower, 10);
                 CreaturePlugin.SetRawAbilityScore(Player, AbilityType.Agility, 10);
@@ -371,14 +371,14 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 CreaturePlugin.SetBaseAttackBonus(Player, 1);
 
                 dbPlayer.BaseStats[AbilityType.Might] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Might);
-                dbPlayer.BaseStats[AbilityType.Perception] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Perception);
+                dbPlayer.BaseStats[AbilityType.Dexterity] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Dexterity);
                 dbPlayer.BaseStats[AbilityType.Vitality] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Vitality);
                 dbPlayer.BaseStats[AbilityType.Willpower] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Willpower);
                 dbPlayer.BaseStats[AbilityType.Agility] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Agility);
                 dbPlayer.BaseStats[AbilityType.Social] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Social);
 
                 dbPlayer.UpgradedStats[AbilityType.Might] = 0;
-                dbPlayer.UpgradedStats[AbilityType.Perception] = 0;
+                dbPlayer.UpgradedStats[AbilityType.Dexterity] = 0;
                 dbPlayer.UpgradedStats[AbilityType.Vitality] = 0;
                 dbPlayer.UpgradedStats[AbilityType.Willpower] = 0;
                 dbPlayer.UpgradedStats[AbilityType.Agility] = 0;
@@ -439,27 +439,27 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             Might = $"MGT [{_might}]";
         };
 
-        public Action OnClickSubtractPerception() => () =>
+        public Action OnClickSubtractDexterity() => () =>
         {
-            _perception--;
-            if (_perception < 0)
-                _perception = 0;
+            _Dexterity--;
+            if (_Dexterity < 0)
+                _Dexterity = 0;
 
             RecalculateAvailableAbilityPoints();
-            Perception = $"PER [{_perception}]";
+            Dexterity = $"PER [{_Dexterity}]";
         };
 
-        public Action OnClickAddPerception() => () =>
+        public Action OnClickAddDexterity() => () =>
         {
             if (_remainingAbilityPoints <= 0)
                 return;
 
-            _perception++;
-            if (_perception > 6)
-                _perception = 6;
+            _Dexterity++;
+            if (_Dexterity > 6)
+                _Dexterity = 6;
 
             RecalculateAvailableAbilityPoints();
-            Perception = $"PER [{_perception}]";
+            Dexterity = $"PER [{_Dexterity}]";
         };
 
 
@@ -655,14 +655,14 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 var dbPlayer = DB.Get<Player>(playerId);
 
                 CreaturePlugin.ModifyRawAbilityScore(Player, AbilityType.Might, _might);
-                CreaturePlugin.ModifyRawAbilityScore(Player, AbilityType.Perception, _perception);
+                CreaturePlugin.ModifyRawAbilityScore(Player, AbilityType.Dexterity, _Dexterity);
                 CreaturePlugin.ModifyRawAbilityScore(Player, AbilityType.Vitality, _vitality);
                 CreaturePlugin.ModifyRawAbilityScore(Player, AbilityType.Willpower, _willpower);
                 CreaturePlugin.ModifyRawAbilityScore(Player, AbilityType.Agility, _agility);
                 CreaturePlugin.ModifyRawAbilityScore(Player, AbilityType.Social, _social);
 
                 dbPlayer.BaseStats[AbilityType.Might] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Might);
-                dbPlayer.BaseStats[AbilityType.Perception] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Perception);
+                dbPlayer.BaseStats[AbilityType.Dexterity] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Dexterity);
                 dbPlayer.BaseStats[AbilityType.Vitality] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Vitality);
                 dbPlayer.BaseStats[AbilityType.Willpower] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Willpower);
                 dbPlayer.BaseStats[AbilityType.Agility] = CreaturePlugin.GetRawAbilityScore(Player, AbilityType.Agility);

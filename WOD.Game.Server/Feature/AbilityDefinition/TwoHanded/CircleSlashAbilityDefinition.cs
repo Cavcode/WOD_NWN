@@ -59,7 +59,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
 
             dmg += Combat.GetAbilityDamageBonus(activator, SkillType.TwoHanded);
 
-            var stat = AbilityType.Perception;
+            var stat = AbilityType.Dexterity;
             if (Ability.IsAbilityToggled(activator, AbilityToggleType.StrongStyleSaberstaff))
             {
                 stat = AbilityType.Might;

@@ -253,7 +253,7 @@ namespace WOD.Game.Server.Core.NWScript
         ///   -> SPELL_* if nFirstCriteriaType was CREATURE_TYPE_DOES_NOT_HAVE_SPELL_EFFECT
         ///   or CREATURE_TYPE_HAS_SPELL_EFFECT
         ///   -> TRUE or FALSE if nFirstCriteriaType was CREATURE_TYPE_IS_ALIVE
-        ///   -> PERCEPTION_* if nFirstCriteriaType was CREATURE_TYPE_PERCEPTION
+        ///   -> Dexterity_* if nFirstCriteriaType was CREATURE_TYPE_Dexterity
         ///   -> PLAYER_CHAR_IS_PC or PLAYER_CHAR_NOT_PC if nFirstCriteriaType was
         ///   CREATURE_TYPE_PLAYER_CHAR
         ///   -> RACIAL_TYPE_* if nFirstCriteriaType was CREATURE_TYPE_RACIAL_TYPE
@@ -1466,7 +1466,7 @@ namespace WOD.Game.Server.Core.NWScript
         }
 
         /// <summary>
-        ///   Use this in an OnPerception script to get the object that was perceived.
+        ///   Use this in an OnDexterity script to get the object that was perceived.
         ///   * Returns OBJECT_INVALID if the caller is not a valid creature.
         /// </summary>
         public static uint GetLastPerceived()
@@ -1476,30 +1476,30 @@ namespace WOD.Game.Server.Core.NWScript
         }
 
         /// <summary>
-        ///   Use this in an OnPerception script to determine whether the object that was
+        ///   Use this in an OnDexterity script to determine whether the object that was
         ///   perceived was heard.
         /// </summary>
-        public static bool GetLastPerceptionHeard()
+        public static bool GetLastDexterityHeard()
         {
             VM.Call(257);
             return Convert.ToBoolean(VM.StackPopInt());
         }
 
         /// <summary>
-        ///   Use this in an OnPerception script to determine whether the object that was
+        ///   Use this in an OnDexterity script to determine whether the object that was
         ///   perceived has become inaudible.
         /// </summary>
-        public static bool GetLastPerceptionInaudible()
+        public static bool GetLastDexterityInaudible()
         {
             VM.Call(258);
             return Convert.ToBoolean(VM.StackPopInt());
         }
 
         /// <summary>
-        ///   Use this in an OnPerception script to determine whether the object that was
+        ///   Use this in an OnDexterity script to determine whether the object that was
         ///   perceived was seen.
         /// </summary>
-        public static bool GetLastPerceptionSeen()
+        public static bool GetLastDexteritySeen()
         {
             VM.Call(259);
             return Convert.ToBoolean(VM.StackPopInt());
@@ -1516,10 +1516,10 @@ namespace WOD.Game.Server.Core.NWScript
         }
 
         /// <summary>
-        ///   Use this in an OnPerception script to determine whether the object that was
+        ///   Use this in an OnDexterity script to determine whether the object that was
         ///   perceived has vanished.
         /// </summary>
-        public static bool GetLastPerceptionVanished()
+        public static bool GetLastDexterityVanished()
         {
             VM.Call(261);
             return Convert.ToBoolean(VM.StackPopInt());

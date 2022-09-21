@@ -75,8 +75,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
 
             if (GetHasFeat(FeatType.FlurryStyle, activator))
             {
-                attackerStat = GetAbilityScore(activator, AbilityType.Perception);
-                attack = Stat.GetAttack(activator, AbilityType.Perception, SkillType.MartialArts);
+                attackerStat = GetAbilityScore(activator, AbilityType.Dexterity);
+                attack = Stat.GetAttack(activator, AbilityType.Dexterity, SkillType.MartialArts);
             }
             else
             {

@@ -30,7 +30,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.NPC
                 .RequirementStamina(6)
                 .HasImpactAction((activator, target, level, location) =>
                 {
-                    var attackerStat = GetAbilityScore(activator, AbilityType.Perception);
+                    var attackerStat = GetAbilityScore(activator, AbilityType.Dexterity);
                     var dmg = 3;
                     
                     var coneTarget = GetFirstObjectInShape(Shape.SpellCone, 14.0f, location);

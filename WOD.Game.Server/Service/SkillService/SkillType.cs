@@ -486,13 +486,13 @@ namespace WOD.Game.Server.Service.SkillService
         Medicine = 48,
 
         [Skill(SkillCategoryType.Roleplay,
-            "Perception",
+            "Dexterity",
             50,
             true,
-            "Your Perception check lets you spot, hear, or otherwise detect the presence of something. It measures your general awareness of your surroundings and the keenness of your senses.",
+            "Your Dexterity check lets you spot, hear, or otherwise detect the presence of something. It measures your general awareness of your surroundings and the keenness of your senses.",
             true,
             false)]
-        Perception = 49,
+        Dexterity = 49,
 
         [Skill(SkillCategoryType.Roleplay,
             "Survival",

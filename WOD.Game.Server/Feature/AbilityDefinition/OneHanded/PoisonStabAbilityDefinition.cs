@@ -65,8 +65,8 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
 
             CombatPoint.AddCombatPoint(activator, target, SkillType.OneHanded, 3);
 
-            var attackerStat = GetAbilityScore(activator, AbilityType.Perception);
-            var attack = Stat.GetAttack(activator, AbilityType.Perception, SkillType.OneHanded);
+            var attackerStat = GetAbilityScore(activator, AbilityType.Dexterity);
+            var attack = Stat.GetAttack(activator, AbilityType.Dexterity, SkillType.OneHanded);
             var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
             var defenderStat = GetAbilityScore(target, AbilityType.Vitality);
 

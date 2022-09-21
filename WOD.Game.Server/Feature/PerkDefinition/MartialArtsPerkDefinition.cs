@@ -470,7 +470,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 })
 
                 .AddPerkLevel()
-                .Description("Your staff attacks now use Agility for accuracy and Perception for damage. In addition, you gain an additional attack with staves, but all staff attacks are made with a -10% to-hit penalty.")
+                .Description("Your staff attacks now use Agility for accuracy and Dexterity for damage. In addition, you gain an additional attack with staves, but all staff attacks are made with a -10% to-hit penalty.")
                 .Price(1)
                 .RequirementCannotHavePerk(PerkType.CrushingStyle)
                 .GrantsFeat(FeatType.FlurryStyle)

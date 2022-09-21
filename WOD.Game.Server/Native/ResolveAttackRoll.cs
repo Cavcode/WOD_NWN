@@ -702,12 +702,12 @@ namespace WOD.Game.Server.Native
             if (Item.LightsaberBaseItemTypes.Contains((BaseItem)weapon.m_nBaseItem))
             {
                 if (Ability.IsAbilityToggled(playerId, AbilityToggleType.StrongStyleLightsaber))
-                    return AbilityType.Perception;
+                    return AbilityType.Dexterity;
             }
             else if (Item.SaberstaffBaseItemTypes.Contains((BaseItem)weapon.m_nBaseItem))
             {
                 if (Ability.IsAbilityToggled(playerId, AbilityToggleType.StrongStyleSaberstaff))
-                    return AbilityType.Perception;
+                    return AbilityType.Dexterity;
             }
             else if (Item.StaffBaseItemTypes.Contains((BaseItem)weapon.m_nBaseItem))
             {
@@ -735,7 +735,7 @@ namespace WOD.Game.Server.Native
 
             switch (weaponAccuracy)
             {
-                case AbilityType.Perception when attacker.m_pStats.GetWISStat() > attacker.m_pStats.GetDEXStat():
+                case AbilityType.Dexterity when attacker.m_pStats.GetWISStat() > attacker.m_pStats.GetDEXStat():
                 case AbilityType.Agility when attacker.m_pStats.GetWISStat() > attacker.m_pStats.GetINTStat():
                     return AbilityType.Willpower;
                 default:

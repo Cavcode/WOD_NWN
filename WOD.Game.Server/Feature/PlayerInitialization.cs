@@ -61,7 +61,7 @@ namespace WOD.Game.Server.Feature
             // Capture original stats before we level up the player.
             var str = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Might);
             var con = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Vitality);
-            var dex = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Perception);
+            var dex = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Dexterity);
             var @int = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Agility);
             var wis = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Willpower);
             var cha = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Social);
@@ -77,7 +77,7 @@ namespace WOD.Game.Server.Feature
             // Set stats back to how they were on entry.
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Might, str);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Vitality, con);
-            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Perception, dex);
+            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Dexterity, dex);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Agility, @int);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Willpower, wis);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Social, cha);
@@ -193,7 +193,7 @@ namespace WOD.Game.Server.Feature
             dbPlayer.Stamina = Stat.GetMaxStamina(player, dbPlayer);
 
             dbPlayer.BaseStats[AbilityType.Might] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Might);
-            dbPlayer.BaseStats[AbilityType.Perception] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Perception);
+            dbPlayer.BaseStats[AbilityType.Dexterity] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Dexterity);
             dbPlayer.BaseStats[AbilityType.Vitality] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Vitality);
             dbPlayer.BaseStats[AbilityType.Willpower] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Willpower);
             dbPlayer.BaseStats[AbilityType.Agility] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Agility);

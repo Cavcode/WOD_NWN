@@ -189,13 +189,13 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                     col.AddRow(row =>
                     {
                         row.AddLabel()
-                            .SetText("Perception")
+                            .SetText("Dexterity")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left)
-                            .SetTooltip("Perception - Improves damage dealt by ranged and finesse weapons and increases physical accuracy.");
+                            .SetTooltip("Dexterity - Improves damage dealt by ranged and finesse weapons and increases physical accuracy.");
 
                         row.AddLabel()
-                            .BindText(model => model.Perception)
+                            .BindText(model => model.Dexterity)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left);
 
@@ -203,8 +203,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetWidth(IncreaseButtonSize)
                             .SetHeight(IncreaseButtonSize)
                             .SetText("+")
-                            .BindIsVisible(model => model.IsPerceptionUpgradeAvailable)
-                            .BindOnClicked(model => model.OnClickUpgradePerception());
+                            .BindIsVisible(model => model.IsDexterityUpgradeAvailable)
+                            .BindOnClicked(model => model.OnClickUpgradeDexterity());
                     });
 
                     col.AddRow(row =>

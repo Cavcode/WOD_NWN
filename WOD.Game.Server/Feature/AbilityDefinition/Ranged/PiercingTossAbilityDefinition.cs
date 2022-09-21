@@ -68,7 +68,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
 
             dmg += Combat.GetAbilityDamageBonus(activator, SkillType.Ranged);
 
-            var attackerStat = GetAbilityScore(activator, AbilityType.Perception);
+            var attackerStat = GetAbilityScore(activator, AbilityType.Dexterity);
             var attack = Stat.GetAttack(activator, AbilityType.Might, SkillType.Ranged);
             var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
             var defenderStat = GetAbilityScore(target, AbilityType.Vitality);

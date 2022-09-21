@@ -1206,9 +1206,9 @@ namespace WOD.Game.Server.Core.NWNX
             };
         }
 
-        public static void DoPerceptionUpdateOnCreature(uint oCreature, uint oTargetCreature)
+        public static void DoDexterityUpdateOnCreature(uint oCreature, uint oTargetCreature)
         {
-            NWNCore.NativeFunctions.nwnxSetFunction(PLUGIN_NAME, "DoPerceptionUpdateOnCreature");
+            NWNCore.NativeFunctions.nwnxSetFunction(PLUGIN_NAME, "DoDexterityUpdateOnCreature");
             NWNCore.NativeFunctions.nwnxPushObject(oTargetCreature);
             NWNCore.NativeFunctions.nwnxPushObject(oCreature);
             NWNCore.NativeFunctions.nwnxCallFunction();

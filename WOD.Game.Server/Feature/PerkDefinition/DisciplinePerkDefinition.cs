@@ -25,7 +25,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Name("Awe")
 
                 .AddPerkLevel()
-                .Description("Those very close to the player suffer a -2 penalty to Might, Willpower, and Perception, and a reduced rate of attack. Allies benefit from the opposite of this effect. Lasts 16 seconds per activation. May add extra dialogue options with NPCs.")
+                .Description("Those very close to the player suffer a -2 penalty to Might, Willpower, and Dexterity, and a reduced rate of attack. Allies benefit from the opposite of this effect. Lasts 16 seconds per activation. May add extra dialogue options with NPCs.")
                 .Price(3)
                 .GrantsFeat(FeatType.Awe);
         }

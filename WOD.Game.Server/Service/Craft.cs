@@ -392,8 +392,8 @@ namespace WOD.Game.Server.Service
                     return ItemPropertyCustom(ItemPropertyType.DMG, (int)CombatDamageType.Ice, amount);
                 case 24: // Might
                     return ItemPropertyAbilityBonus(AbilityType.Might, amount);
-                case 25: // Perception
-                    return ItemPropertyAbilityBonus(AbilityType.Perception, amount);
+                case 25: // Dexterity
+                    return ItemPropertyAbilityBonus(AbilityType.Dexterity, amount);
                 case 26: // Attack Bonus
                     return ItemPropertyAttackBonus(amount);
                 case 27: // Recast Reduction

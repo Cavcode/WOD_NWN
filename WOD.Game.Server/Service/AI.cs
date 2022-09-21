@@ -32,14 +32,14 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// Entry point for creature perception logic.
+        /// Entry point for creature Dexterity logic.
         /// </summary>
-        [NWNEventHandler("crea_perception")]
-        public static void CreaturePerception()
+        [NWNEventHandler("crea_Dexterity")]
+        public static void CreatureDexterity()
         {
             ExecuteScript("crea_perc_bef", OBJECT_SELF);
-            // This is a stripped-down version of the default NWN perception event.
-            // We handle most of our perception logic with the aggro aura effect.
+            // This is a stripped-down version of the default NWN Dexterity event.
+            // We handle most of our Dexterity logic with the aggro aura effect.
             ProcessCreatureAllies();
             ExecuteScript("crea_perc_aft", OBJECT_SELF);
         }
@@ -512,8 +512,8 @@ namespace WOD.Game.Server.Service
             var lastPerceived = GetLastPerceived();
             if (self == lastPerceived) return;
 
-            var isSeen = GetLastPerceptionSeen();
-            var isVanished = GetLastPerceptionVanished();
+            var isSeen = GetLastDexteritySeen();
+            var isVanished = GetLastDexterityVanished();
 
             if (GetIsPC(lastPerceived) || GetIsDead(lastPerceived)) return;
             var isSameFaction = GetFactionEqual(self, lastPerceived);

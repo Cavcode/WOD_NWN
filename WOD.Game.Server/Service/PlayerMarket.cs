@@ -227,12 +227,6 @@ namespace WOD.Game.Server.Service
             if (Craft.IsItemEnhancement(item))
                 return MarketCategoryType.Enhancement;
 
-            // Ship Deeds
-            if (Space.IsItemShip(item))
-                return MarketCategoryType.Starship;
-            if (Space.IsItemShipModule(item))
-                return MarketCategoryType.StarshipParts;
-
             // Structures
             if (Property.GetStructureTypeFromItem(item) != StructureType.Invalid)
                 return MarketCategoryType.Structure;

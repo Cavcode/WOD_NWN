@@ -748,7 +748,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 
                 .AddPerkLevel()
                 .RequirementCharacterType(CharacterType.ForceSensitive)
-                .Description("Lightsaber attacks use your Perception stat for accuracy and Might stat for damage while active. Additionally, your lightsaber damage is increased by your MGT modifier while active.")
+                .Description("Lightsaber attacks use your Dexterity stat for accuracy and Might stat for damage while active. Additionally, your lightsaber damage is increased by your MGT modifier while active.")
                 .Price(1)
                 .GrantsFeat(FeatType.StrongStyleLightsaber);
         }

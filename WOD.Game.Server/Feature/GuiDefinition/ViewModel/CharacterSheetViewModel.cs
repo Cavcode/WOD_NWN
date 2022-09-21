@@ -52,7 +52,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set => Set(value);
         }
 
-        public int Perception
+        public int Dexterity
         {
             get => Get<int>();
             set => Set(value);
@@ -196,7 +196,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set => Set(value);
         }
 
-        public bool IsPerceptionUpgradeAvailable
+        public bool IsDexterityUpgradeAvailable
         {
             get => Get<bool>();
             set => Set(value);
@@ -359,9 +359,9 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             UpgradeAttribute(AbilityType.Might, "Might");
         };
 
-        public Action OnClickUpgradePerception() => () =>
+        public Action OnClickUpgradeDexterity() => () =>
         {
-            UpgradeAttribute(AbilityType.Perception, "Perception");
+            UpgradeAttribute(AbilityType.Dexterity, "Dexterity");
         };
 
         public Action OnClickUpgradeVitality() => () =>
@@ -402,14 +402,14 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             STM = Stat.GetCurrentStamina(Player, dbPlayer) + " / " + Stat.GetMaxStamina(Player, dbPlayer);
             Name = GetName(Player);
             Might = GetAbilityScore(Player, AbilityType.Might);
-            Perception = GetAbilityScore(Player, AbilityType.Perception);
+            Dexterity = GetAbilityScore(Player, AbilityType.Dexterity);
             Vitality = GetAbilityScore(Player, AbilityType.Vitality);
             Willpower = GetAbilityScore(Player, AbilityType.Willpower);
             Agility = GetAbilityScore(Player, AbilityType.Agility);
             Social = GetAbilityScore(Player, AbilityType.Social);
 
             IsMightUpgradeAvailable = (dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Might] < MaxUpgrades) || isRacialBonusAvailable;
-            IsPerceptionUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Perception] < MaxUpgrades || isRacialBonusAvailable;
+            IsDexterityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Dexterity] < MaxUpgrades || isRacialBonusAvailable;
             IsVitalityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Vitality] < MaxUpgrades || isRacialBonusAvailable;
             IsWillpowerUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Willpower] < MaxUpgrades || isRacialBonusAvailable;
             IsAgilityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Agility] < MaxUpgrades || isRacialBonusAvailable;
@@ -472,21 +472,21 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 Ability.IsAbilityToggled(Player, AbilityToggleType.StrongStyleLightsaber))
             {
                 damageStat = AbilityType.Might;
-                accuracyStatOverride = AbilityType.Perception;
+                accuracyStatOverride = AbilityType.Dexterity;
             }
             // Strong Style (Saberstaff)
             if (Item.SaberstaffBaseItemTypes.Contains(mainHandType) &&
                 Ability.IsAbilityToggled(Player, AbilityToggleType.StrongStyleSaberstaff))
             {
                 damageStat = AbilityType.Might;
-                accuracyStatOverride = AbilityType.Perception;
+                accuracyStatOverride = AbilityType.Dexterity;
             }
 
             // Flurry Style (Staff)
             if (Item.StaffBaseItemTypes.Contains(mainHandType) && 
                 GetHasFeat(FeatType.CrushingStyle, Player))
             {
-                damageStat = AbilityType.Perception;
+                damageStat = AbilityType.Dexterity;
                 accuracyStatOverride = AbilityType.Agility;
             } 
             

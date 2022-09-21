@@ -32,9 +32,9 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Devices
 
             dmg += Combat.GetAbilityDamageBonus(activator, SkillType.Devices);
 
-            var attackerStat = GetAbilityScore(activator, AbilityType.Perception);
+            var attackerStat = GetAbilityScore(activator, AbilityType.Dexterity);
             var defenderStat = GetAbilityScore(target, AbilityType.Vitality);
-            var attack = Stat.GetAttack(activator, AbilityType.Perception, SkillType.Devices);
+            var attack = Stat.GetAttack(activator, AbilityType.Dexterity, SkillType.Devices);
             var defense = Stat.GetDefense(target, CombatDamageType.Physical, AbilityType.Vitality);
             var damage = Combat.CalculateDamage(
                 attack,

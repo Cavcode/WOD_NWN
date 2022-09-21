@@ -21,11 +21,6 @@ namespace WOD.Game.Server.Feature.DialogDefinition
 
             var player  = GetPC();
 
-            if (Space.IsPlayerInSpaceMode(player))
-            {
-                return;
-            }
-
             if (HoloCom.IsInCall(player))
             {
                 var activeCallTarget = HoloCom.GetTargetForActiveCall(player);
@@ -57,7 +52,7 @@ namespace WOD.Game.Server.Feature.DialogDefinition
 
             for (var pc = GetFirstPC(); GetIsObjectValid(pc); pc = GetNextPC())
             {
-                if (GetIsDM(pc) || pc == player || GetIsDMPossessed(pc) || Space.IsPlayerInSpaceMode(pc)) 
+                if (GetIsDM(pc) || pc == player || GetIsDMPossessed(pc)) 
                     continue;
 
                 var message = $"Call {GetName(pc)}";
@@ -69,7 +64,7 @@ namespace WOD.Game.Server.Feature.DialogDefinition
                 var receiver = pc;
                 page.AddResponse(message, () =>
                 {
-                    if (!HoloCom.IsInCall(receiver) && !Space.IsPlayerInSpaceMode(player) && !Space.IsPlayerInSpaceMode(receiver))
+                    if (!HoloCom.IsInCall(receiver))
                     {
                         HoloCom.SetIsCallSender(player);
                         DelayCommand(1.0f, () =>

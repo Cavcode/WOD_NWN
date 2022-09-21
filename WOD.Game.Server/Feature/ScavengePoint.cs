@@ -51,8 +51,8 @@ namespace WOD.Game.Server.Feature
 
             var attempts = 1;
 
-            // Chance for a second attempt based on the hard look perk level and the user's Perception modifier.
-            if (Random.D100(1) <= (hardLookLevel * 10 + GetAbilityModifier(AbilityType.Perception, user) * 5))
+            // Chance for a second attempt based on the hard look perk level and the user's Dexterity modifier.
+            if (Random.D100(1) <= (hardLookLevel * 10 + GetAbilityModifier(AbilityType.Dexterity, user) * 5))
             {
                 attempts++;
             }
@@ -77,9 +77,9 @@ namespace WOD.Game.Server.Feature
             {
                 var roll = Random.D20(1);
 
-                if (roll + GetAbilityModifier(AbilityType.Perception, user) >= dc)
+                if (roll + GetAbilityModifier(AbilityType.Dexterity, user) >= dc)
                 {
-                    FloatingTextStringOnCreature(ColorToken.SkillCheck($"Search *success*: ({roll} + {GetAbilityModifier(AbilityType.Perception, user)} vs. DC: {dc})"), user, false);
+                    FloatingTextStringOnCreature(ColorToken.SkillCheck($"Search *success*: ({roll} + {GetAbilityModifier(AbilityType.Dexterity, user)} vs. DC: {dc})"), user, false);
 
                     var item = lootTable.GetRandomItem(treasureHunterLevel);
                     var quantity = Random.Next(item.MaxQuantity) + 1;
@@ -94,7 +94,7 @@ namespace WOD.Game.Server.Feature
                 }
                 else
                 {
-                    FloatingTextStringOnCreature(ColorToken.SkillCheck($"Search *failure*: ({roll} + {GetAbilityModifier(AbilityType.Perception, user)} vs DC: {dc})"), user, false);
+                    FloatingTextStringOnCreature(ColorToken.SkillCheck($"Search *failure*: ({roll} + {GetAbilityModifier(AbilityType.Dexterity, user)} vs DC: {dc})"), user, false);
                     xp = deltaXP / 4;
                 }
 

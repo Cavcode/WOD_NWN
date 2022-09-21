@@ -1011,7 +1011,7 @@ namespace WOD.Game.Server.Core.NWScript
         ///   -> SPELL_* if nFirstCriteriaType was CREATURE_TYPE_DOES_NOT_HAVE_SPELL_EFFECT
         ///   or CREATURE_TYPE_HAS_SPELL_EFFECT
         ///   -> TRUE or FALSE if nFirstCriteriaType was CREATURE_TYPE_IS_ALIVE
-        ///   -> PERCEPTION_* if nFirstCriteriaType was CREATURE_TYPE_PERCEPTION
+        ///   -> Dexterity_* if nFirstCriteriaType was CREATURE_TYPE_Dexterity
         ///   -> PLAYER_CHAR_IS_PC or PLAYER_CHAR_NOT_PC if nFirstCriteriaType was
         ///   CREATURE_TYPE_PLAYER_CHAR
         ///   -> RACIAL_TYPE_* if nFirstCriteriaType was CREATURE_TYPE_RACIAL_TYPE
