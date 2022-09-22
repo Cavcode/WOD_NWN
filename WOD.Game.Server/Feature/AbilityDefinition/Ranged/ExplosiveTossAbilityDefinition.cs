@@ -101,7 +101,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
                 .HasRecastDelay(RecastGroup.ExplosiveToss, 30f)
                 .HasActivationDelay(0.5f)
                 .HasMaxRange(15.0f)
-                .RequirementStamina(3)
+                
                 .IsCastedAbility()
                 .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
@@ -117,7 +117,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
                 .HasRecastDelay(RecastGroup.ExplosiveToss, 30f)
                 .HasActivationDelay(0.5f)
                 .HasMaxRange(15.0f)
-                .RequirementStamina(4)
+                
                 .IsCastedAbility()
                 .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
@@ -133,7 +133,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
                 .HasRecastDelay(RecastGroup.ExplosiveToss, 30f)
                 .HasActivationDelay(0.5f)
                 .HasMaxRange(15.0f)
-                .RequirementStamina(5)
+                
                 .IsCastedAbility()
                 .IsHostileAbility()
                 .UnaffectedByHeavyArmor()

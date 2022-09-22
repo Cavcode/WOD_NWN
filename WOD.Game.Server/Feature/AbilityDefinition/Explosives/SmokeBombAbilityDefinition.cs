@@ -51,7 +51,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Devices
                 .Level(1)
                 .HasRecastDelay(RecastGroup.Bombs, 60f)
                 .HasActivationDelay(3f)
-                .RequirementStamina(3)
+                
                 .UsesAnimation(Animation.ThrowGrenade)
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()
@@ -79,7 +79,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Devices
                 .Level(2)
                 .HasRecastDelay(RecastGroup.Bombs, 60f)
                 .HasActivationDelay(3f)
-                .RequirementStamina(4)
+                
                 .UsesAnimation(Animation.ThrowGrenade)
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()
@@ -107,7 +107,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Devices
                 .Level(3)
                 .HasRecastDelay(RecastGroup.Bombs, 60f)
                 .HasActivationDelay(3f)
-                .RequirementStamina(5)
+                
                 .UsesAnimation(Animation.ThrowGrenade)
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()

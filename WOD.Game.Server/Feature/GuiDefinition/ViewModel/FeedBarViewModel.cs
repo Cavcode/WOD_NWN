@@ -66,7 +66,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             SendMessageToPC(Player, "Progress: " + FloatToString(progress));
 
             // Ventrue will vomit if they drink rat or lesser blood.
-            if (playerType == ClassType.Ventrue && GetLocalInt(target,"enemyType") == 1)
+            if (playerType == CharacterSubType.Ventrue && GetLocalInt(target,"enemyType") == 1)
             {
                 // Stun player and play vomit animation. Gross.
                 var daze = EffectDazed();
@@ -77,12 +77,13 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 
             // Proceed with blood drinking.
             targetBloodAmount -= (0.1f * GetLocalFloat(Player, "targetBloodAmountMax"));
-            Stat.RestoreFP(Player, FloatToInt(targetBloodAmount));
+            Stat.RestoreResource(Player, FloatToInt(targetBloodAmount));
             SetLocalFloat(target, "bloodAmount", targetBloodAmount);
         }
 
         protected override void Initialize(GuiPayloadBase initialPayload)
         {
+            var playerId = GetObjectUUID(Player);
             StartFeed();
             AssignCommand(Player, () =>
             {
@@ -91,7 +92,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 PlaySound("heartbeat_loop");
                 PlaySound("feed_on_loop");
             });
-            Scheduler.ScheduleRepeating(StartFeed, TimeSpan.FromSeconds(1), "feedSchedule");
+            Scheduler.ScheduleRepeating(StartFeed, TimeSpan.FromSeconds(1), scheduleIdenitfier: "feedSchedule" + playerId);
         }
     }
 }

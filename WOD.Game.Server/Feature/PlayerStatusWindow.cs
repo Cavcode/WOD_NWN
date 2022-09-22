@@ -58,16 +58,6 @@ namespace WOD.Game.Server.Feature
             Gui.PublishRefreshEvent(target, new PlayerStatusRefreshEvent(PlayerStatusRefreshEvent.StatType.HP));
         }
 
-        [NWNEventHandler("pc_target_upd")]
-        public static void PlayerSpaceTargetAdjusted()
-        {
-            var player = OBJECT_SELF;
-            if (!GetIsPC(player) || GetIsDM(player) || GetIsDMPossessed(player))
-                return;
-
-            Gui.PublishRefreshEvent(player, new TargetStatusRefreshEvent());
-        }
-
         [NWNEventHandler("mod_enter")]
         [NWNEventHandler("area_enter")]
         public static void LoadPlayerStatusWindow()

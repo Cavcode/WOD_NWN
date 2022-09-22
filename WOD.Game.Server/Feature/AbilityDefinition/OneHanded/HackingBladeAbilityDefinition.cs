@@ -90,7 +90,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
                 .Name("Hacking Blade I")
                 .Level(1)
                 .HasRecastDelay(RecastGroup.HackingBlade, 30f)
-                .RequirementStamina(3)
+                
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -101,7 +101,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
                 .Name("Hacking Blade II")
                 .Level(2)
                 .HasRecastDelay(RecastGroup.HackingBlade, 30f)
-                .RequirementStamina(4)
+                
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -112,7 +112,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
                 .Name("Hacking Blade III")
                 .Level(3)
                 .HasRecastDelay(RecastGroup.HackingBlade, 30f)
-                .RequirementStamina(5)
+                
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);

@@ -592,7 +592,7 @@ namespace WOD.Game.Server.Feature
                 var interval = x == 1 ? 0f : 0.2f * (x - 1);
                 var groupId = x;
                 _intervalPlayers[x] = new List<uint>();
-                Scheduler.ScheduleRepeating(() => ProcessIntervalGroup(groupId), TimeSpan.FromSeconds(1), "", TimeSpan.FromSeconds(interval));
+                Scheduler.ScheduleRepeating(() => ProcessIntervalGroup(groupId), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(interval));
             }
         }
 

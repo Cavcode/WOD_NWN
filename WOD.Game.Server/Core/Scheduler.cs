@@ -38,7 +38,7 @@ namespace WOD.Game.Server.Core
             return item;
         }
 
-        public static ScheduledItem ScheduleRepeating(Action task, TimeSpan schedule, string scheduleIdenitfier, TimeSpan delay = default)
+        public static ScheduledItem ScheduleRepeating(Action task, TimeSpan schedule, TimeSpan delay = default, string scheduleIdenitfier = "")
         {
             if (schedule <= TimeSpan.Zero)
             {

@@ -61,7 +61,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Grants an additional attack to the user for one minute. [Cross Skill]")
                 .Price(4)
                 .RequirementSkill(SkillType.MartialArts, 25)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.Furor);
         }
 
@@ -74,14 +74,14 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Improves critical chance by 5%. [Cross Skill]")
                 .Price(5)
                 .RequirementSkill(SkillType.MartialArts, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.InnerStrength1)
 
                 .AddPerkLevel()
                 .Description("Improves critical chance by 5%. [Cross Skill]")
                 .Price(6)
                 .RequirementSkill(SkillType.MartialArts, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.InnerStrength2)
 
                 .TriggerEquippedItem((player, item, slot, type, level) =>
@@ -123,14 +123,14 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Restores your HP by a base amount of 115 points. [Cross Skill]")
                 .Price(4)
                 .RequirementSkill(SkillType.MartialArts, 25)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.Chi2)
 
                 .AddPerkLevel()
                 .Description("Restores your HP by a base amount of 170 points. [Cross Skill]")
                 .Price(4)
                 .RequirementSkill(SkillType.MartialArts, 40)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.Chi3);
         }
 
@@ -248,21 +248,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack deals an additional 8 DMG and has a 50% chance to inflict Shock for 30 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 15)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.ElectricFist1)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 17 DMG and has a 75% chance to inflict Shock for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 30)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.ElectricFist2)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 24 DMG and has a 100% chance to inflict Shock for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.ElectricFist3);
         }
 
@@ -275,21 +275,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack deals an additional 6 DMG and has a 50% chance to inflict Poison for 30 seconds.")
                 .Price(2)
                 .RequirementSkill(SkillType.MartialArts, 5)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.StrikingCobra1)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 15 DMG and has a 75% chance to inflict Poison for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 20)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.StrikingCobra2)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 22 DMG and has a 100% chance to inflict Poison for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.StrikingCobra3);
         }
 
@@ -407,21 +407,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack deals an additional 6 DMG and has a 50% chance to inflict Blindness for 12 seconds.")
                 .Price(2)
                 .RequirementSkill(SkillType.MartialArts, 15)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.Slam1)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 15 DMG and has a 75% chance to inflict Blindness for 12 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 30)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.Slam2)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 22 DMG and has a 100% chance to inflict Blindness for 12 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.Slam3);
         }
 
@@ -434,21 +434,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack deals an additional 4 DMG and has a 25% chance to inflict knockdown on your target for 6 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 5)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.LegSweep1)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 13 DMG and has a 40% chance to inflict knockdown on your target for 6 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 20)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.LegSweep2)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 20 DMG and has a 50% chance to inflict knockdown on your target for 6 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.MartialArts, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+                
                 .GrantsFeat(FeatType.LegSweep3);
         }
 

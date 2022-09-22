@@ -62,7 +62,7 @@ namespace WOD.Game.Server.Feature
             var str = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Might);
             var con = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Vitality);
             var dex = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Dexterity);
-            var @int = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Agility);
+            var @int = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Power);
             var wis = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Will);
             var cha = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Social);
 
@@ -78,7 +78,7 @@ namespace WOD.Game.Server.Feature
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Might, str);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Vitality, con);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Dexterity, dex);
-            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Agility, @int);
+            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Power, @int);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Will, wis);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Social, cha);
         }
@@ -185,18 +185,16 @@ namespace WOD.Game.Server.Feature
             dbPlayer.Name = GetName(player);
             dbPlayer.BAB = 1;
             Stat.AdjustPlayerMaxHP(dbPlayer, player, Stat.BaseHP);
-            Stat.AdjustPlayerMaxFP(dbPlayer, Stat.BaseFP, player);
-            Stat.AdjustPlayerMaxSTM(dbPlayer, Stat.BaseSTM, player);
+            Stat.AdjustPlayerMaxResource(dbPlayer, Stat.BaseResource, player);
             CreaturePlugin.SetBaseAttackBonus(player, 1);
             dbPlayer.HP = GetCurrentHitPoints(player);
-            dbPlayer.FP = Stat.GetMaxFP(player, dbPlayer);
-            dbPlayer.Stamina = Stat.GetMaxStamina(player, dbPlayer);
+            dbPlayer.Resource = Stat.GetMaxResource(player, dbPlayer);
 
             dbPlayer.BaseStats[AbilityType.Might] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Might);
             dbPlayer.BaseStats[AbilityType.Dexterity] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Dexterity);
             dbPlayer.BaseStats[AbilityType.Vitality] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Vitality);
             dbPlayer.BaseStats[AbilityType.Will] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Will);
-            dbPlayer.BaseStats[AbilityType.Agility] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Agility);
+            dbPlayer.BaseStats[AbilityType.Power] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Power);
             dbPlayer.BaseStats[AbilityType.Social] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Social);
 
             dbPlayer.RebuildComplete = true;
@@ -221,54 +219,12 @@ namespace WOD.Game.Server.Feature
         private static void InitializeLanguages(uint player, Player dbPlayer)
         {
             var race = GetRacialType(player);
-            var languages = new List<SkillType>(new[] { SkillType.Basic });
+            var languages = new List<SkillType>(new[] { SkillType.English });
 
             switch (race)
             {
-                case RacialType.Bothan:
-                    languages.Add(SkillType.Bothese);
-                    break;
-                case RacialType.Chiss:
-                    languages.Add(SkillType.Cheunh);
-                    break;
-                case RacialType.Zabrak:
-                    languages.Add(SkillType.Zabraki);
-                    break;
-                case RacialType.Wookiee:
-                    languages.Add(SkillType.Shyriiwook);
-                    break;
-                case RacialType.Twilek:
-                    languages.Add(SkillType.Twileki);
-                    break;
-                case RacialType.Cathar:
-                    languages.Add(SkillType.Catharese);
-                    break;
-                case RacialType.Trandoshan:
-                    languages.Add(SkillType.Dosh);
-                    break;
-                case RacialType.Cyborg:
-                    languages.Add(SkillType.Droidspeak);
-                    break;
-                case RacialType.Mirialan:
-                    languages.Add(SkillType.Mirialan);
-                    break;
-                case RacialType.MonCalamari:
-                    languages.Add(SkillType.MonCalamarian);
-                    break;
-                case RacialType.Ugnaught:
-                    languages.Add(SkillType.Ugnaught);
-                    break;
-                case RacialType.Togruta:
-                    languages.Add(SkillType.Togruti);
-                    break;
-                case RacialType.Rodian:
-                    languages.Add(SkillType.Rodese);
-                    break;
-                case RacialType.KelDor:
-                    languages.Add(SkillType.KelDor);
-                    break;
-                case RacialType.Droid:
-                    languages.Add(SkillType.Droidspeak);
+                case RacialType.Human:
+                    languages.Add(SkillType.English);
                     break;
             }
 
@@ -337,10 +293,8 @@ namespace WOD.Game.Server.Feature
         {
             var @class = GetClassByPosition(1, player);
 
-            if (@class == ClassType.Standard)
-                dbPlayer.CharacterType = CharacterType.Standard;
-            else if (@class == ClassType.ForceSensitive)
-                dbPlayer.CharacterType = CharacterType.ForceSensitive;
+            if (@class == ClassType.Kindred)
+                dbPlayer.CharacterType = CharacterType.Kindred;
         }
 
         /// <summary>

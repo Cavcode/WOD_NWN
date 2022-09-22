@@ -103,7 +103,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Slam I")
                 .Level(1)
                 .HasRecastDelay(RecastGroup.Slam, 12f)
-                .RequirementStamina(3)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -114,7 +113,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Slam II")
                 .Level(2)
                 .HasRecastDelay(RecastGroup.Slam, 12f)
-                .RequirementStamina(4)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -125,7 +123,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Slam III")
                 .Level(3)
                 .HasRecastDelay(RecastGroup.Slam, 12f)
-                .RequirementStamina(5)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);

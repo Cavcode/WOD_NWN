@@ -7,7 +7,6 @@ using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Core.NWScript.Enum.Item;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
 using WOD.Game.Server.Enumeration;
-using WOD.Game.Server.Feature.StatusEffectDefinition.StatusEffectData;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.ActivityService;
@@ -444,14 +443,8 @@ namespace WOD.Game.Server.Feature
             {
                 var playerId = GetObjectUUID(activator);
                 var dbPlayer = DB.Get<Entity.Player>(playerId);
-                var foodEffect = StatusEffect.GetEffectData<FoodEffectData>(activator, StatusEffectType.Food);
 
                 var recastReduction = dbPlayer.AbilityRecastReduction;
-
-                if (foodEffect != null)
-                {
-                    recastReduction += foodEffect.RecastReductionPercent;
-                }
 
                 var recastPercentage = recastReduction * 0.01f;
                 if (recastPercentage > 0.5f)

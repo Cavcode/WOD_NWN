@@ -5,7 +5,6 @@ using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
 using WOD.Game.Server.Entity;
 using WOD.Game.Server.Feature.GuiDefinition.RefreshEvent;
-using WOD.Game.Server.Feature.StatusEffectDefinition.StatusEffectData;
 using WOD.Game.Server.Service.SkillService;
 using WOD.Game.Server.Service.StatusEffectService;
 using Player = WOD.Game.Server.Entity.Player;
@@ -51,13 +50,6 @@ namespace WOD.Game.Server.Service
                 var social = GetAbilityScore(player, AbilityType.Social);
                 if (social > 0)
                     bonusPercentage += social * 0.025f;
-
-                // Food bonus
-                var foodEffect = StatusEffect.GetEffectData<FoodEffectData>(player, StatusEffectType.Food);
-                if (foodEffect != null)
-                {
-                    bonusPercentage += foodEffect.XPBonusPercent * 0.01f;
-                }
 
                 // DM bonus
                 bonusPercentage += dbPlayer.DMXPBonus * 0.01f;

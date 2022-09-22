@@ -27,7 +27,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.NPC
                 .HasActivationDelay(2.0f)
                 .HasRecastDelay(RecastGroup.FireBreath, 60f)
                 .IsCastedAbility()
-                .RequirementStamina(6)
                 .HasImpactAction((activator, target, level, location) =>
                 {
                     var attackerStat = GetAbilityScore(activator, AbilityType.Dexterity);

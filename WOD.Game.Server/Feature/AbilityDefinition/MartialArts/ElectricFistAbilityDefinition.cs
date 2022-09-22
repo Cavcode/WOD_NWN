@@ -92,7 +92,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Electric Fist I")
                 .Level(1)
                 .HasRecastDelay(RecastGroup.ElectricFist, 30f)
-                .RequirementStamina(3)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -103,7 +102,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Electric Fist II")
                 .Level(2)
                 .HasRecastDelay(RecastGroup.ElectricFist, 30f)
-                .RequirementStamina(4)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -114,7 +112,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Electric Fist III")
                 .Level(3)
                 .HasRecastDelay(RecastGroup.ElectricFist, 30f)
-                .RequirementStamina(5)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);

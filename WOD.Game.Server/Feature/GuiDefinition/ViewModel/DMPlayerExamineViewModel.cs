@@ -161,9 +161,9 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             _playerId = GetObjectUUID(initialPayload.Target);
             _targetName = GetName(initialPayload.Target);
             _targetDescription = GetDescription(initialPayload.Target);
-            _characterType = GetClassByPosition(1, initialPayload.Target) == ClassType.ForceSensitive
-                ? "Force Sensitive"
-                : "Standard";
+            _characterType = GetClassByPosition(1, initialPayload.Target) == ClassType.Kindred
+                ? "Kindred"
+                : "Kine";
             _credits = $"{GetGold(initialPayload.Target)}cr";
 
             ActiveNoteName = string.Empty;

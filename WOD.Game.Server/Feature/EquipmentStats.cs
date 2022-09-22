@@ -26,8 +26,6 @@ namespace WOD.Game.Server.Feature
             _statChangeActions[ItemPropertyType.HPBonus] = ApplyHPBonus;
             _statChangeActions[ItemPropertyType.FPBonus] = ApplyFPBonus;
             _statChangeActions[ItemPropertyType.FPRegen] = ApplyFPRegenBonus;
-            _statChangeActions[ItemPropertyType.STMBonus] = ApplySTMBonus;
-            _statChangeActions[ItemPropertyType.STMRegen] = ApplySTMRegenBonus;
             _statChangeActions[ItemPropertyType.AbilityRecastReduction] = ApplyAbilityRecastReduction;
             _statChangeActions[ItemPropertyType.Attack] = ApplyAttack;
             _statChangeActions[ItemPropertyType.ForceAttack] = ApplyForceAttack;
@@ -346,9 +344,6 @@ namespace WOD.Game.Server.Feature
                 case 3:
                     skillType = SkillType.Construction;
                     break;
-                case 4:
-                    skillType = SkillType.Agriculture;
-                    break;
             }
 
             if (skillType == SkillType.Invalid)
@@ -398,9 +393,6 @@ namespace WOD.Game.Server.Feature
                 case 3:
                     skillType = SkillType.Construction;
                     break;
-                case 4:
-                    skillType = SkillType.Agriculture;
-                    break;
             }
             if (isAdding)
             {
@@ -442,9 +434,6 @@ namespace WOD.Game.Server.Feature
                     break;
                 case 3:
                     skillType = SkillType.Construction;
-                    break;
-                case 4:
-                    skillType = SkillType.Agriculture;
                     break;
             }
             if (isAdding)

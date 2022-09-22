@@ -94,7 +94,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Striking Cobra I")
                 .Level(1)
                 .HasRecastDelay(RecastGroup.StrikingCobra, 60f)
-                .RequirementStamina(3)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -105,7 +104,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Striking Cobra II")
                 .Level(2)
                 .HasRecastDelay(RecastGroup.StrikingCobra, 60f)
-                .RequirementStamina(5)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -116,7 +114,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Striking Cobra III")
                 .Level(3)
                 .HasRecastDelay(RecastGroup.StrikingCobra, 60f)
-                .RequirementStamina(8)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);

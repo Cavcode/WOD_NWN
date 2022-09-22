@@ -91,7 +91,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetTooltip("Force Points - Resource used to activate force abilities. Force sensitive characters only.");
 
                         row.AddLabel()
-                            .BindText(model => model.FP)
+                            .BindText(model => model.Resource)
                             .SetColor(0, 138, 250)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left);
@@ -515,7 +515,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                                         .SetText("HoloCom")
                                         .SetHeight(32f)
                                         .SetWidth(100f)
-                                        .BindOnClicked(model => model.OnClickHoloCom())
+                                        //.BindOnClicked(model => model.OnClickHoloCom())
                                         .BindIsEnabled(model => model.IsHolocomEnabled);
                                 });
                                 col2.AddRow(row2 =>

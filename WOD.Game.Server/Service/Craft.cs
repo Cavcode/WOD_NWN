@@ -400,26 +400,26 @@ namespace WOD.Game.Server.Service
                     return ItemPropertyCustom(ItemPropertyType.AbilityRecastReduction, -1, amount);
                 case 28: // Structure Bonus
                     return ItemPropertyCustom(ItemPropertyType.StructureBonus, -1, amount);
-                case 29: // Food Bonus - HP Regen
-                    return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.HPRegen, amount);
-                case 30: // Food Bonus - FP Regen
-                    return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.FPRegen, amount);
-                case 31: // Food Bonus - STM Regen
-                    return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.STMRegen, amount);
-                case 32: // Food Bonus - Rest Regen
-                    return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.RestRegen, amount);
-                case 33: // Food Bonus - XP Bonus
-                    return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.XPBonus, amount);
-                case 34: // Food Bonus - Recast Reduction
-                    return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.RecastReduction, amount);
-                case 35: // Food Bonus - Duration
-                    return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.Duration, amount);
-                case 36: // Food Bonus - HP
-                    return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.HP, amount);
-                case 37: // Food Bonus - FP
-                    return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.FP, amount);
-                case 38: // Food Bonus - STM
-                    return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.STM, amount);
+                // case 29: // Food Bonus - HP Regen
+                //     return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.HPRegen, amount);
+                // case 30: // Food Bonus - FP Regen
+                //     return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.FPRegen, amount);
+                // case 31: // Food Bonus - STM Regen
+                //     return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.STMRegen, amount);
+                // case 32: // Food Bonus - Rest Regen
+                //     return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.RestRegen, amount);
+                // case 33: // Food Bonus - XP Bonus
+                //     return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.XPBonus, amount);
+                // case 34: // Food Bonus - Recast Reduction
+                //     return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.RecastReduction, amount);
+                // case 35: // Food Bonus - Duration
+                //     return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.Duration, amount);
+                // case 36: // Food Bonus - HP
+                //     return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.HP, amount);
+                // case 37: // Food Bonus - FP
+                //     return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.FP, amount);
+                // case 38: // Food Bonus - STM
+                //     return ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.STM, amount);
                 case 39: // Control - Gunsmithing
                     return ItemPropertyCustom(ItemPropertyType.Control, 2, amount);
                 case 40: // Craftsmanship - Gunsmithing

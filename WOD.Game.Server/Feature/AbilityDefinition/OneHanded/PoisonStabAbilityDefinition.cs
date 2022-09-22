@@ -90,7 +90,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
                 .Name("Poison Stab I")
                 .Level(1)
                 .HasRecastDelay(RecastGroup.PoisonStab, 30f)
-                .RequirementStamina(3)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -101,7 +100,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
                 .Name("Poison Stab II")
                 .Level(2)
                 .HasRecastDelay(RecastGroup.PoisonStab, 30f)
-                .RequirementStamina(4)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -112,7 +110,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
                 .Name("Poison Stab III")
                 .Level(3)
                 .HasRecastDelay(RecastGroup.PoisonStab, 30f)
-                .RequirementStamina(5)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);

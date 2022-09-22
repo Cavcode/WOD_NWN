@@ -86,7 +86,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
                 .Level(1)
                 .HasRecastDelay(RecastGroup.QuickDraw, 30f)
                 .HasMaxRange(30.0f)
-                .RequirementStamina(3)
+                
                 .IsCastedAbility()
                 .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
@@ -100,7 +100,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
                 .Level(2)
                 .HasRecastDelay(RecastGroup.QuickDraw, 30f)
                 .HasMaxRange(30.0f)
-                .RequirementStamina(4)
+                
                 .IsCastedAbility()
                 .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
@@ -114,7 +114,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
                 .Level(3)
                 .HasRecastDelay(RecastGroup.QuickDraw, 30f)
                 .HasMaxRange(30.0f)
-                .RequirementStamina(5)
+                
                 .IsCastedAbility()
                 .IsHostileAbility()
                 .UnaffectedByHeavyArmor()

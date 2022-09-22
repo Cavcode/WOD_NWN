@@ -93,7 +93,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
                 .Name("Crippling Shot I")
                 .Level(1)
                 .HasRecastDelay(RecastGroup.CripplingShot, 60f)
-                .RequirementStamina(3)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -104,7 +103,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
                 .Name("Crippling Shot II")
                 .Level(2)
                 .HasRecastDelay(RecastGroup.CripplingShot, 60f)
-                .RequirementStamina(5)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -115,7 +113,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.Ranged
                 .Name("Crippling Shot III")
                 .Level(3)
                 .HasRecastDelay(RecastGroup.CripplingShot, 60f)
-                .RequirementStamina(8)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);

@@ -96,7 +96,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Leg Sweep I")
                 .Level(1)
                 .HasRecastDelay(RecastGroup.LegSweep, 30f)
-                .RequirementStamina(3)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -107,7 +106,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Leg Sweep II")
                 .Level(2)
                 .HasRecastDelay(RecastGroup.LegSweep, 30f)
-                .RequirementStamina(4)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -118,7 +116,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Leg Sweep III")
                 .Level(3)
                 .HasRecastDelay(RecastGroup.LegSweep, 30f)
-                .RequirementStamina(5)
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);

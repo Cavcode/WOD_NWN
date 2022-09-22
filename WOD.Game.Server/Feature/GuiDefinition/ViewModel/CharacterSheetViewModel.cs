@@ -34,7 +34,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             get => Get<string>();
             set => Set(value);
         }
-        public string FP
+        public string Resource
         {
             get => Get<string>();
             set => Set(value);
@@ -257,17 +257,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             Gui.TogglePlayerWindow(Player, GuiWindowType.Recipes);
         };
 
-        public Action OnClickHoloCom() => () =>
-        {
-            if (Space.IsPlayerInSpaceMode(Player))
-            {
-                SendMessageToPC(Player, ColorToken.Red("Holocom cannot be used in space."));
-                return;
-            }
-
-            Dialog.StartConversation(Player, Player, nameof(HoloComDialog));
-        };
-
         public Action OnClickKeyItems() => () =>
         {
             Gui.TogglePlayerWindow(Player, GuiWindowType.KeyItems);
@@ -376,7 +365,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 
         public Action OnClickUpgradeAgility() => () =>
         {
-            UpgradeAttribute(AbilityType.Agility, "Agility");
+            UpgradeAttribute(AbilityType.Power, "Agility");
         };
 
         public Action OnClickUpgradeSocial() => () =>
@@ -390,29 +379,21 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 
             HP = GetCurrentHitPoints(Player) + " / " + GetMaxHitPoints(Player);
 
-            if (dbPlayer.CharacterType == Enumeration.CharacterType.Standard)
-            {
-                FP = $"0 / 0";
-            }
-            else
-            {
-                FP = Stat.GetCurrentFP(Player, dbPlayer) + " / " + Stat.GetMaxFP(Player, dbPlayer);
-            }
+            Resource = Stat.GetCurrentResource(Player, dbPlayer) + " / " + Stat.GetMaxResource(Player, dbPlayer);
 
-            STM = Stat.GetCurrentStamina(Player, dbPlayer) + " / " + Stat.GetMaxStamina(Player, dbPlayer);
             Name = GetName(Player);
             Might = GetAbilityScore(Player, AbilityType.Might);
             Dexterity = GetAbilityScore(Player, AbilityType.Dexterity);
             Vitality = GetAbilityScore(Player, AbilityType.Vitality);
             Willpower = GetAbilityScore(Player, AbilityType.Will);
-            Agility = GetAbilityScore(Player, AbilityType.Agility);
+            Agility = GetAbilityScore(Player, AbilityType.Power);
             Social = GetAbilityScore(Player, AbilityType.Social);
 
             IsMightUpgradeAvailable = (dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Might] < MaxUpgrades) || isRacialBonusAvailable;
             IsDexterityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Dexterity] < MaxUpgrades || isRacialBonusAvailable;
             IsVitalityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Vitality] < MaxUpgrades || isRacialBonusAvailable;
             IsWillpowerUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Will] < MaxUpgrades || isRacialBonusAvailable;
-            IsAgilityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Agility] < MaxUpgrades || isRacialBonusAvailable;
+            IsAgilityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Power] < MaxUpgrades || isRacialBonusAvailable;
             IsSocialUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Social] < MaxUpgrades || isRacialBonusAvailable;
         }
 
@@ -487,7 +468,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 GetHasFeat(FeatType.CrushingStyle, Player))
             {
                 damageStat = AbilityType.Dexterity;
-                accuracyStatOverride = AbilityType.Agility;
+                accuracyStatOverride = AbilityType.Power;
             } 
             
             var mainHandSkill = Skill.GetSkillTypeByBaseItem(mainHandType);
@@ -512,11 +493,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             var Construction = dbPlayer.Control.ContainsKey(SkillType.Construction)
                 ? dbPlayer.Control[SkillType.Construction]
                 : 0;
-            var agriculture = dbPlayer.Control.ContainsKey(SkillType.Agriculture)
-                ? dbPlayer.Control[SkillType.Agriculture]
-                : 0;
 
-            Control = $"{smithery}/{Gunsmithing}/{Construction}/{agriculture}";
+            Control = $"{smithery}/{Gunsmithing}/{Construction}";
 
             smithery = dbPlayer.Craftsmanship.ContainsKey(SkillType.Smithery)
                 ? dbPlayer.Craftsmanship[SkillType.Smithery]
@@ -527,10 +505,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             Construction = dbPlayer.Craftsmanship.ContainsKey(SkillType.Construction)
                 ? dbPlayer.Craftsmanship[SkillType.Construction]
                 : 0;
-            agriculture = dbPlayer.Craftsmanship.ContainsKey(SkillType.Agriculture)
-                ? dbPlayer.Craftsmanship[SkillType.Agriculture]
-                : 0;
-            Craftsmanship = $"{smithery}/{Gunsmithing}/{Construction}/{agriculture}";
+            Craftsmanship = $"{smithery}/{Gunsmithing}/{Construction}";
             RebuildTokens = dbPlayer.NumberRebuildsAvailable.ToString();
         }
 
@@ -549,9 +524,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
         {
             var playerId = GetObjectUUID(Player);
             var dbPlayer = DB.Get<Player>(playerId);
-            CharacterType = dbPlayer.CharacterType == Enumeration.CharacterType.Standard ? "Standard" : "Force Sensitive";
+            CharacterType = dbPlayer.CharacterType == Enumeration.CharacterType.Kindred ? "Standard" : "Force Sensitive";
             Race = GetStringByStrRef(Convert.ToInt32(Get2DAString("racialtypes", "Name", (int)GetRacialType(Player))), GetGender(Player));
-            IsHolocomEnabled = !Space.IsPlayerInSpaceMode(Player);
 
             RefreshPortrait();
             RefreshStats(dbPlayer);

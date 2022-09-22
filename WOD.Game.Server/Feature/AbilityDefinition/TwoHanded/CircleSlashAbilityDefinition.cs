@@ -106,7 +106,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
                 .Level(1)
                 .HasRecastDelay(RecastGroup.CircleSlash, 30f)
                 .HasActivationDelay(0.5f)
-                .RequirementStamina(3)
+                
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
@@ -119,7 +119,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
                 .Level(2)
                 .HasRecastDelay(RecastGroup.CircleSlash, 30f)
                 .HasActivationDelay(0.5f)
-                .RequirementStamina(4)
+                
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)
@@ -132,7 +132,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
                 .Level(3)
                 .HasRecastDelay(RecastGroup.CircleSlash, 30f)
                 .HasActivationDelay(0.5f)
-                .RequirementStamina(5)
+                
                 .IsCastedAbility()
                 .UnaffectedByHeavyArmor()
                 .HasCustomValidation(Validation)

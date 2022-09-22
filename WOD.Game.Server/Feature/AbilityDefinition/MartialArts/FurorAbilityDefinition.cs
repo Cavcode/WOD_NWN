@@ -25,7 +25,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Furor")
                 .HasRecastDelay(RecastGroup.Furor, 180f)
                 .HasActivationDelay(3f)
-                .RequirementStamina(8)
+                
                 .IsCastedAbility()
                 .HasImpactAction((activator, target, level, location) =>
                 {

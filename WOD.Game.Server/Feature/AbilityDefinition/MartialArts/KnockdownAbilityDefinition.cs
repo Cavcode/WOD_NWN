@@ -25,7 +25,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.MartialArts
                 .Name("Knockdown")
                 .HasRecastDelay(RecastGroup.Knockdown, 60f)
                 .IsWeaponAbility()
-                .RequirementStamina(6)
+                
                 .HasImpactAction((activator, target, level, targetLocation) =>
                 {
                     var isHit = Random.D100(1) <= 60;

@@ -366,27 +366,9 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                     _venerationPerk = PerkType.VenerationConstruction;
                     _wasteNotPerk = PerkType.WasteNotConstruction;
                     break;
-                case SkillType.Agriculture:
-                    _primaryAbility = AbilityType.Social;
-                    _secondaryAbility = AbilityType.Will;
-
-                    _rapidSynthesisPerk = PerkType.RapidSynthesisCooking;
-                    _carefulSynthesisPerk = PerkType.CarefulSynthesisCooking;
-
-                    _basicTouchPerk = PerkType.BasicTouchCooking;
-                    _standardTouchPerk = PerkType.StandardTouchCooking;
-                    _preciseTouchPerk = PerkType.PreciseTouchCooking;
-
-                    _mastersMendPerk = PerkType.MastersMendCooking;
-                    _steadyHandPerk = PerkType.SteadyHandCooking;
-                    _muscleMemoryPerk = PerkType.MuscleMemoryCooking;
-
-                    _venerationPerk = PerkType.VenerationCooking;
-                    _wasteNotPerk = PerkType.WasteNotCooking;
-                    break;
                 case SkillType.Gunsmithing:
                     _primaryAbility = AbilityType.Vitality;
-                    _secondaryAbility = AbilityType.Agility;
+                    _secondaryAbility = AbilityType.Power;
 
                     _rapidSynthesisPerk = PerkType.RapidSynthesisGunsmithing;
                     _carefulSynthesisPerk = PerkType.CarefulSynthesisGunsmithing;
@@ -1111,13 +1093,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 }
             }
 
-            // Food items have increased duration based on quality percentage
-            if (recipe.Category == RecipeCategoryType.Food && (int)qualityPercent > 0)
-            {
-                var durationBonus = (int)qualityPercent;
-                var ip = ItemPropertyCustom(ItemPropertyType.FoodBonus, (int)FoodItemPropertySubType.Duration, durationBonus);
-                BiowareXP2.IPSafeAddItemProperty(item, ip, 0.0f, AddItemPropertyPolicy.IgnoreExisting, false, false);
-            }
 
             // Add the recipe to the completed list (unlocks auto-crafting)
             if (firstTime)

@@ -347,21 +347,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack deals an additional 6 DMG and has a 50% chance to inflict Bleed for 30 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 15)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.HackingBlade1)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 15 DMG and has a 75% chance to inflict Bleed for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 30)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.HackingBlade2)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 22 DMG and has a 100% chance to inflict Bleed for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.HackingBlade3);
         }
 
@@ -374,21 +374,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Instantly deals 10 DMG to your target.")
                 .Price(2)
                 .RequirementSkill(SkillType.OneHanded, 5)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.RiotBlade1)
 
                 .AddPerkLevel()
                 .Description("Instantly deals 20 DMG to your target.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 20)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.RiotBlade2)
 
                 .AddPerkLevel()
                 .Description("Instantly deals 30 DMG to your target.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.RiotBlade3);
         }
 
@@ -506,21 +506,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack deals an additional 8 DMG and has a 50% chance to inflict Poison for 30 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 15)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.PoisonStab1)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 18 DMG and has a 75% chance to inflict Poison for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 30)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.PoisonStab2)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 28 DMG and has a 100% chance to inflict Poison for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.PoisonStab3);
         }
 
@@ -533,21 +533,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Deals 14 DMG to your target when dealt from behind. Damage is halved if not behind target.")
                 .Price(2)
                 .RequirementSkill(SkillType.OneHanded, 5)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.Backstab1)
 
                 .AddPerkLevel()
                 .Description("Deals 30 DMG to your target when dealt from behind. Damage is halved if not behind target.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 20)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.Backstab2)
 
                 .AddPerkLevel()
                 .Description("Deals 45 DMG to your target when dealt from behind. Damage is halved if not behind target.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.Backstab3);
         }
 
@@ -560,14 +560,14 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your accuracy with lightsabers is increased by 5.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 5)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.WeaponFocusLightsabers)
 
                 .AddPerkLevel()
                 .Description("Your base damage with lightsabers is increased by 2 DMG.")
                 .Price(4)
                 .RequirementSkill(SkillType.OneHanded, 15)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.WeaponSpecializationLightsabers);
         }
 
@@ -580,7 +580,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Improves the chance to critically hit with lightsabers by 5%.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 25)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.ImprovedCriticalLightsabers);
         }
 
@@ -592,35 +592,35 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .AddPerkLevel()
                 .Description("Grants the ability to equip tier 1 Lightsabers.")
                 .Price(2)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.LightsaberProficiency1)
 
                 .AddPerkLevel()
                 .Description("Grants the ability to equip tier 2 Lightsabers.")
                 .Price(2)
                 .RequirementSkill(SkillType.OneHanded, 10)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.LightsaberProficiency2)
 
                 .AddPerkLevel()
                 .Description("Grants the ability to equip tier 3 Lightsabers.")
                 .Price(2)
                 .RequirementSkill(SkillType.OneHanded, 20)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.LightsaberProficiency3)
 
                 .AddPerkLevel()
                 .Description("Grants the ability to equip tier 4 Lightsabers.")
                 .Price(2)
                 .RequirementSkill(SkillType.OneHanded, 30)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.LightsaberProficiency4)
 
                 .AddPerkLevel()
                 .Description("Grants the ability to equip tier 5 Lightsabers.")
                 .Price(2)
                 .RequirementSkill(SkillType.OneHanded, 40)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.LightsaberProficiency5);
         }
 
@@ -655,14 +655,14 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Grants an additional attack when equipped with a Lightsaber.")
                 .Price(8)
                 .RequirementSkill(SkillType.OneHanded, 25)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.LightsaberMastery1)
                 
                 .AddPerkLevel()
                 .Description("Grants an additional attack when equipped with a Lightsaber.")
                 .Price(8)
                 .RequirementSkill(SkillType.OneHanded, 50)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.LightsaberMastery2);
         }
 
@@ -675,21 +675,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Leap to a distant target instantly, inflicting 8 DMG and stunning for 2 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 15)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.ForceLeap1)
 
                 .AddPerkLevel()
                 .Description("Leap to a distant target instantly, inflicting 15 DMG and stunning for 2 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 30)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.ForceLeap2)
 
                 .AddPerkLevel()
                 .Description("Leap to a distant target instantly, inflicting 23 DMG and stunning for 2 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 45)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.ForceLeap3);
         }
 
@@ -702,21 +702,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack deals an additional 6 DMG and has a 50% chance to inflict Breach, reducing evasion for 30 seconds.")
                 .Price(2)
                 .RequirementSkill(SkillType.OneHanded, 5)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.SaberStrike1)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 15 DMG and has a 75% chance to inflict Breach, reducing evasion for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 20)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.SaberStrike2)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 22 DMG and has a 100% chance to inflict Breach, reducing evasion for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.OneHanded, 35)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.SaberStrike3);
         }
 
@@ -747,7 +747,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 })
                 
                 .AddPerkLevel()
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .Description("Lightsaber attacks use your Dexterity stat for accuracy and Might stat for damage while active. Additionally, your lightsaber damage is increased by your MGT modifier while active.")
                 .Price(1)
                 .GrantsFeat(FeatType.StrongStyleLightsaber);

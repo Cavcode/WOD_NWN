@@ -68,7 +68,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
             builder.Create(FeatType.ShieldBash1, PerkType.ShieldBash)
                 .Name("Shield Bash I")
                 .HasRecastDelay(RecastGroup.ShieldBash, 60f)
-                .RequirementStamina(3)
+                
                 .IsCastedAbility()
                 .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
@@ -80,7 +80,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
             builder.Create(FeatType.ShieldBash2, PerkType.ShieldBash)
                 .Name("Shield Bash II")
                 .HasRecastDelay(RecastGroup.ShieldBash, 60f)
-                .RequirementStamina(5)
+                
                 .IsCastedAbility()
                 .IsHostileAbility()
                 .UnaffectedByHeavyArmor()
@@ -92,7 +92,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.OneHanded
             builder.Create(FeatType.ShieldBash3, PerkType.ShieldBash)
                 .Name("Shield Bash III")
                 .HasRecastDelay(RecastGroup.ShieldBash, 60f)
-                .RequirementStamina(8)
+                
                 .IsCastedAbility()
                 .IsHostileAbility()
                 .UnaffectedByHeavyArmor()

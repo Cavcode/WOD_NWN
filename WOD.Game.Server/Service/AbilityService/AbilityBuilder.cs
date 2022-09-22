@@ -239,19 +239,6 @@ namespace WOD.Game.Server.Service.AbilityService
         }
 
         /// <summary>
-        /// Adds a stamina requirement to use the ability at this level.
-        /// </summary>
-        /// <param name="requiredSTM">The amount of STM needed to use this ability at this level.</param>
-        /// <returns>An ability builder with the configured options</returns>
-        public AbilityBuilder RequirementStamina(int requiredSTM)
-        {
-            var requirement = new AbilityRequirementStamina(requiredSTM);
-            _activeAbility.Requirements.Add(requirement);
-
-            return this;
-        }
-
-        /// <summary>
         /// Indicates this ability is unaffected by heavy armor penalties.
         /// </summary>
         /// <returns>An ability builder with the configured options</returns>

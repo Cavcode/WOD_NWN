@@ -83,7 +83,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
                 .Name("Crescent Moon I")
                 .Level(1)
                 .HasRecastDelay(RecastGroup.CrescentMoon, 30f)
-                .RequirementStamina(3)
+                
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -94,7 +94,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
                 .Name("Crescent Moon II")
                 .Level(2)
                 .HasRecastDelay(RecastGroup.CrescentMoon, 30f)
-                .RequirementStamina(4)
+                
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);
@@ -105,7 +105,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.TwoHanded
                 .Name("Crescent Moon III")
                 .Level(3)
                 .HasRecastDelay(RecastGroup.CrescentMoon, 30f)
-                .RequirementStamina(5)
+                
                 .IsWeaponAbility()
                 .HasCustomValidation(Validation)
                 .HasImpactAction(ImpactAction);

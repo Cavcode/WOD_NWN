@@ -712,7 +712,7 @@ namespace WOD.Game.Server.Native
             else if (Item.StaffBaseItemTypes.Contains((BaseItem)weapon.m_nBaseItem))
             {
                 if (attacker.m_pStats.HasFeat((ushort)FeatType.FlurryStyle) == 1)
-                    return AbilityType.Agility;
+                    return AbilityType.Power;
             }
 
             return AbilityType.Invalid;
@@ -736,7 +736,7 @@ namespace WOD.Game.Server.Native
             switch (weaponAccuracy)
             {
                 case AbilityType.Dexterity when attacker.m_pStats.GetWISStat() > attacker.m_pStats.GetDEXStat():
-                case AbilityType.Agility when attacker.m_pStats.GetWISStat() > attacker.m_pStats.GetINTStat():
+                case AbilityType.Power when attacker.m_pStats.GetWISStat() > attacker.m_pStats.GetINTStat():
                     return AbilityType.Will;
                 default:
                     return AbilityType.Invalid;

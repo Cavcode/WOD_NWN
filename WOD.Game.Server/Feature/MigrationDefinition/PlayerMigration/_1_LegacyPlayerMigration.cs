@@ -37,7 +37,7 @@ namespace WOD.Game.Server.Feature.MigrationDefinition.PlayerMigration
         private void AutoLevelUp(uint player)
         {
             // Most players are Force characters so we default to that class. This can be changed via the migration UI.
-            CreaturePlugin.SetClassByPosition(player, 0, ClassType.ForceSensitive);
+            CreaturePlugin.SetClassByPosition(player, 0, ClassType.Kindred);
 
             GiveXPToCreature(player, 800000);
             var @class = GetClassByPosition(1, player);
@@ -50,7 +50,7 @@ namespace WOD.Game.Server.Feature.MigrationDefinition.PlayerMigration
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Might, 10);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Vitality, 10);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Dexterity, 10);
-            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Intellect, 10);
+            CreaturePlugin.SetRawAbilityScore(player, AbilityType.Power, 10);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Will, 10);
             CreaturePlugin.SetRawAbilityScore(player, AbilityType.Social, 10);
         }
@@ -84,7 +84,7 @@ namespace WOD.Game.Server.Feature.MigrationDefinition.PlayerMigration
             dbPlayer.BaseStats[AbilityType.Dexterity] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Dexterity);
             dbPlayer.BaseStats[AbilityType.Vitality] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Vitality);
             dbPlayer.BaseStats[AbilityType.Will] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Will);
-            dbPlayer.BaseStats[AbilityType.Intellect] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Intellect);
+            dbPlayer.BaseStats[AbilityType.Power] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Power);
             dbPlayer.BaseStats[AbilityType.Social] = CreaturePlugin.GetRawAbilityScore(player, AbilityType.Social);
         }
 

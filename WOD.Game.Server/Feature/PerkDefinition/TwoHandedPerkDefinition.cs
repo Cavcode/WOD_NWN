@@ -64,7 +64,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Grants the Improved Power Attack feat which grants a 6 DMG bonus at the cost of -10 to accuracy. [Cross Skill]")
                 .Price(4)
                 .RequirementSkill(SkillType.TwoHanded, 25)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.ImprovedPowerAttack);
         }
 
@@ -77,7 +77,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Grants an additional 5 accuracy while wielding two-handed weapons.")
                 .Price(5)
                 .RequirementSkill(SkillType.TwoHanded, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.SuperiorWeaponFocus);
         }
 
@@ -90,7 +90,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Increases the maximum critical damage of two-handed weapons by 50%.")
                 .Price(6)
                 .RequirementSkill(SkillType.TwoHanded, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.IncreaseMultiplier);
         }
 
@@ -220,21 +220,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack deals an additional 12 DMG and inflicts stun for 3 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 15)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.CrescentMoon1)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 21 DMG and inflicts stun for 3 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 30)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.CrescentMoon2)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 34 DMG and inflicts stun for 3 seconds.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.CrescentMoon3);
         }
 
@@ -247,21 +247,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Instantly deals 16 DMG to your target.")
                 .Price(2)
                 .RequirementSkill(SkillType.TwoHanded, 5)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.HardSlash1)
 
                 .AddPerkLevel()
                 .Description("Instantly deals 24 DMG to your target.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 20)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.HardSlash2)
 
                 .AddPerkLevel()
                 .Description("Instantly deals 38 DMG to your target.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.HardSlash3);
         }
 
@@ -379,21 +379,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your next attack deals an additional 12 DMG and has a 45% chance to interrupt the concentration of your target.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 15)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.Skewer1)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 21 DMG and has a 75% chance to interrupt the concentration of your target.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 30)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.Skewer2)
 
                 .AddPerkLevel()
                 .Description("Your next attack deals an additional 34 DMG and has a 100% chance to interrupt the concentration of your target.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.Skewer3);
         }
 
@@ -406,21 +406,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Instantly attacks twice, each for 11 DMG.")
                 .Price(2)
                 .RequirementSkill(SkillType.TwoHanded, 5)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.DoubleThrust1)
 
                 .AddPerkLevel()
                 .Description("Instantly attacks twice, each for 19 DMG.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 20)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.DoubleThrust2)
 
                 .AddPerkLevel()
                 .Description("Instantly attacks twice, each for 29 DMG.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.DoubleThrust3);
         }
 
@@ -538,21 +538,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Attacks up to 3 nearby enemies for 10 DMG each.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 15)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.SpinningWhirl1)
 
                 .AddPerkLevel()
                 .Description("Attacks up to 3 nearby enemies for 18 DMG each.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 30)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.SpinningWhirl2)
 
                 .AddPerkLevel()
                 .Description("Attacks up to 3 nearby enemies for 28 DMG each.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 45)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.SpinningWhirl3);
         }
 
@@ -565,21 +565,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Instantly attacks twice, each for 8 DMG. Successful hits reduce your target's Evasion by 2 for 1 minute.")
                 .Price(2)
                 .RequirementSkill(SkillType.TwoHanded, 5)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.CrossCut1)
 
                 .AddPerkLevel()
                 .Description("Instantly attacks twice, each for 17 DMG. Successful hits reduce your target's Evasion by 4 for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 20)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.CrossCut2)
 
                 .AddPerkLevel()
                 .Description("Instantly attacks twice, each for 25 DMG. Successful hits reduce your target's Evasion by 6 for 1 minute.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 35)
-                .RequirementCharacterType(CharacterType.Standard)
+
                 .GrantsFeat(FeatType.CrossCut3);
         }
 
@@ -592,14 +592,14 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Your accuracy with saberstaves is increased by 5.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 5)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.WeaponFocusSaberstaffs)
 
                 .AddPerkLevel()
                 .Description("Your base damage with saberstaves is increased by 2 DMG.")
                 .Price(4)
                 .RequirementSkill(SkillType.TwoHanded, 15)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.WeaponSpecializationSaberstaffs);
         }
 
@@ -612,7 +612,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Improves the chance to critically hit with saberstaves by 5%.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 25)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.ImprovedCriticalSaberstaffs);
         }
 
@@ -624,35 +624,35 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .AddPerkLevel()
                 .Description("Grants the ability to equip tier 1 Saberstaffs.")
                 .Price(2)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.SaberstaffProficiency1)
 
                 .AddPerkLevel()
                 .Description("Grants the ability to equip tier 2 Saberstaffs.")
                 .Price(2)
                 .RequirementSkill(SkillType.TwoHanded, 10)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.SaberstaffProficiency2)
 
                 .AddPerkLevel()
                 .Description("Grants the ability to equip tier 3 Saberstaffs.")
                 .Price(2)
                 .RequirementSkill(SkillType.TwoHanded, 20)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.SaberstaffProficiency3)
 
                 .AddPerkLevel()
                 .Description("Grants the ability to equip tier 4 Saberstaffs.")
                 .Price(2)
                 .RequirementSkill(SkillType.TwoHanded, 30)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.SaberstaffProficiency4)
 
                 .AddPerkLevel()
                 .Description("Grants the ability to equip tier 5 Saberstaffs.")
                 .Price(2)
                 .RequirementSkill(SkillType.TwoHanded, 40)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.SaberstaffProficiency5);
         }
 
@@ -687,14 +687,14 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Grants an additional attack when equipped with a Saberstaff.")
                 .Price(8)
                 .RequirementSkill(SkillType.TwoHanded, 25)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.SaberstaffMastery1)
                 
                 .AddPerkLevel()
                 .Description("Grants an additional attack when equipped with a Saberstaff.")
                 .Price(8)
                 .RequirementSkill(SkillType.TwoHanded, 50)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.SaberstaffMastery2);
         }
 
@@ -707,21 +707,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Attacks up to 3 nearby enemies for 10 DMG each.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 15)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.CircleSlash1)
 
                 .AddPerkLevel()
                 .Description("Attacks up to 3 nearby enemies for 18 DMG each.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 30)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.CircleSlash2)
 
                 .AddPerkLevel()
                 .Description("Attacks up to 3 nearby enemies for 28 DMG each.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 45)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.CircleSlash3);
         }
 
@@ -734,21 +734,21 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 .Description("Instantly attacks twice, each for 12 DMG.")
                 .Price(2)
                 .RequirementSkill(SkillType.TwoHanded, 5)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.DoubleStrike1)
 
                 .AddPerkLevel()
                 .Description("Instantly attacks twice, each for 21 DMG.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 20)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.DoubleStrike2)
 
                 .AddPerkLevel()
                 .Description("Instantly attacks twice, each for 29 DMG.")
                 .Price(3)
                 .RequirementSkill(SkillType.TwoHanded, 35)
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .GrantsFeat(FeatType.DoubleStrike3);
         }
 
@@ -779,7 +779,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
                 })
 
                 .AddPerkLevel()
-                .RequirementCharacterType(CharacterType.ForceSensitive)
+                
                 .Description("Saberstaff attacks use your Dexterity stat for accuracy and Might stat for damage while active. Additionally, your saberstaff damage is increased by your MGT modifier while active.")
                 .Price(1)
                 .GrantsFeat(FeatType.StrongStyleSaberstaff);

@@ -126,20 +126,20 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                     {
                         row.AddButton()
                             .SetText("-")
-                            .BindOnClicked(model => model.OnClickSubtractWillpower())
+                            .BindOnClicked(model => model.OnClickSubtractPower())
                             .SetHeight(32f)
                             .SetWidth(32f)
                             .BindIsEnabled(model => model.CanDistribute);
 
                         row.AddLabel()
-                            .BindText(model => model.Willpower)
+                            .BindText(model => model.Power)
                             .SetTooltip("Willpower - Improves your force attack, force defense, and max force points.")
                             .SetHeight(32f)
                             .SetWidth(500f);
 
                         row.AddButton()
                             .SetText("+")
-                            .BindOnClicked(model => model.OnClickAddWillpower())
+                            .BindOnClicked(model => model.OnClickAddPower())
                             .SetHeight(32f)
                             .SetWidth(32f)
                             .BindIsEnabled(model => model.CanDistribute);
@@ -149,20 +149,20 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                     {
                         row.AddButton()
                             .SetText("-")
-                            .BindOnClicked(model => model.OnClickSubtractAgility())
+                            .BindOnClicked(model => model.OnClickSubtractPower())
                             .SetHeight(32f)
                             .SetWidth(32f)
                             .BindIsEnabled(model => model.CanDistribute);
 
                         row.AddLabel()
-                            .BindText(model => model.Agility)
+                            .BindText(model => model.Power)
                             .SetTooltip("Agility - Improves ranged accuracy, evasion, and max stamina.")
                             .SetHeight(32f)
                             .SetWidth(500f);
 
                         row.AddButton()
                             .SetText("+")
-                            .BindOnClicked(model => model.OnClickAddAgility())
+                            .BindOnClicked(model => model.OnClickAddPower())
                             .SetHeight(32f)
                             .SetWidth(32f)
                             .BindIsEnabled(model => model.CanDistribute);

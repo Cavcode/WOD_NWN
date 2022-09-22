@@ -149,23 +149,23 @@ namespace WOD.Game.Server.Service
             // One-Handed Skills
             _itemToAccuracyAbilityMapping[BaseItem.BastardSword] = AbilityType.Dexterity;
             _itemToAccuracyAbilityMapping[BaseItem.BattleAxe] = AbilityType.Dexterity;
-            _itemToAccuracyAbilityMapping[BaseItem.Dagger] = AbilityType.Agility;
+            _itemToAccuracyAbilityMapping[BaseItem.Dagger] = AbilityType.Power;
             _itemToAccuracyAbilityMapping[BaseItem.HandAxe] = AbilityType.Dexterity;
-            _itemToAccuracyAbilityMapping[BaseItem.Kama] = AbilityType.Agility;
+            _itemToAccuracyAbilityMapping[BaseItem.Kama] = AbilityType.Power;
             _itemToAccuracyAbilityMapping[BaseItem.Katana] = AbilityType.Dexterity;
-            _itemToAccuracyAbilityMapping[BaseItem.Kukri] = AbilityType.Agility;
+            _itemToAccuracyAbilityMapping[BaseItem.Kukri] = AbilityType.Power;
             _itemToAccuracyAbilityMapping[BaseItem.LightFlail] = AbilityType.Dexterity;
             _itemToAccuracyAbilityMapping[BaseItem.LightHammer] = AbilityType.Dexterity;
             _itemToAccuracyAbilityMapping[BaseItem.LightMace] = AbilityType.Dexterity;
             _itemToAccuracyAbilityMapping[BaseItem.Longsword] = AbilityType.Dexterity;
             _itemToAccuracyAbilityMapping[BaseItem.MorningStar] = AbilityType.Dexterity;
-            _itemToAccuracyAbilityMapping[BaseItem.Rapier] = AbilityType.Agility;
+            _itemToAccuracyAbilityMapping[BaseItem.Rapier] = AbilityType.Power;
             _itemToAccuracyAbilityMapping[BaseItem.Scimitar] = AbilityType.Dexterity;
-            _itemToAccuracyAbilityMapping[BaseItem.ShortSword] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Sickle] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Whip] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Lightsaber] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Electroblade] = AbilityType.Agility;
+            _itemToAccuracyAbilityMapping[BaseItem.ShortSword] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Sickle] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Whip] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Lightsaber] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Electroblade] = AbilityType.Power;
 
             // Two-Handed Skills
             _itemToAccuracyAbilityMapping[BaseItem.DireMace] = AbilityType.Dexterity;
@@ -180,29 +180,29 @@ namespace WOD.Game.Server.Service
             _itemToAccuracyAbilityMapping[BaseItem.ShortSpear] = AbilityType.Dexterity;
             _itemToAccuracyAbilityMapping[BaseItem.TwoBladedSword] = AbilityType.Dexterity;
             _itemToAccuracyAbilityMapping[BaseItem.DoubleAxe] = AbilityType.Dexterity;
-            _itemToAccuracyAbilityMapping[BaseItem.Saberstaff] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.TwinElectroBlade] = AbilityType.Agility;
+            _itemToAccuracyAbilityMapping[BaseItem.Saberstaff] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.TwinElectroBlade] = AbilityType.Power;
 
             // Martial Arts Skills
             _itemToAccuracyAbilityMapping[BaseItem.Club] = AbilityType.Dexterity;
             _itemToAccuracyAbilityMapping[BaseItem.Bracer] = AbilityType.Dexterity;
             _itemToAccuracyAbilityMapping[BaseItem.Gloves] = AbilityType.Dexterity;
             _itemToAccuracyAbilityMapping[BaseItem.QuarterStaff] = AbilityType.Dexterity;
-            _itemToAccuracyAbilityMapping[BaseItem.Katar] = AbilityType.Agility;
+            _itemToAccuracyAbilityMapping[BaseItem.Katar] = AbilityType.Power;
 
             // Ranged Skills
-            _itemToAccuracyAbilityMapping[BaseItem.Cannon] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Rifle] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Longbow] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Pistol] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Arrow] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Bolt] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Bullet] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Sling] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Grenade] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Shuriken] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.ThrowingAxe] = AbilityType.Agility;
-            _itemToAccuracyAbilityMapping[BaseItem.Dart] = AbilityType.Agility;
+            _itemToAccuracyAbilityMapping[BaseItem.Cannon] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Rifle] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Longbow] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Pistol] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Arrow] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Bolt] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Bullet] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Sling] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Grenade] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Shuriken] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.ThrowingAxe] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.Dart] = AbilityType.Power;
 
             // NPCs
             _itemToAccuracyAbilityMapping[BaseItem.CreatureBludgeonWeapon] = AbilityType.Dexterity;

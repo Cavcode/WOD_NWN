@@ -168,7 +168,7 @@ namespace WOD.Game.Server.Service
 
                 // Grant Force XP if player is concentrating Comprehend Speech.
                 if (grantSenseXP)
-                    Skill.GiveSkillXP(listener, AbilityType.Power, amount * 10);
+                    Skill.GiveSkillXP(listener, SkillType.Force, amount * 10);
 
                 SetLocalInt(listener, "LAST_LANGUAGE_SKILL_INCREASE_LOW", (int)(now & 0xFFFFFFFF));
                 SetLocalInt(listener, "LAST_LANGUAGE_SKILL_INCREASE_HIGH", (int)((now >> 32) & 0xFFFFFFFF));

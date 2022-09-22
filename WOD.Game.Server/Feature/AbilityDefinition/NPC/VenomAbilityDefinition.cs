@@ -26,7 +26,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.NPC
                 .HasActivationDelay(1.5f)
                 .HasRecastDelay(RecastGroup.Venom, 35f)
                 .IsCastedAbility()
-                .RequirementStamina(3)
+                
                 .HasImpactAction((activator, target, level, location) =>
                 {
                     ApplyEffectToObject(DurationType.Instant, EffectVisualEffect(VisualEffect.Vfx_Imp_Disease_S), target);

@@ -27,7 +27,7 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.NPC
                 .HasActivationDelay(2.0f)
                 .HasRecastDelay(RecastGroup.Talon, 40f)
                 .IsCastedAbility()
-                .RequirementStamina(3)
+                
                 .HasImpactAction((activator, target, level, location) =>
                 {
                     const int DMG = 1;
