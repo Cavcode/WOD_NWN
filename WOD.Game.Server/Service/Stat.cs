@@ -67,7 +67,7 @@ namespace WOD.Game.Server.Service
                 }
                 var baseResource = dbPlayer.MaxResource;
                 var modifier = GetAbilityModifier(AbilityType.Will, creature);
-                var foodEffect = StatusEffect.GetEffectData<FoodEffectData>(creature, StatusEffectType.Food);
+
                 var foodBonus = 0;
 
                 // TODO: Possibly add a bonus for type of blood consumed.
@@ -706,7 +706,7 @@ namespace WOD.Game.Server.Service
                 case AbilityType.Will:
                     stat = creature.m_pStats.GetWISStat();
                     break;
-                case AbilityType.Intellect:
+                case AbilityType.Power:
                     stat = creature.m_pStats.GetINTStat();
                     break;
                 case AbilityType.Social:

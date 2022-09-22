@@ -75,6 +75,7 @@ namespace WOD.Game.Server.Entity
             UnlockedRecipes = new Dictionary<RecipeType, DateTime>();
             CraftedRecipes = new Dictionary<RecipeType, DateTime>();
             CharacterType = CharacterType.Invalid;
+            CharacterSubType = CharacterSubType.Invalid;
             KeyItems = new Dictionary<KeyItemType, DateTime>();
             Guilds = new Dictionary<GuildType, PlayerGuild>();
             Factions = new Dictionary<FactionType, PlayerFactionStanding>();
@@ -132,6 +133,7 @@ namespace WOD.Game.Server.Entity
         public DateTime? DatePerkRefundAvailable { get; set; }
         [Indexed]
         public CharacterType CharacterType { get; set; }
+        public CharacterSubType CharacterSubType { get; set; }
         public EmoteStyle EmoteStyle { get; set; }
         public string SerializedHotBar { get; set; }
         public AppearanceType OriginalAppearanceType { get; set; }

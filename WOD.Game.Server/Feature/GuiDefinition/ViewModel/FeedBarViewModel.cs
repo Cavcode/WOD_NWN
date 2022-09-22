@@ -24,7 +24,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
         {
             var playerId = GetObjectUUID(Player);
             var dbPlayer = DB.Get<Player>(playerId);
-            var playerType = GetClassByPosition(1, Player);
             var target = GetLocalObject(Player, "bloodTarget");
             var targetBloodAmount = GetLocalFloat(target,"bloodAmount");
             var progress = 0.0f;
@@ -66,7 +65,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             SendMessageToPC(Player, "Progress: " + FloatToString(progress));
 
             // Ventrue will vomit if they drink rat or lesser blood.
-            if (playerType == CharacterSubType.Ventrue && GetLocalInt(target,"enemyType") == 1)
+            if (dbPlayer.CharacterSubType == CharacterSubType.Ventrue && (BloodType)GetLocalInt(target,"bloodType") == BloodType.Poor)
             {
                 // Stun player and play vomit animation. Gross.
                 var daze = EffectDazed();

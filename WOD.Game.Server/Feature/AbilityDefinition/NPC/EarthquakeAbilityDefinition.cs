@@ -26,7 +26,6 @@ namespace WOD.Game.Server.Feature.AbilityDefinition.NPC
                 .DisplaysVisualEffectWhenActivating(VisualEffect.Vfx_Dur_Aura_Blue)
                 .HasRecastDelay(RecastGroup.Earthquake, 60f)
                 .IsCastedAbility()
-                .RequirementStamina(10)
                 .HasImpactAction((activator, target, level, location) =>
                 {
                     var count = 1;

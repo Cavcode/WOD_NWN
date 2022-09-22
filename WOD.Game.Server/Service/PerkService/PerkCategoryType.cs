@@ -106,11 +106,45 @@ namespace WOD.Game.Server.Service.PerkService
         [PerkCategory("Gunsmithing", true)]
         Gunsmithing = 33,
 
-        [PerkCategory("Devices", true)]
-        Devices = 34,
+        [PerkCategory("Explosives", true)]
+        Explosives = 34,
 
         [PerkCategory("One Handed - Shield", true)]
         OneHandedShield = 35,
+
+        [PerkCategory("Celerity", true)]
+        Celerity = 36,
+
+        [PerkCategory("Obfuscate", true)]
+        Obfuscate = 37,
+
+        [PerkCategory("Potence", true)]
+        Potence = 38,
+
+        [PerkCategory("Presence", true)]
+        Presence = 39,
+
+        [PerkCategory("Animalism", true)]
+        Animalism = 40,
+
+        [PerkCategory("Fortitude", true)]
+        Fortitude = 41,
+
+        [PerkCategory("Protean", true)]
+        Protean = 42,
+
+        [PerkCategory("Dominate", true)]
+        Dominate = 43,
+
+        [PerkCategory("Dementation", true)]
+        Dementation = 44,
+
+        [PerkCategory("Auspex", true)]
+        Auspex = 45,
+
+        [PerkCategory("Thaumaturgy", true)]
+        Thaumaturgy = 46,
+
     }
 
     public class PerkCategoryAttribute : Attribute

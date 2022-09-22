@@ -26,7 +26,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
 
         private void DemolitionExpert()
         {
-            _builder.Create(PerkCategoryType.Devices, PerkType.DemolitionExpert)
+            _builder.Create(PerkCategoryType.Explosives, PerkType.DemolitionExpert)
                 .Name("Demolition Expert")
 
                 .AddPerkLevel()
@@ -50,7 +50,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
 
         private void FragGrenade()
         {
-            _builder.Create(PerkCategoryType.Devices, PerkType.FragGrenade)
+            _builder.Create(PerkCategoryType.Explosives, PerkType.FragGrenade)
                 .Name("Frag Grenade")
 
                 .AddPerkLevel()
@@ -73,7 +73,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
 
         private void ConcussionGrenade()
         {
-            _builder.Create(PerkCategoryType.Devices, PerkType.ConcussionGrenade)
+            _builder.Create(PerkCategoryType.Explosives, PerkType.ConcussionGrenade)
                 .Name("Concussion Grenade")
 
                 .AddPerkLevel()
@@ -100,7 +100,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
 
         private void FlashbangGrenade()
         {
-            _builder.Create(PerkCategoryType.Devices, PerkType.FlashbangGrenade)
+            _builder.Create(PerkCategoryType.Explosives, PerkType.FlashbangGrenade)
                 .Name("Flashbang Grenade")
 
                 .AddPerkLevel()
@@ -127,7 +127,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
 
         private void AdhesiveGrenade()
         {
-            _builder.Create(PerkCategoryType.Devices, PerkType.AdhesiveGrenade)
+            _builder.Create(PerkCategoryType.Explosives, PerkType.AdhesiveGrenade)
                 .Name("Adhesive Grenade")
 
                 .AddPerkLevel()
@@ -154,7 +154,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
 
         private void SmokeBomb()
         {
-            _builder.Create(PerkCategoryType.Devices, PerkType.SmokeBomb)
+            _builder.Create(PerkCategoryType.Explosives, PerkType.SmokeBomb)
                 .Name("Smoke Bomb")
 
                 .AddPerkLevel()
@@ -181,7 +181,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
 
         private void IncendiaryBomb()
         {
-            _builder.Create(PerkCategoryType.Devices, PerkType.IncendiaryBomb)
+            _builder.Create(PerkCategoryType.Explosives, PerkType.IncendiaryBomb)
                 .Name("Incendiary Bomb")
 
                 .AddPerkLevel()
@@ -208,7 +208,7 @@ namespace WOD.Game.Server.Feature.PerkDefinition
 
         private void GasBomb()
         {
-            _builder.Create(PerkCategoryType.Devices, PerkType.GasBomb)
+            _builder.Create(PerkCategoryType.Explosives, PerkType.GasBomb)
                 .Name("Gas Bomb")
 
                 .AddPerkLevel()
