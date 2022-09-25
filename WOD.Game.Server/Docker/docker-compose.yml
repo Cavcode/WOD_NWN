@@ -23,7 +23,7 @@ services:
         hostname: nwnx-server
         stop_signal: SIGINT
         image: nwnxee/unified:latest
-        env_file: ${PWD-.}/WOD.env
+        env_file: ${PWD-.}/wod.env
         links:
             - "redis:redis"
         stdin_open: true

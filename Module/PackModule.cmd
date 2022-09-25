@@ -1,1 +1,1 @@
-SWLOR.CLI.exe -p ./"Star Wars LOR v2.mod"
+SWLOR.CLI.exe -p ./"WOD.mod"
