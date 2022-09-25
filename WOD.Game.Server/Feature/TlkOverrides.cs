@@ -21,22 +21,22 @@ namespace WOD.Game.Server.Feature
             SetTlkOverride(131, "Social"); // Charisma
             SetTlkOverride(132, "Vitality"); // Constitution
             SetTlkOverride(133, "Dexterity"); // Dexterity
-            SetTlkOverride(134, "Intellect"); // Intelligence
+            SetTlkOverride(134, "Power"); // Intelligence
             SetTlkOverride(135, "Might"); // Strength
-            SetTlkOverride(136, "Willpower"); // Wisdom
+            SetTlkOverride(136, "Will"); // Wisdom
 
             SetTlkOverride(328, "Increased Might By"); // Strength
             SetTlkOverride(329, "Increased Dexterity By"); // Dexterity
-            SetTlkOverride(330, "Intellect"); // Intelligence
+            SetTlkOverride(330, "Increased Power By"); // Intelligence
             SetTlkOverride(331, "Increased Vitality By"); // Constitution
-            SetTlkOverride(332, "Increased Willpower By"); // Wisdom
+            SetTlkOverride(332, "Increased Will By"); // Wisdom
             SetTlkOverride(333, "Increased Social By"); // Charisma
 
             SetTlkOverride(473, "Might Information"); // Strength
             SetTlkOverride(474, "Dexterity Information"); // Dexterity
             SetTlkOverride(475, "Vitality Information"); // Constitution
-            SetTlkOverride(476, "Willpower Information"); // Wisdom
-            SetTlkOverride(477, "Intellect"); // Intelligence
+            SetTlkOverride(476, "Will Information"); // Wisdom
+            SetTlkOverride(477, "Power Information"); // Intelligence
             SetTlkOverride(479, "Social Information"); // Charisma
 
             SetTlkOverride(457, BuildRecommendedButtonText());
@@ -45,58 +45,48 @@ namespace WOD.Game.Server.Feature
                 "Might improves damage dealt by melee weapons and increases carrying capacity.\n\n" + 
                 "Primary Skills: One-Handed, Two-Handed, Martial Arts, Smithery, Gathering\n\n" +
                 "Other Notes:\n\n" +
-                "Improves damage dealt by regular melee weapons.\n" +
-                "Improves damage dealt by heavy melee weapons.\n" + 
-                "Improves damage dealt by throwing weapons.");
+                "Improves damage and accuracy of regular melee weapons.\n" +
+                "Improves damage and accuracy of heavy melee weapons.\n" +
+                "Improves damage and accuracy of throwing weapons.");
             SetTlkOverride(460, 
-                "Dexterity improves damage dealt by ranged and finesse weapons and increases physical accuracy.\n\n" +
+                "Dexterity improves damage dealt by ranged and finesse weapons and increases physical and ranged accuracy.\n\n" +
                 "Primary Skills: One-Handed, Two-Handed, Martial Arts, Ranged, Construction, Devices\n\n" + 
-                "Other Notes:\n\n" + 
-                "Improves accuracy of regular melee weapons.\n" + 
-                "Improves accuracy of heavy melee weapons.\n" + 
-                "Improves damage of finesse melee weapons.\n" + 
-                "Improves damage of ranged weapons.");
+                "Other Notes:\n\n" +
+                "Improves damage and accuarcy of finesse melee weapons.\n" +
+                "Improves evasion.\n" +
+                "Improves damage and accuracy of ranged weapons.");
             SetTlkOverride(461, 
                 "Vitality improves your max hit points and reduces damage received.\n\n" +
                 "Primary Skills: Armor, Smithery, Gunsmithing\n\n" +
                 "Other Notes:\n\n" +
                 "Increases maximum HP.\n" +
-                "Improves physical defense (reducing damage taken).\n" +
-                "Improves natural HP/res/STM regen.\n" +
-                "Improves rest recovery.");
+                "Improves physical defense (reducing damage taken).\n");
             SetTlkOverride(462,
-                "Willpower improves your force attack, force defense, max force points, and first aid capabilities.\n\n" +
-                "Primary Skills: Force, Construction, Agriculture, First Aid\n\n" +
+                "Will improves your sub-type ability defense and resource pool.\n\n" +
+                "Primary Skills: Construction, First Aid\n\n" +
                 "Other Notes:\n\n" +
-                "Increases maximum res.\n" + 
-                "Improves force defense (reducing damage taken).\n" +
-                "Improves effectiveness of First Aid abilities.\n" +
-                "Improves effectiveness of Force abilities.");
+                "Increases maximum resource pool.\n" + 
+                "Improves ability defense (reducing damage taken).\n");
             SetTlkOverride(463,
-                "Agility improves accuracy of ranged and finesse weapons, evasion, and max stamina.\n\n" +
-                "Primary Skills: One-Handed, Martial Arts, Ranged, Gunsmithing\n\n" +
-                "Other Notes:\n\n" + 
-                "Increases maximum stamina.\n" +
-                "Improves evasion.\n" +
-                "Improves accuracy of finesse weapons.\n" +
-                "Improves accuracy of ranged weapons.\n" +
-                "Improves accuracy of throwing weapons.");
+                "Power improves the effectiveness of your sub-type abilities.\n\n" +
+                "Primary Skills: Sub-type skills\n\n" +
+                "Other Notes:\n\n");
             SetTlkOverride(478,
                 "Social improves your XP gain and leadership capabilities.\n\n" +
-                "Primary Skills: Leadership, Agriculture\n\n" +
+                "Primary Skills: Leadership\n\n" +
                 "Other Notes:\n\n" + 
                 "Improves guild point acquisition.\n" +
                 "Improves quest credit rewards.\n" + 
                 "Improves XP gain.");
 
-            SetTlkOverride(535, "Credit"); // Gold Piece
+            SetTlkOverride(535, "Dollar"); // Gold Piece
 
             SetTlkOverride(1027, "Poison"); // Acid
 
-            SetTlkOverride(3593, "Give credits."); // GP
-            SetTlkOverride(5025, "The Galactic Credit Standard, or simply the 'credit', is the main form of currency throughout the galaxy."); // GP desc
-            SetTlkOverride(6407, "Credits"); // GP
-            SetTlkOverride(7059, "Drop or give credits, etc.");
+            SetTlkOverride(3593, "Give dollars."); // GP
+            SetTlkOverride(5025, "The United States dollar, or U.S. dollar, is made up of 100 cents. It is represented by the symbol $ or US$ to differentiate it from other dollar-based currencies. The U.S. dollar is considered a benchmark currency and is the most used currency in transactions across the world."); // GP desc
+            SetTlkOverride(6407, "Dollars"); // GP
+            SetTlkOverride(7059, "Drop or give dollars, etc.");
 
             SetTlkOverride(7099, "Evasion");
 
@@ -116,21 +106,21 @@ namespace WOD.Game.Server.Feature
             SetTlkOverride(58372, "Dexterity Decreased");
             SetTlkOverride(58373, "Vitality Increased");
             SetTlkOverride(58374, "Vitality Decreased");
-            SetTlkOverride(58375, "Agility Increased");
-            SetTlkOverride(58376, "Agility Decreased");
-            SetTlkOverride(58377, "Willpower Increased");
-            SetTlkOverride(58378, "Willpower Decreased");
+            SetTlkOverride(58375, "Power Increased");
+            SetTlkOverride(58376, "Power Decreased");
+            SetTlkOverride(58377, "Will Increased");
+            SetTlkOverride(58378, "Will Decreased");
             SetTlkOverride(58379, "Social Increased");
             SetTlkOverride(58380, "Social Decreased");
 
             SetTlkOverride(61619, "Sell <CUSTOM0> for <CUSTOM1>cr");
             SetTlkOverride(61620, "Buy <CUSTOM0> for <CUSTOM1>cr");
-            SetTlkOverride(62489, "Acquired <CUSTOM0> credits");
-            SetTlkOverride(62490, "Lost <CUSTOM0> credits");
+            SetTlkOverride(62489, "Acquired <CUSTOM0> dollars");
+            SetTlkOverride(62490, "Lost <CUSTOM0> dollars");
 
             SetTlkOverride(66129, "Premonition");
 
-            SetTlkOverride(66751, "Holonet");
+            SetTlkOverride(66751, "News");
             SetTlkOverride(66755, "Comms");
 
             SetTlkOverride(83393, "Poison"); // Acid
@@ -138,11 +128,11 @@ namespace WOD.Game.Server.Feature
 
         private static string BuildRecommendedButtonText()
         {
-            return "Your character is guided by six core attributes: Might, Vitality, Dexterity, Willpower, Intellect, and Social.\n\n" +
+            return "Your character is guided by six core attributes: Might, Vitality, Dexterity, Will, Power, and Social.\n\n" +
                    "Might: Improves damage dealt by melee weapons, increases melee accuracy and increases carrying capacity.\n" +
                    "Vitality: Improves your max hit points and reduces damage received.\n" +
-                   "Intellect: Improves damage dealt by subtype abilities.\n" +
-                   "Willpower: Improves subtype ability defense.\n" +
+                   "Power: Improves damage dealt by subtype abilities.\n" +
+                   "Will: Improves subtype ability defense.\n" +
                    "Dexterity: Improves ranged accuracy and evasion.\n" +
                    "Social: Improves your XP gain and leadership capabilities.\n\n";
         }

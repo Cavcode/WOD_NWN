@@ -8,6 +8,7 @@ using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.GuiService;
 using WOD.Game.Server.Service.GuiService.Component;
 using WOD.Game.Server.Service.SkillService;
+using System.Linq;
 
 namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 {
@@ -145,7 +146,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
                 if (skill.CharacterTypeRestriction != CharacterType.Invalid &&
                     skill.CharacterTypeRestriction != dbPlayer.CharacterType)
                 {
-                    continue;
+                    if (skill.CharacterSubTypeRestrictions.Contains(dbPlayer.CharacterSubType))
+                        continue;
                 }
 
                 var playerSkill = dbPlayer.Skills[type];
