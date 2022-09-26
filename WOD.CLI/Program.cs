@@ -11,7 +11,6 @@ namespace WOD.CLI
         private static readonly StructureItemCreator _structureItemCreator = new();
         private static readonly EnhancementItemBuilder _enhancementItemBuilder = new();
         private static readonly RecipeCodeBuilder _recipeCodeBuilder = new();
-        private static readonly LegacyMigrator _legacyMigrator = new();
         private static readonly AdHocTool _adHocTool = new();
 
         static void Main(string[] args)

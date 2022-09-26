@@ -84,7 +84,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                     col.AddRow(row =>
                     {
                         row.AddLabel()
-                            .SetText("FP")
+                            .BindText(model => model.ResourceName)
                             .SetColor(0, 138, 250)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left)

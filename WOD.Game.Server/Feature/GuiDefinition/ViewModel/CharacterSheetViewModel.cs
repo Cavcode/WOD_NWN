@@ -8,6 +8,7 @@ using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.CombatService;
 using WOD.Game.Server.Service.GuiService;
+using WOD.Game.Server.Enumeration;
 using WOD.Game.Server.Service.SkillService;
 using Skill = WOD.Game.Server.Service.Skill;
 
@@ -39,8 +40,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             get => Get<string>();
             set => Set(value);
         }
-
-        public string STM
+        public string ResourceName
         {
             get => Get<string>();
             set => Set(value);
@@ -64,13 +64,13 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set => Set(value);
         }
 
-        public int Willpower
+        public int Will
         {
             get => Get<int>();
             set => Set(value);
         }
 
-        public int Agility
+        public int Power
         {
             get => Get<int>();
             set => Set(value);
@@ -124,7 +124,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set => Set(value);
         }
 
-        public int DefenseForce
+        public int DefenseSubAbility
         {
             get => Get<int>();
             set => Set(value);
@@ -208,13 +208,13 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set => Set(value);
         }
 
-        public bool IsWillpowerUpgradeAvailable
+        public bool IsWillUpgradeAvailable
         {
             get => Get<bool>();
             set => Set(value);
         }
 
-        public bool IsAgilityUpgradeAvailable
+        public bool IsPowerUpgradeAvailable
         {
             get => Get<bool>();
             set => Set(value);
@@ -352,14 +352,14 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             UpgradeAttribute(AbilityType.Vitality, "Vitality");
         };
 
-        public Action OnClickUpgradeWillpower() => () =>
+        public Action OnClickUpgradeWill() => () =>
         {
-            UpgradeAttribute(AbilityType.Will, "Willpower");
+            UpgradeAttribute(AbilityType.Will, "Will");
         };
 
-        public Action OnClickUpgradeAgility() => () =>
+        public Action OnClickUpgradePower() => () =>
         {
-            UpgradeAttribute(AbilityType.Power, "Agility");
+            UpgradeAttribute(AbilityType.Power, "Power");
         };
 
         public Action OnClickUpgradeSocial() => () =>
@@ -371,6 +371,9 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
         {
             var isRacialBonusAvailable = dbPlayer.RacialStat == AbilityType.Invalid;
 
+           ResourceName = dbPlayer.CharacterType == Enumeration.CharacterType.Kindred ? "Vitae" : "Resource";
+           
+                ResourceName = "Resource";
             HP = GetCurrentHitPoints(Player) + " / " + GetMaxHitPoints(Player);
 
             Resource = Stat.GetCurrentResource(Player, dbPlayer) + " / " + Stat.GetMaxResource(Player, dbPlayer);
@@ -379,15 +382,15 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             Might = GetAbilityScore(Player, AbilityType.Might);
             Dexterity = GetAbilityScore(Player, AbilityType.Dexterity);
             Vitality = GetAbilityScore(Player, AbilityType.Vitality);
-            Willpower = GetAbilityScore(Player, AbilityType.Will);
-            Agility = GetAbilityScore(Player, AbilityType.Power);
+            Will = GetAbilityScore(Player, AbilityType.Will);
+            Power = GetAbilityScore(Player, AbilityType.Power);
             Social = GetAbilityScore(Player, AbilityType.Social);
 
             IsMightUpgradeAvailable = (dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Might] < MaxUpgrades) || isRacialBonusAvailable;
             IsDexterityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Dexterity] < MaxUpgrades || isRacialBonusAvailable;
             IsVitalityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Vitality] < MaxUpgrades || isRacialBonusAvailable;
-            IsWillpowerUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Will] < MaxUpgrades || isRacialBonusAvailable;
-            IsAgilityUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Power] < MaxUpgrades || isRacialBonusAvailable;
+            IsWillUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Will] < MaxUpgrades || isRacialBonusAvailable;
+            IsPowerUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Power] < MaxUpgrades || isRacialBonusAvailable;
             IsSocialUpgradeAvailable = dbPlayer.UnallocatedAP > 0 && dbPlayer.UpgradedStats[AbilityType.Social] < MaxUpgrades || isRacialBonusAvailable;
         }
 
@@ -468,7 +471,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             var mainHandSkill = Skill.GetSkillTypeByBaseItem(mainHandType);
             Attack = Stat.GetAttack(Player, damageStat, mainHandSkill);
             DefensePhysical = Stat.GetDefense(Player, CombatDamageType.Physical, AbilityType.Vitality);
-            DefenseForce = Stat.GetDefense(Player, CombatDamageType.Force, AbilityType.Will);
+            DefenseSubAbility = Stat.GetDefense(Player, CombatDamageType.Force, AbilityType.Will);
 
             var fireDefense = dbPlayer.Defenses[CombatDamageType.Fire].ToString();
             var poisonDefense = dbPlayer.Defenses[CombatDamageType.Poison].ToString();
