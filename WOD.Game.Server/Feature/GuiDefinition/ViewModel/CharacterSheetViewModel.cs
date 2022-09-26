@@ -226,12 +226,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             set => Set(value);
         }
 
-        public bool IsHolocomEnabled
-        {
-            get => Get<bool>();
-            set => Set(value);
-        }
-
         public Action OnClickSkills() => () =>
         {
             Gui.TogglePlayerWindow(Player, GuiWindowType.Skills);

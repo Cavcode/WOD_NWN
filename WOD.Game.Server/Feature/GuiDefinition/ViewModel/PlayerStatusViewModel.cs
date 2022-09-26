@@ -16,21 +16,10 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
         private int _screenWidth;
         private int _screenScale;
 
-        private static readonly GuiColor _hpColor = new GuiColor(139, 0, 0);
-        private static readonly GuiColor _stmColor = new GuiColor(0, 104, 0);
+        private static readonly GuiColor _hpColor = new GuiColor(0, 128, 128);
         private static readonly GuiColor _ResourceColor = new GuiColor(3, 87, 152);
 
-        private static readonly GuiColor _shieldColor = new GuiColor(3, 87, 152);
-        private static readonly GuiColor _hullColor = new GuiColor(139, 0, 0);
-        private static readonly GuiColor _capacitorColor = new GuiColor(166, 111, 0);
-
         public GuiColor Bar1Color
-        {
-            get => Get<GuiColor>();
-            set => Set(value);
-        }
-        
-        public GuiColor Bar2Color
         {
             get => Get<GuiColor>();
             set => Set(value);
@@ -47,11 +36,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             get => Get<string>();
             set => Set(value);
         }
-        public string Bar2Label
-        {
-            get => Get<string>();
-            set => Set(value);
-        }
         public string Bar3Label
         {
             get => Get<string>();
@@ -63,11 +47,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
             get => Get<string>();
             set => Set(value);
         }
-        public string Bar2Value
-        {
-            get => Get<string>();
-            set => Set(value);
-        }
         public string Bar3Value
         {
             get => Get<string>();
@@ -75,11 +54,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
         }
 
         public float Bar1Progress
-        {
-            get => Get<float>();
-            set => Set(value);
-        }
-        public float Bar2Progress
         {
             get => Get<float>();
             set => Set(value);
@@ -108,17 +82,14 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
 
         private void ToggleLabels(bool isCharacter)
         {
+            var playerId = GetObjectUUID(Player);
+            var dbPlayer = DB.Get<Player>(playerId);
+
             if (isCharacter)
             {
                 Bar1Label = "HP:";
-                Bar2Label = "STM:";
-                Bar3Label = "Resource:";
-            }
-            else
-            {
-                Bar1Label = "SH:";
-                Bar2Label = "HL:";
-                Bar3Label = "CAP:";
+                if (dbPlayer.CharacterType == CharacterType.Kindred)
+                    Bar3Label = "VIT:";
             }
         }
 
@@ -179,7 +150,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
         {
             ToggleLabels(true);
             Bar1Color = _hpColor;
-            Bar2Color = _stmColor;
             Bar3Color = _ResourceColor;
 
             if (type == PlayerStatusRefreshEvent.StatType.HP)
@@ -196,7 +166,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition.ViewModel
         {
             ToggleLabels(true);
             Bar1Color = _hpColor;
-            Bar2Color = _stmColor;
             Bar3Color = _ResourceColor;
             UpdateHP();
             UpdateResource();

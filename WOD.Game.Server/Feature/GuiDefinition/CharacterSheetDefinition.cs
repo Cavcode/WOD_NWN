@@ -88,33 +88,11 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetColor(0, 138, 250)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left)
-                            .SetTooltip("Force Points - Resource used to activate force abilities. Force sensitive characters only.");
+                            .SetTooltip("Resource used to activate sub-type abilities.");
 
                         row.AddLabel()
                             .BindText(model => model.Resource)
                             .SetColor(0, 138, 250)
-                            .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left);
-
-                        row.AddButton()
-                            .SetWidth(IncreaseButtonSize)
-                            .SetHeight(IncreaseButtonSize)
-                            .SetText("+")
-                            .SetIsVisible(false);
-                    });
-
-                    col.AddRow(row =>
-                    {
-                        row.AddLabel()
-                            .SetText("STM")
-                            .SetColor(0, 139, 0)
-                            .SetVerticalAlign(NuiVerticalAlign.Top)
-                            .SetHorizontalAlign(NuiHorizontalAlign.Left)
-                            .SetTooltip("Stamina - Resource used to activate non-force abilities.");
-
-                        row.AddLabel()
-                            .BindText(model => model.STM)
-                            .SetColor(0, 139, 0)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left);
 
@@ -171,7 +149,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetText("Might")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left)
-                            .SetTooltip("Might - Improves damage dealt by melee weapons and increases carrying capacity.");
+                            .SetTooltip("Might - Improves damage dealt by melee weapons, improves physical accuracy, and increases carrying capacity.");
 
                         row.AddLabel()
                             .BindText(model => model.Might)
@@ -192,7 +170,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetText("Dexterity")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left)
-                            .SetTooltip("Dexterity - Improves damage dealt by ranged and finesse weapons and increases physical accuracy.");
+                            .SetTooltip("Dexterity - Improves damage dealt by ranged and finesse weapon and increases accuracy.");
 
                         row.AddLabel()
                             .BindText(model => model.Dexterity)
@@ -231,13 +209,13 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                     col.AddRow(row =>
                     {
                         row.AddLabel()
-                            .SetText("Willpower")
+                            .SetText("Will")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left)
-                            .SetTooltip("Willpower - Improves your force attack, force defense, and max force points.");
+                            .SetTooltip("Will - Improves your sub-type ability defense and increases your resource pool.");
 
                         row.AddLabel()
-                            .BindText(model => model.Willpower)
+                            .BindText(model => model.Will)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left);
 
@@ -245,21 +223,21 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetWidth(IncreaseButtonSize)
                             .SetHeight(IncreaseButtonSize)
                             .SetText("+")
-                            .BindIsVisible(model => model.IsWillpowerUpgradeAvailable)
-                            .BindOnClicked(model => model.OnClickUpgradeWillpower());
+                            .BindIsVisible(model => model.IsWillUpgradeAvailable)
+                            .BindOnClicked(model => model.OnClickUpgradePower());
                     });
 
 
                     col.AddRow(row =>
                     {
                         row.AddLabel()
-                            .SetText("Agility")
+                            .SetText("Power")
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left)
-                            .SetTooltip("Agility - Improves ranged accuracy, evasion, and max stamina.");
+                            .SetTooltip("Power - Improves your sub-type ability effectiveness.");
 
                         row.AddLabel()
-                            .BindText(model => model.Agility)
+                            .BindText(model => model.Power)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left);
 
@@ -267,8 +245,8 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetWidth(IncreaseButtonSize)
                             .SetHeight(IncreaseButtonSize)
                             .SetText("+")
-                            .BindIsVisible(model => model.IsAgilityUpgradeAvailable)
-                            .BindOnClicked(model => model.OnClickUpgradeAgility());
+                            .BindIsVisible(model => model.IsPowerUpgradeAvailable)
+                            .BindOnClicked(model => model.OnClickUpgradePower());
                     });
 
                     col.AddRow(row =>
@@ -398,7 +376,7 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                             .SetTooltip("Force Defense - Reduces the amount of damage taken by force attacks.");
 
                         row.AddLabel()
-                            .BindText(model => model.DefenseForce)
+                            .BindText(model => model.DefenseSubAbility)
                             .SetVerticalAlign(NuiVerticalAlign.Top)
                             .SetHorizontalAlign(NuiHorizontalAlign.Left);
                     });
@@ -508,15 +486,6 @@ namespace WOD.Game.Server.Feature.GuiDefinition
                                         .SetHeight(32f)
                                         .SetWidth(100f)
                                         .BindOnClicked(model => model.OnClickRecipes());
-                                });
-                                col2.AddRow(row2 =>
-                                {
-                                    row2.AddButton()
-                                        .SetText("HoloCom")
-                                        .SetHeight(32f)
-                                        .SetWidth(100f)
-                                        //.BindOnClicked(model => model.OnClickHoloCom())
-                                        .BindIsEnabled(model => model.IsHolocomEnabled);
                                 });
                                 col2.AddRow(row2 =>
                                 {
