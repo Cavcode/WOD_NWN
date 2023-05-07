@@ -33,7 +33,9 @@ namespace WOD.Game.Server.Native
         public static void RegisterHook()
         {
             delegate* unmanaged<void*, void*, int, int, int, int, int, int> pHook = &OnGetDamageRoll;
-            var hookPtr = VM.RequestHook(new IntPtr(FunctionsLinux._ZN17CNWSCreatureStats13GetDamageRollEP10CNWSObjectiiiii), (IntPtr)pHook, -1000000);
+            var hookPtr = VM.RequestHook(NativeLibrary.GetExport(
+                NativeLibrary.GetMainProgramHandle(), "_ZN17CNWSCreatureStats13GetDamageRollEP10CNWSObjectiiiii"),
+                (IntPtr)pHook, -1000000);
             _callOriginal = Marshal.GetDelegateForFunctionPointer<GetDamageRollHook>(hookPtr);
         }
 
