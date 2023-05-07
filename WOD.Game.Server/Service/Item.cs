@@ -129,7 +129,7 @@ namespace WOD.Game.Server.Service
             _itemToDamageAbilityMapping[BaseItem.Arrow] = AbilityType.Dexterity;
             _itemToDamageAbilityMapping[BaseItem.Bolt] = AbilityType.Dexterity;
             _itemToDamageAbilityMapping[BaseItem.Bullet] = AbilityType.Dexterity;
-            _itemToDamageAbilityMapping[BaseItem.Sling] = AbilityType.Dexterity;
+            _itemToDamageAbilityMapping[BaseItem.RHandGun] = AbilityType.Dexterity;
             _itemToDamageAbilityMapping[BaseItem.Grenade] = AbilityType.Dexterity;
             _itemToDamageAbilityMapping[BaseItem.Shuriken] = AbilityType.Might;
             _itemToDamageAbilityMapping[BaseItem.ThrowingAxe] = AbilityType.Might;
@@ -198,7 +198,7 @@ namespace WOD.Game.Server.Service
             _itemToAccuracyAbilityMapping[BaseItem.Arrow] = AbilityType.Power;
             _itemToAccuracyAbilityMapping[BaseItem.Bolt] = AbilityType.Power;
             _itemToAccuracyAbilityMapping[BaseItem.Bullet] = AbilityType.Power;
-            _itemToAccuracyAbilityMapping[BaseItem.Sling] = AbilityType.Power;
+            _itemToAccuracyAbilityMapping[BaseItem.RHandGun] = AbilityType.Power;
             _itemToAccuracyAbilityMapping[BaseItem.Grenade] = AbilityType.Power;
             _itemToAccuracyAbilityMapping[BaseItem.Shuriken] = AbilityType.Power;
             _itemToAccuracyAbilityMapping[BaseItem.ThrowingAxe] = AbilityType.Power;
@@ -676,6 +676,14 @@ namespace WOD.Game.Server.Service
         public static List<BaseItem> PistolBaseItemTypes { get; } = new List<BaseItem>
         {
             BaseItem.Pistol
+        };
+
+        /// <summary>
+        /// Retrieves the list of RHandGun base item types.
+        /// </summary>
+        public static List<BaseItem> RHandGun { get; } = new List<BaseItem>
+        {
+            BaseItem.RHandGun
         };
 
         /// <summary>

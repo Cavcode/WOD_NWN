@@ -456,6 +456,7 @@ namespace WOD.Game.Server.Native
             if (Item.RifleBaseItemTypes.Contains(baseItemType) &&
                 attacker.m_pStats.HasFeat((ushort)FeatType.WeaponSpecializationRifles) == 1)
             {
+
                 return 1;
             }
 

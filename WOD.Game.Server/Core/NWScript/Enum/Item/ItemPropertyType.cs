@@ -112,12 +112,14 @@ namespace WOD.Game.Server.Core.NWScript.Enum.Item
         Attack = 111,
         ForceAttack = 112,
         ModuleBonus = 113,
-        StarshipBonus = 114,
+        GunType = 114,
         CPBonus = 115,
 
         Evasion = 117,
         AbilityRecastReduction = 118,
         FPRegen = 119,
         STMRegen = 120,
+
+  
     }
 }

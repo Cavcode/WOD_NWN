@@ -5,6 +5,7 @@ using WOD.Game.Server.Core;
 using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript;
 using WOD.Game.Server.Core.NWScript.Enum;
+using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
 using WOD.Game.Server.Service;
 using WOD.Game.Server.Service.AbilityService;
 using WOD.Game.Server.Service.LogService;

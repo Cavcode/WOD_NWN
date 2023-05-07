@@ -7,8 +7,9 @@ namespace WOD.Game.Server.Core.NWScript.Enum
         Might = 0,
         Dexterity = 1,
         Vitality = 2,
-        Power = 3,
+        Intellect = 3,
         Will = 4,
-        Social = 5
+        Social = 5,
+        Power = 6,
     }
 }

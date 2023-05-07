@@ -71,7 +71,8 @@ namespace WOD.Game.Server.Feature
                     BaseItem.Lightsaber,
                     BaseItem.Saberstaff,
                     BaseItem.Electroblade,
-                    BaseItem.TwinElectroBlade
+                    BaseItem.TwinElectroBlade,
+                    BaseItem.RHandGun
         };
 
         /// <summary>

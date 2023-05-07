@@ -88,7 +88,8 @@ namespace WOD.Game.Server.Feature
                     Item.TwinBladeBaseItemTypes.Contains(rightHandType) || 
                     Item.SaberstaffBaseItemTypes.Contains(rightHandType) ||
                     Item.RifleBaseItemTypes.Contains(rightHandType) ||
-                    Item.PistolBaseItemTypes.Contains(rightHandType))
+                    Item.PistolBaseItemTypes.Contains(rightHandType) ||
+                    Item.RHandGun.Contains(rightHandType))
                 {
                     return true;
                 }

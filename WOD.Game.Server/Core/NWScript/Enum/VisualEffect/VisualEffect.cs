@@ -560,5 +560,46 @@ namespace WOD.Game.Server.Core.NWScript.Enum.VisualEffect
         Vfx_Imp_Mirv_Rock2 = 839,
         Vfx_Imp_Mirv_Rock3 = 840,
         Vfx_Dur_Chat_Bubble = 841,
+
+        Vfx_Ricochet = 842,
+        Vfx_Pistol_Gunshot = 843,
+        Vfx_Pistol_Casing = 844,
+
+        Vfx_Imp_Stone1 = 845,
+        Vfx_Imp_Stone2 = 846,
+        Vfx_Imp_Stone3 = 847,
+        Vfx_Imp_Stone4 = 848, 
+
+        Vfx_Imp_Dirt1 = 849,
+        Vfx_Imp_Dirt2 = 850,
+        Vfx_Imp_Dirt3 = 851,
+        Vfx_Imp_Dirt4 = 852,
+
+        Vfx_Imp_Metal1 = 853,
+        Vfx_Imp_Metal2 = 854,
+        Vfx_Imp_Metal3 = 855,
+        Vfx_Imp_Metal4 = 856,
+
+        Vfx_Imp_Water1 = 857,
+        Vfx_Imp_Water2 = 858,
+        Vfx_Imp_Water3 = 859,
+        Vfx_Imp_Water4 = 860,
+
+        Vfx_Imp_Wood1 = 861,
+        Vfx_Imp_Wood2 = 862,
+        Vfx_Imp_Wood3 = 863,
+        Vfx_Imp_Wood4 = 864,
+
+        Vfx_Gun_Miss1 = 865,
+        Vfx_Gun_Miss2 = 866,
+        Vfx_Gun_Miss3 = 867,
+        Vfx_Gun_Miss4 = 868,
+
+        Vfx_Imp_Flsh1 = 869,
+        Vfx_Imp_Flsh2 = 870,
+        Vfx_Imp_Flsh3 = 871,
+        Vfx_Imp_Flsh4 = 872,
+
+
     }
 }

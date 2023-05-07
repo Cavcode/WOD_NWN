@@ -145,6 +145,7 @@ namespace WOD.Game.Server.Feature
 
             // Damage Plugin Events start here.
             DamagePlugin.SetDamageEventScript("on_nwnx_dmg", OBJECT_INVALID);
+            DamagePlugin.SetAttackEventScript("on_nwnx_atk", OBJECT_INVALID);
 
             // Events Plugin Events start here.
 

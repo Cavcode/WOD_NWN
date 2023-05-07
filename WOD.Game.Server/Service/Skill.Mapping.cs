@@ -76,7 +76,7 @@ namespace WOD.Game.Server.Service
             _itemToSkillMapping[BaseItem.Arrow] = SkillType.Ranged;
             _itemToSkillMapping[BaseItem.Bolt] = SkillType.Ranged;
             _itemToSkillMapping[BaseItem.Bullet] = SkillType.Ranged;
-            _itemToSkillMapping[BaseItem.Sling] = SkillType.Ranged;
+            _itemToSkillMapping[BaseItem.RHandGun] = SkillType.Ranged;
             _itemToSkillMapping[BaseItem.Grenade] = SkillType.Ranged;
             _itemToSkillMapping[BaseItem.Shuriken] = SkillType.Ranged;
             _itemToSkillMapping[BaseItem.ThrowingAxe] = SkillType.Ranged;

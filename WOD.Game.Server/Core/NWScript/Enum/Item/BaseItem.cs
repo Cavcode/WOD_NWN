@@ -130,5 +130,7 @@ namespace WOD.Game.Server.Core.NWScript.Enum.Item
         TwinElectroBlade = 537,
         MiscellaneousThinStackable = 538,
 
+        RHandGun = 541,
+
     }
 }
