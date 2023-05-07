@@ -413,7 +413,7 @@ namespace WOD.Game.Server.Service
 
             if (removeIcon && statusEffectDetail.EffectIconId > 0 && GetIsObjectValid(creature))
             {
-                ObjectPlugin.RemoveIconEffect(creature, (int)statusEffectDetail.EffectIconId);
+                RemoveEffectByTag(creature, $"EFFECT_ICON_{statusEffectDetail.EffectIconId}");
             }
 
             if(showMessage)
