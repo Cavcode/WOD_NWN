@@ -434,30 +434,6 @@ namespace WOD.Game.Server.Service
                     return ItemPropertyCustom(ItemPropertyType.Craftsmanship, 4, amount);
                 case 45: // Module Bonus
                     return ItemPropertyCustom(ItemPropertyType.ModuleBonus, -1, amount);
-                case 46: // Starship Hull
-                    return ItemPropertyCustom(ItemPropertyType.StarshipBonus, 46, amount);
-                case 47: // Starship Capacitor
-                    return ItemPropertyCustom(ItemPropertyType.StarshipBonus, 47, amount);
-                case 48: // Starship Shield
-                    return ItemPropertyCustom(ItemPropertyType.StarshipBonus, 48, amount);
-                case 49: // Starship Shield Recharge Rate
-                    return ItemPropertyCustom(ItemPropertyType.StarshipBonus, 49, amount);
-                case 50: // Starship EM Damage
-                    return ItemPropertyCustom(ItemPropertyType.StarshipBonus, 50, amount);
-                case 51: // Starship Thermal Damage
-                    return ItemPropertyCustom(ItemPropertyType.StarshipBonus, 51, amount);
-                case 52: // Starship Explosive Damage
-                    return ItemPropertyCustom(ItemPropertyType.StarshipBonus, 52, amount);
-                case 53: // Starship Accuracy
-                    return ItemPropertyCustom(ItemPropertyType.StarshipBonus, 53, amount);
-                case 54: // Starship Evasion
-                    return ItemPropertyCustom(ItemPropertyType.StarshipBonus, 54, amount);
-                case 55: // Starship Thermal Defense
-                    return ItemPropertyCustom(ItemPropertyType.StarshipBonus, 55, amount);
-                case 56: // Starship Explosive Defense
-                    return ItemPropertyCustom(ItemPropertyType.StarshipBonus, 56, amount);
-                case 57: // Starship EM Defense
-                    return ItemPropertyCustom(ItemPropertyType.StarshipBonus, 57, amount);
 
             }
 

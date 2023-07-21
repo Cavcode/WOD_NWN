@@ -67,9 +67,10 @@ namespace WOD.Game.Server.Feature
 
             if (GetWeaponRanged(GetItemInSlot(InventorySlot.RightHand,player)))
             {
-                var gunshotVfx =
+                
+                //var gunshotVfx =
 
-                GetItemHasItemProperty();
+                //GetItemHasItemProperty();
                 ApplyEffectToObject(DurationType.Instant, gunshotMissVfx, player);
 
                 var casing = EffectVisualEffect(VisualEffect.Vfx_Pistol_Casing);
@@ -127,12 +128,12 @@ namespace WOD.Game.Server.Feature
             var gunshotVfxPick = EffectVisualEffect(gunshotVfx);
             return gunshotVfxPick;
         }
-        private static VisualEffect GetHitVfx()
+        private static Effect GetHitVfx()
         {
             var rnd = new Random();
             var randIndex = rnd.Next(_miss.Count);
             var hitVfx = _miss[randIndex];
-            var gunshotHitVfxPick = EffectVisualEffect(gunshotVfx);
+            var gunshotHitVfxPick = EffectVisualEffect(hitVfx);
             return gunshotHitVfxPick;
         }
 

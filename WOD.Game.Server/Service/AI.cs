@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using WOD.Game.Server.Core;
-using WOD.Game.Server.Core.NWNX;
 using WOD.Game.Server.Core.NWScript.Enum;
-using WOD.Game.Server.Core.NWScript.Enum.Item;
 using WOD.Game.Server.Core.NWScript.Enum.VisualEffect;
 using WOD.Game.Server.Feature.AIDefinition;
 using WOD.Game.Server.Service.AIService;
@@ -13,172 +10,147 @@ namespace WOD.Game.Server.Service
 {
     public static class AI
     {
-        private static readonly Dictionary<uint, HashSet<uint>> _creatureAllies = new Dictionary<uint, HashSet<uint>>();
+        private static readonly Dictionary<uint, HashSet<uint>> _creatureAllies = new();
+        private static readonly Dictionary<AIDefinitionType, IAIDefinition> _aiDefinitions = new();
 
-        private const string StickyTargetRounds = "AI_STICKY_TARGET_ROUNDS";
+        [NWNEventHandler("mod_cache")]
+        public static void CacheAIData()
+        {
+            _aiDefinitions[AIDefinitionType.Generic] = new GenericAIDefinition();
+
+        }
 
         /// <summary>
         /// Entry point for creature heartbeat logic.
         /// </summary>
-        [NWNEventHandler("crea_heartbeat")]
+        [NWNEventHandler("crea_hb_aft")]
         public static void CreatureHeartbeat()
         {
-            ExecuteScript("crea_hb_bef", OBJECT_SELF);
-            RestoreCreatureStats();
+            Stat.RestoreNPCStats(true);
             ProcessFlags();
-            AttackHighestEnmityTarget();
-            ExecuteScript("cdef_c2_default1", OBJECT_SELF);
-            ExecuteScript("crea_hb_aft", OBJECT_SELF);
+            Enmity.AttackHighestEnmityTarget(OBJECT_SELF);
         }
 
         /// <summary>
-        /// Entry point for creature Dexterity logic.
+        /// Entry point for creature perception logic.
         /// </summary>
-        [NWNEventHandler("crea_Dexterity")]
-        public static void CreatureDexterity()
+        [NWNEventHandler("crea_perc_aft")]
+        public static void CreaturePerception()
         {
-            ExecuteScript("crea_perc_bef", OBJECT_SELF);
-            // This is a stripped-down version of the default NWN Dexterity event.
-            // We handle most of our Dexterity logic with the aggro aura effect.
+            // This is a stripped-down version of the default NWN perception event.
+            // We handle most of our perception logic with the aggro aura effect.
             ProcessCreatureAllies();
-            ExecuteScript("crea_perc_aft", OBJECT_SELF);
         }
 
         /// <summary>
         /// Entry point for creature combat round end logic.
         /// </summary>
-        [NWNEventHandler("crea_roundend")]
+        [NWNEventHandler("crea_rndend_aft")]
         public static void CreatureCombatRoundEnd()
         {
-            if (!Activity.IsBusy(OBJECT_SELF))
+            var creature = OBJECT_SELF;
+            if (!Activity.IsBusy(creature))
             {
-                ExecuteScript("crea_rndend_bef", OBJECT_SELF);
-                ProcessPerkAI();
-                ExecuteScript("cdef_c2_default3", OBJECT_SELF);
-                ExecuteScript("crea_rndend_aft", OBJECT_SELF);
+                ProcessPerkAI(AIDefinitionType.Generic, creature, true);
             }
+
+            Enmity.AttackHighestEnmityTarget(creature);
         }
 
         /// <summary>
         /// Entry point for creature conversation logic.
         /// </summary>
-        [NWNEventHandler("crea_convo")]
+        [NWNEventHandler("crea_convo_aft")]
         public static void CreatureConversation()
         {
-            ExecuteScript("crea_convo_bef", OBJECT_SELF);
-            ExecuteScript("cdef_c2_default4", OBJECT_SELF);
-
             var conversation = GetLocalString(OBJECT_SELF, "CONVERSATION");
             if (!string.IsNullOrWhiteSpace(conversation))
             {
                 var talker = GetLastSpeaker();
                 Dialog.StartConversation(talker, OBJECT_SELF, conversation);
             }
-            ExecuteScript("crea_convo_aft", OBJECT_SELF);
         }
 
         /// <summary>
         /// Entry point for creature physical attacked logic
         /// </summary>
-        [NWNEventHandler("crea_attacked")]
+        [NWNEventHandler("crea_attack_aft")]
         public static void CreaturePhysicalAttacked()
         {
-            ExecuteScript("crea_attack_bef", OBJECT_SELF);
-            ExecuteScript("cdef_c2_default5", OBJECT_SELF);
-            ExecuteScript("crea_attack_aft", OBJECT_SELF);
+            Enmity.AttackHighestEnmityTarget(OBJECT_SELF);
         }
 
         /// <summary>
         /// Entry point for creature damaged logic
         /// </summary>
-        [NWNEventHandler("crea_damaged")]
+        [NWNEventHandler("crea_damaged_aft")]
         public static void CreatureDamaged()
         {
-            ExecuteScript("crea_damaged_bef", OBJECT_SELF);
-            ExecuteScript("cdef_c2_default6", OBJECT_SELF);
-            ExecuteScript("crea_damaged_aft", OBJECT_SELF);
+            Enmity.AttackHighestEnmityTarget(OBJECT_SELF);
         }
 
         /// <summary>
         /// Entry point for creature death logic
         /// </summary>
-        [NWNEventHandler("crea_death")]
+        [NWNEventHandler("crea_death_aft")]
         public static void CreatureDeath()
         {
-            ExecuteScript("crea_death_bef", OBJECT_SELF);
             RemoveFromAlliesCache();
-            ExecuteScript("cdef_c2_default7", OBJECT_SELF);
-            ExecuteScript("crea_death_aft", OBJECT_SELF);
         }
 
         /// <summary>
         /// Entry point for creature disturbed logic
         /// </summary>
-        [NWNEventHandler("crea_disturb")]
+        [NWNEventHandler("crea_disturb_aft")]
         public static void CreatureDisturbed()
         {
-            ExecuteScript("crea_disturb_bef", OBJECT_SELF);
-            ExecuteScript("cdef_c2_default8", OBJECT_SELF);
-            ExecuteScript("crea_disturb_aft", OBJECT_SELF);
+            Enmity.AttackHighestEnmityTarget(OBJECT_SELF);
         }
 
         /// <summary>
         /// Entry point for creature spawn logic
         /// </summary>
-        [NWNEventHandler("crea_spawn")]
+        [NWNEventHandler("crea_spawn_aft")]
         public static void CreatureSpawn()
         {
-            ExecuteScript("crea_spawn_bef", OBJECT_SELF);
-            LoadCreatureStats();
+            SetLocalString(OBJECT_SELF, "X2_SPECIAL_COMBAT_AI_SCRIPT", "xxx");
+
+            Stat.LoadNPCStats();
             LoadAggroEffect();
             DoVFX();
             SetLocalLocation(OBJECT_SELF, "HOME_LOCATION", GetLocation(OBJECT_SELF));
-            ExecuteScript("cdef_c2_default9", OBJECT_SELF);
-            ExecuteScript("crea_spawn_aft", OBJECT_SELF);
         }
 
         /// <summary>
         /// Entry point for creature rested logic
         /// </summary>
-        [NWNEventHandler("crea_rested")]
+        [NWNEventHandler("crea_rested_aft")]
         public static void CreatureRested()
         {
-            ExecuteScript("crea_rested_bef", OBJECT_SELF);
-            ExecuteScript("cdef_c2_defaulta", OBJECT_SELF);
-            ExecuteScript("crea_rested_aft", OBJECT_SELF);
         }
 
         /// <summary>
         /// Entry point for creature spell cast at logic
         /// </summary>
-        [NWNEventHandler("crea_spellcastat")]
+        [NWNEventHandler("crea_splcast_aft")]
         public static void CreatureSpellCastAt()
         {
-            ExecuteScript("crea_splcast_bef", OBJECT_SELF);
-            ExecuteScript("cdef_c2_defaultb", OBJECT_SELF);
-            ExecuteScript("crea_splcast_aft", OBJECT_SELF);
         }
 
         /// <summary>
         /// Entry point for creature user defined logic
         /// </summary>
-        [NWNEventHandler("crea_userdef")]
+        [NWNEventHandler("crea_userdef_aft")]
         public static void CreatureUserDefined()
         {
-            ExecuteScript("crea_userdef_bef", OBJECT_SELF);
-            ExecuteScript("cdef_c2_defaultd", OBJECT_SELF);
-            ExecuteScript("crea_userdef_aft", OBJECT_SELF);
         }
 
         /// <summary>
         /// Entry point for creature blocked logic
         /// </summary>
-        [NWNEventHandler("crea_blocked")]
+        [NWNEventHandler("crea_block_aft")]
         public static void CreatureBlocked()
         {
-            ExecuteScript("crea_block_bef", OBJECT_SELF);
-            ExecuteScript("cdef_c2_defaulte", OBJECT_SELF);
-            ExecuteScript("crea_block_aft", OBJECT_SELF);
         }
 
         /// <summary>
@@ -246,111 +218,70 @@ namespace WOD.Game.Server.Service
         {
         }
 
-        /// <summary>
-        /// Fail-safe to ensure the creature attacks 
-        /// </summary>
-        private static void AttackHighestEnmityTarget()
-        {
-            var self = OBJECT_SELF;
-            if (GetIsInCombat(self))
-                return;
-
-            var target = Enmity.GetHighestEnmityTarget(self);
-            if (!GetIsObjectValid(target))
-                return;
-
-            var action = GetCurrentAction(self);
-            if (action != ActionType.RandomWalk && 
-                action != ActionType.Invalid)
-                return;
-
-            AssignCommand(self, () =>
-            {
-                ClearAllActions();
-                ActionAttack(target);
-            });
-        }
 
         /// <summary>
         /// Handles custom perk usage
         /// </summary>
-        private static void ProcessPerkAI()
+        public static void ProcessPerkAI(AIDefinitionType aiType, uint creature, bool usesEnmity)
         {
-            var self = OBJECT_SELF;
-
             // Petrified - do nothing else.
-            if (GetHasEffect(self, EffectTypeScript.Petrify)) 
+            if (GetHasEffect(creature, EffectTypeScript.Petrify))
                 return;
 
             // Attempt to target the highest enmity creature.
             // If no target can be determined, exit early.
-            var target = Enmity.GetHighestEnmityTarget(self);
-            if (!GetIsObjectValid(target))
+            var target = Enmity.GetHighestEnmityTarget(creature);
+            if (usesEnmity && !GetIsObjectValid(target))
             {
                 ClearAllActions();
                 return;
             }
 
             // If currently randomly walking, clear all actions.
-            if (GetCurrentAction(self) == ActionType.RandomWalk)
+            if (GetCurrentAction(creature) == ActionType.RandomWalk)
             {
                 ClearAllActions();
             }
 
             // Not currently fighting - attack target
-            if (GetCurrentAction(self) == ActionType.Invalid)
+            if (GetCurrentAction(creature) == ActionType.Invalid)
             {
-                DeleteLocalInt(self, StickyTargetRounds);
                 ClearAllActions();
                 ActionAttack(target);
-            }
-            // The AI should stick to their same target for 3 rounds before shifting to the next highest enmity target.
-            else if (target != GetAttackTarget(self))
-            {
-                var rounds = GetLocalInt(self, StickyTargetRounds) + 1;
-                if (rounds > 3)
-                {
-                    DeleteLocalInt(self, StickyTargetRounds);
-                    ClearAllActions();
-                    ActionAttack(target);
-                }
             }
             // Perk ability usage
             else
             {
-                if (!_creatureAllies.TryGetValue(self, out var allies))
-                {
-                    allies = new HashSet<uint>();
-                }
-                allies.Add(self);
+                var master = GetMaster(creature);
+                var hasPCMaster = GetIsObjectValid(master) && GetIsPC(master);
+                var allies = new List<uint>();
 
-                var (feat, featTarget) = GenericAIDefinition.DeterminePerkAbility(self, target, allies);
+                if (hasPCMaster)
+                {
+                    allies = Party.GetAllPartyMembers(creature);
+                }
+                else
+                {
+                    if (_creatureAllies.ContainsKey(creature))
+                    {
+                        allies = _creatureAllies[creature].ToList();
+                    }
+
+                    allies.Add(creature);
+                }
+
+                if (!GetIsObjectValid(target))
+                    target = GetAttemptedAttackTarget();
+
+                var aiDefinition = _aiDefinitions[aiType];
+                aiDefinition.PreProcessAI(creature, target, allies);
+                var (feat, featTarget) = aiDefinition.DeterminePerkAbility();
                 if (feat != FeatType.Invalid && GetIsObjectValid(featTarget))
                 {
                     ClearAllActions();
                     ActionUseFeat(feat, featTarget);
                 }
             }
-        }
-
-        /// <summary>
-        /// Forces a creature to start attacking a different target, regardless of enmity level.
-        /// This also resets their sticky targeting.
-        /// If either the creature or the target is invalid, nothing will happen.
-        /// </summary>
-        /// <param name="creature">The creature to force a target swap upon.</param>
-        /// <param name="target">The new target.</param>
-        public static void ForceTargetSwap(uint creature, uint target)
-        {
-            if (!GetIsObjectValid(creature) || !GetIsObjectValid(target))
-                return;
-
-            DeleteLocalInt(creature, StickyTargetRounds);
-            AssignCommand(creature, () =>
-            {
-                ClearAllActions();
-                ActionAttack(target);
-            });
         }
 
         /// <summary>
@@ -377,36 +308,6 @@ namespace WOD.Game.Server.Service
         }
 
         /// <summary>
-        /// When a creature spawns, store their STM and FP as local variables.
-        /// Also load their HP per their skin, if specified.
-        /// </summary>
-        private static void LoadCreatureStats()
-        {
-            var self = OBJECT_SELF;
-            var skin = GetItemInSlot(InventorySlot.CreatureArmor, self);
-
-            var maxHP = 0;
-            for (var ip = GetFirstItemProperty(skin); GetIsItemPropertyValid(ip); ip = GetNextItemProperty(skin))
-            {
-                if (GetItemPropertyType(ip) == ItemPropertyType.NPCHP)
-                {
-                    maxHP += GetItemPropertyCostTableValue(ip);
-                }
-            }
-
-            if (maxHP > 30000)
-                maxHP = 30000;
-
-            if (maxHP > 0)
-            {
-                ObjectPlugin.SetMaxHitPoints(self, maxHP);
-                ObjectPlugin.SetCurrentHitPoints(self, maxHP);
-            }
-
-            SetLocalInt(self, "FP", Stat.GetMaxResource(self));
-        }
-
-        /// <summary>
         /// When the creature spawns, add an AOE effect to the creature which will be used to process aggro ranges.
         /// </summary>
         private static void LoadAggroEffect()
@@ -421,43 +322,18 @@ namespace WOD.Game.Server.Service
             // Allow builders to put permanent effects on creatures - e.g. to make them statues, or make them glow.
             // Index of standard VFX effects here: https://nwnlexicon.com/index.php?title=Vfx_dur
             var vfx = GetLocalInt(OBJECT_SELF, "PERMANENT_VFX_ID");
-            if (vfx > 0) 
+            if (vfx > 0)
                 ApplyEffectToObject(DurationType.Permanent, EffectVisualEffect((VisualEffect)vfx), OBJECT_SELF);
 
             // Cutscene paralysis - for statues.
             var paralyze = GetLocalInt(OBJECT_SELF, "PARALYZE");
-            if (paralyze > 0) 
+            if (paralyze > 0)
                 ApplyEffectToObject(DurationType.Permanent, SupernaturalEffect(EffectCutsceneParalyze()), OBJECT_SELF);
 
             // Daze - for creatures that should not be able to attack.
             var daze = GetLocalInt(OBJECT_SELF, "DAZE");
-            if (daze > 0) 
+            if (daze > 0)
                 ApplyEffectToObject(DurationType.Permanent, SupernaturalEffect(EffectDazed()), OBJECT_SELF);
-        }
-
-        /// <summary>
-        /// When a creature's heartbeat fires, restore their STM and FP.
-        /// </summary>
-        private static void RestoreCreatureStats()
-        {
-            var self = OBJECT_SELF;
-            var maxResource = Stat.GetMaxResource(self);
-            var fp = GetLocalInt(self, "FP") + 1;
-
-            if (fp > maxResource)
-                fp = maxResource;
-  
-
-            SetLocalInt(self, "FP", fp);
-
-            // If out of combat - restore HP at 10% per tick.
-            if (!GetIsInCombat(self) &&
-                !GetIsObjectValid(Enmity.GetHighestEnmityTarget(self)) &&
-                GetCurrentHitPoints(self) < GetMaxHitPoints(self))
-            {
-                var hpToHeal = GetMaxHitPoints(self) * 0.1f;
-                ApplyEffectToObject(DurationType.Instant, EffectHeal((int)hpToHeal), self);
-            }
         }
 
         /// <summary>
@@ -469,7 +345,7 @@ namespace WOD.Game.Server.Service
             var self = OBJECT_SELF;
 
             // Certain effects should interrupt the random walk process.
-            var effects = new[] {EffectTypeScript.Dazed, EffectTypeScript.Petrify};
+            var effects = new[] { EffectTypeScript.Dazed, EffectTypeScript.Petrify };
             for (var effect = GetFirstEffect(self); GetIsEffectValid(effect); effect = GetNextEffect(self))
             {
                 if (effects.Contains(GetEffectType(effect)))
@@ -495,7 +371,7 @@ namespace WOD.Game.Server.Service
                 AssignCommand(self, () => ActionForceMoveToLocation(homeLocation));
             }
             // Randomly walk flag
-            else if(aiFlags.HasFlag(AIFlag.RandomWalk) &&
+            else if (aiFlags.HasFlag(AIFlag.RandomWalk) &&
                 Random.D100(1) <= 40)
             {
                 AssignCommand(self, ActionRandomWalk);
@@ -512,8 +388,8 @@ namespace WOD.Game.Server.Service
             var lastPerceived = GetLastPerceived();
             if (self == lastPerceived) return;
 
-            var isSeen = GetLastDexteritySeen();
-            var isVanished = GetLastDexterityVanished();
+            var isSeen = GetLastPerceptionSeen();
+            var isVanished = GetLastPerceptionVanished();
 
             if (GetIsPC(lastPerceived) || GetIsDead(lastPerceived)) return;
             var isSameFaction = GetFactionEqual(self, lastPerceived);
@@ -544,7 +420,7 @@ namespace WOD.Game.Server.Service
             var self = OBJECT_SELF;
             if (!_creatureAllies.ContainsKey(self)) return;
 
-            for(var index = _creatureAllies.Count-1; index >= 0; index--)
+            for (var index = _creatureAllies.Count - 1; index >= 0; index--)
             {
                 var ally = _creatureAllies.ElementAt(index).Key;
                 if (_creatureAllies.ContainsKey(ally))
@@ -564,7 +440,7 @@ namespace WOD.Game.Server.Service
         /// <param name="flags">The flags to set.</param>
         public static void SetAIFlag(uint creature, AIFlag flags)
         {
-            var flagValue = (int) flags;
+            var flagValue = (int)flags;
             SetLocalInt(creature, "AI_FLAGS", flagValue);
         }
 
@@ -576,7 +452,12 @@ namespace WOD.Game.Server.Service
         public static AIFlag GetAIFlag(uint creature)
         {
             var flagValue = GetLocalInt(creature, "AI_FLAGS");
-            return (AIFlag) flagValue;
+            return (AIFlag)flagValue;
         }
+
+        /// <summary>
+        /// Restores an NPC's STM and FP.
+        /// </summary>
+ 
     }
 }

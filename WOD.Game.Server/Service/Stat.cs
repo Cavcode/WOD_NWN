@@ -1226,6 +1226,31 @@ namespace WOD.Game.Server.Service
 
             CreaturePlugin.SetCriticalRangeModifier(player, -critMod, 0, true);
         }
+        public static void RestoreNPCStats(bool outOfCombatRegen)
+        {
+            var self = OBJECT_SELF;
+            var maxFP = GetMaxResource(self);
+            var fp = GetLocalInt(self, "FP") + 1;
 
+            if (fp > maxFP)
+                fp = maxFP;
+            //if (stm > maxSTM)
+            //    stm = maxSTM;
+
+            SetLocalInt(self, "FP", fp);
+            //SetLocalInt(self, "STAMINA", stm);
+
+            if (outOfCombatRegen)
+            {
+                // If out of combat - restore HP at 10% per tick.
+                if (!GetIsInCombat(self) &&
+                    !GetIsObjectValid(Enmity.GetHighestEnmityTarget(self)) &&
+                    GetCurrentHitPoints(self) < GetMaxHitPoints(self))
+                {
+                    var hpToHeal = GetMaxHitPoints(self) * 0.1f;
+                    ApplyEffectToObject(DurationType.Instant, EffectHeal((int)hpToHeal), self);
+                }
+            }
+        }
     }
 }

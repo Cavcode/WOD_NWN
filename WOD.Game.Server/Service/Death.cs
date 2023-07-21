@@ -49,7 +49,6 @@ namespace WOD.Game.Server.Service
                     ApplyEffectToObject(DurationType.Temporary, EffectKnockdown(), player, 60f);
                     ApplyEffectToObject(DurationType.Temporary, EffectSlow(), player, 300f);
                     ApplyEffectToObject(DurationType.Temporary, EffectACDecrease(10), player, 300f);
-                    ApplyEffectToObject(DurationType.Temporary, EffectAttackDecrease(10), player, 300f);
                 }
             }
             else
